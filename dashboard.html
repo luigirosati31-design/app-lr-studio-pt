@@ -47,7 +47,7 @@
             font-size: 0.9rem;
             color: #ccc;
         }
-        input, textarea, select {
+        input, textarea {
             width: 100%;
             padding: 12px;
             margin: 8px 0 15px 0;
@@ -59,7 +59,7 @@
             font-family: 'Montserrat', sans-serif;
             box-sizing: border-box;
         }
-        input:focus, textarea:focus, select:focus { border-color: #d4af37; }
+        input:focus, textarea:focus { border-color: #d4af37; }
         button {
             width: 100%;
             padding: 14px;
@@ -99,35 +99,6 @@
             color: #ddd;
             line-height: 1.5;
         }
-        /* Stile Mappa Muscolare Interattiva */
-        .muscle-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .muscle-btn {
-            background-color: #0a0a0a;
-            color: #ccc;
-            border: 1px solid #333;
-            padding: 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-        }
-        .muscle-btn:hover {
-            border-color: #d4af37;
-            color: #ffffff;
-        }
-        .muscle-btn.active {
-            background-color: #d4af37;
-            color: #000000;
-            border-color: #d4af37;
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
-        }
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -143,23 +114,6 @@
             <button class="btn-logout" onclick="esci()">Esci</button>
         </div>
 
-        <!-- SEZIONE MAPPA MUSCOLARE INTERATTIVA -->
-        <div class="card">
-            <h3>Mappa Muscolare & Focus</h3>
-            <p style="font-size: 0.85rem; color: #888; margin-top: 0;">Seleziona un distretto per evidenziarlo e visualizzare i dettagli:</p>
-            <div class="muscle-grid">
-                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Spalle')">Spalle</button>
-                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Petto')">Petto</button>
-                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Dorso')">Dorso</button>
-                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Braccia')">Braccia</button>
-                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Gambe')">Gambe</button>
-                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Addome')">Addome</button>
-            </div>
-            <div id="info-muscolo" style="background: #0a0a0a; padding: 12px; border-radius: 6px; border: 1px solid #222; font-size: 0.9rem; color: #d4af37; text-align: center;">
-                Nessun muscolo selezionato
-            </div>
-        </div>
-
         <!-- SEZIONE SCHEDA ATTIVA -->
         <div class="card">
             <h3 id="titolo-scheda-corrente">La Tua Scheda</h3>
@@ -168,9 +122,9 @@
             </div>
         </div>
 
-        <!-- SEZIONE AGGIORNAMENTO MISURE ANTROPOMETRICHE -->
+        <!-- SEZIONE AGGIORNAMENTO MISURE -->
         <div class="card">
-            <h3>Registra Misurazioni & Progressi</h3>
+            <h3>Registra Misurazioni</h3>
             
             <div class="grid-2">
                 <div>
@@ -194,10 +148,10 @@
                 </div>
             </div>
 
-            <label for="note-utente">Note / Sensazioni sull'allenamento</label>
-            <textarea id="note-utente" rows="3" placeholder="Es. Ottime sensazioni, carichi stabili."></textarea>
+            <label for="note-utente">Note / Sensazioni</label>
+            <textarea id="note-utente" rows="3" placeholder="Es. Ottime sensazioni sull'allenamento."></textarea>
 
-            <button onclick="salvaMisure()">Salva e Invia al Coach</button>
+            <button onclick="salvaMisure()">Invia al Coach</button>
         </div>
     </div>
 
@@ -217,15 +171,6 @@
             }
             utenteCorrente = session.user;
             caricaSchedaCliente(utenteCorrente.id, utenteCorrente.email);
-        }
-
-        function selezionaMuscolo(elemento, nomeMuscolo) {
-            // Rimuovi la classe active da tutti i bottoni
-            document.querySelectorAll('.muscle-btn').forEach(btn => btn.classList.remove('active'));
-            // Attiva quello cliccato
-            elemento.classList.add('active');
-            // Mostra feedback visivo
-            document.getElementById('info-muscolo').textContent = `Focus selezionato: ${nomeMuscolo} (Pronto per il workout)`;
         }
 
         async function caricaSchedaCliente(userId, userEmail) {
@@ -248,7 +193,7 @@
                 titoloScheda.textContent = data[0].titolo || "La Tua Scheda";
                 boxScheda.textContent = data[0].dettagli;
             } else {
-                boxScheda.textContent = "Nessuna scheda assegnata al momento. Il coach la caricherà presto!";
+                boxScheda.textContent = "Nessuna scheda assegnata al momento.";
             }
         }
 
@@ -260,7 +205,7 @@
             const note = document.getElementById('note-utente').value;
 
             if (!peso && !petto && !spalle && !braccio && !note) {
-                alert("Inserisci almeno un valore prima di salvare.");
+                alert("Inserisci almeno un valore.");
                 return;
             }
 
@@ -278,9 +223,9 @@
             ]);
 
             if (error) {
-                alert("Errore durante l'invio dei dati: " + error.message);
+                alert("Errore durante l'invio: " + error.message);
             } else {
-                alert("Misure registrate e inviate con successo!");
+                alert("Misurazioni inviate con successo!");
                 document.getElementById('peso-utente').value = '';
                 document.getElementById('petto-utente').value = '';
                 document.getElementById('spalle-utente').value = '';

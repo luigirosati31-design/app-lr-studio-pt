@@ -6,234 +6,264 @@
     <title>Admin - LR Studio PT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { 
             background-color: #000000; 
             color: #ffffff; 
             font-family: 'Montserrat', sans-serif; 
-            margin: 0; 
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+            margin: 0;
+            padding: 20px 20px 40px 20px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .header {
+            width: 100%;
+            max-width: 450px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #333;
-            padding-bottom: 15px;
             margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333333;
         }
-        h2, h3 { 
-            color: #d4af37; 
+        .header h1 {
+            color: #d4af37;
+            font-size: 1.2rem;
+            margin: 0;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+        .logout-btn {
+            background-color: transparent;
+            color: #888888;
+            border: 1px solid #333333;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .card-container {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         .card {
             background-color: #111111;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
             padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #d4af37;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        .card h3 {
+            color: #d4af37;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #222;
+            padding-bottom: 10px;
         }
         label {
             display: block;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #ccc;
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            margin-top: 12px;
         }
-        input, select, textarea {
+        input, select {
             width: 100%;
-            padding: 12px;
-            margin: 8px 0 15px 0;
-            border-radius: 6px;
-            border: 1px solid #333333;
             background: #0a0a0a;
-            color: #ffffff;
-            outline: none;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
             font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
             box-sizing: border-box;
         }
-        input:focus, select:focus, textarea:focus { border-color: #d4af37; }
-        button {
-            width: 100%;
-            padding: 14px;
-            background-color: #d4af37;
-            color: #000000;
-            border: none;
-            border-radius: 6px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
+        input:focus, select:focus { border-color: #d4af37; outline: none; }
+        .exercise-row {
+            background: #161616;
+            border: 1px solid #222;
+            padding: 12px;
+            border-radius: 8px;
             margin-top: 10px;
         }
-        button:hover { background-color: #b5952f; }
-        .btn-logout {
-            background-color: transparent;
-            color: #ff4d4d;
-            border: 1px solid #ff4d4d;
-            width: auto;
-            padding: 8px 15px;
-            font-size: 0.8rem;
-            margin-top: 0;
-        }
-        .btn-logout:hover {
-            background-color: #ff4d4d;
-            color: #fff;
-        }
-        table {
+        .exercise-row input { margin-bottom: 8px; }
+        .admin-btn {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
+            padding: 12px;
+            background-color: #d4af37;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            text-transform: uppercase;
         }
-        th, td {
-            padding: 10px;
-            border-bottom: 1px solid #222;
-            text-align: left;
-            font-size: 0.9rem;
+        .admin-btn:hover { background-color: #b5952f; }
+        .btn-secondary {
+            background-color: transparent;
+            color: #d4af37;
+            border: 1px dashed #d4af37;
+            margin-top: 10px;
         }
-        th { color: #d4af37; }
+        .remove-row {
+            background: transparent;
+            color: #e74c3c;
+            border: none;
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            float: right;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <h2>Pannello Admin</h2>
-            <button class="btn-logout" onclick="esci()">Esci</button>
+    <div class="header">
+        <h1>Area Admin</h1>
+        <button class="logout-btn" onclick="faiLogout()">Esci</button>
+    </div>
+
+    <div class="card-container">
+        
+        <div class="card">
+            <h3>1. Seleziona Destinatario</h3>
+            <label>Email del Cliente</label>
+            <input type="email" id="clienteEmail" placeholder="es. cliente@email.com">
         </div>
 
-        <!-- SEZIONE CREAZIONE SCHEDA -->
         <div class="card">
-            <h3>Assegna Nuova Scheda</h3>
-            <label for="select-cliente">Seleziona Cliente</label>
-            <select id="select-cliente">
-                <option value="">Caricamento clienti...</option>
-            </select>
-
-            <label for="titolo-scheda">Nome Scheda (es. Scheda Forza A)</label>
-            <input type="text" id="titolo-scheda" placeholder="Es. Full Body Ipertrofia">
-
-            <label for="dettagli-allenamento">Dettagli Esercizi / Note</label>
-            <textarea id="dettagli-allenamento" rows="6" placeholder="Es: 1. Panca Piana 4x8 90''&#10;2. Rematore 3x10 60''"></textarea>
-
-            <button onclick="salvaScheda()">Salva e Assegna Scheda</button>
-        </div>
-
-        <!-- SEZIONE MONITORAGGIO MISURE UTENTI -->
-        <div class="card">
-            <h3>Ultime Misurazioni / Progressi Clienti</h3>
-            <div style="overflow-x:auto;">
-                <table id="tabella-misure">
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Data</th>
-                            <th>Peso (kg)</th>
-                            <th>Note</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #777;">Nessun dato registrato</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <h3>2. Aggiorna Misurazioni Fisiche</h3>
+            <div class="grid-2">
+                <div><label>Peso (kg)</label><input type="text" id="mPeso" placeholder="es. 78.5"></div>
+                <div><label>Petto (cm)</label><input type="text" id="mPetto" placeholder="es. 105"></div>
             </div>
+            <div class="grid-2">
+                <div><label>Spalle (cm)</label><input type="text" id="mSpalle" placeholder="es. 122"></div>
+                <div><label>Braccio (cm)</label><input type="text" id="mBraccio" placeholder="es. 38.5"></div>
+            </div>
+            <div class="grid-2">
+                <div><label>Vita (cm)</label><input type="text" id="mVita" placeholder="es. 80"></div>
+                <div><label>Fianchi (cm)</label><input type="text" id="mFianchi" placeholder="es. 95"></div>
+            </div>
+            <div class="grid-2">
+                <div><label>Quadricipiti (cm)</label><input type="text" id="mQuadricipiti" placeholder="es. 60"></div>
+                <div><label>Polpacci (cm)</label><input type="text" id="mPolpacci" placeholder="es. 38"></div>
+            </div>
+            <button class="admin-btn btn-secondary" onclick="aggiornaMisure()">Aggiorna Misure</button>
         </div>
+
+        <div class="card">
+            <h3>3. Crea Scheda di Allenamento</h3>
+            <label>Titolo Sessione / Gruppo Muscolare</label>
+            <input type="text" id="giornoSessione" placeholder="es. Giorno A - Petto e Tricipiti">
+
+            <div id="containerEsercizi">
+                <div class="exercise-row">
+                    <button type="button" class="remove-row" onclick="this.parentElement.remove()">Elimina</button>
+                    <label>Nome Esercizio</label>
+                    <input type="text" class="input-nome" placeholder="es. Panca Piana Manubri">
+                    <label>Target (Serie x Rip)</label>
+                    <input type="text" class="input-target" placeholder="es. 4 x 10">
+                    <label>Recupero (in secondi)</label>
+                    <input type="number" class="input-rec" value="90">
+                    <label>Link URL GIF (Opzionale)</label>
+                    <input type="text" class="input-gif" placeholder="Lascia vuoto per icona standard">
+                </div>
+            </div>
+
+            <button class="admin-btn btn-secondary" onclick="aggiungiRigaEsercizio()">+ Aggiungi Esercizio</button>
+            <button class="admin-btn" onclick="pubblicaScheda()">Pubblica Scheda su Supabase</button>
+        </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const supabaseUrl = 'https://xhgxosffgsuokrsycvyd.supabase.co';
+        const supabaseUrl = 'httpsxhgxosffgsuokrsycvyd.supabase.co'.replace('https', 'https://'); // fallback sicuro
+        const fixedUrl = 'https://xhgxosffgsuokrsycvyd.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
-        const db = window.supabase.createClient(supabaseUrl, supabaseKey);
+        const db = window.supabase.createClient(fixedUrl, supabaseKey);
 
-        // Controllo accesso admin all'avvio
-        async function initAdmin() {
-            const { data: { session } } = await db.auth.getSession();
-            if (!session || session.user.email.toLowerCase() !== "luigirosati31@gmail.com") {
-                window.location.href = "index.html";
-                return;
-            }
-            caricaClienti();
-            caricaMisure();
+        function faiLogout() { window.location.href = "index.html"; }
+
+        function aggiungiRigaEsercizio() {
+            const container = document.getElementById('containerEsercizi');
+            const nuovaRiga = document.createElement('div');
+            nuovaRiga.className = 'exercise-row';
+            nuovaRiga.innerHTML = `
+                <button type="button" class="remove-row" onclick="this.parentElement.remove()">Elimina</button>
+                <label>Nome Esercizio</label>
+                <input type="text" class="input-nome" placeholder="es. Rematore Manubrio">
+                <label>Target (Serie x Rip)</label>
+                <input type="text" class="input-target" placeholder="es. 4 x 12">
+                <label>Recupero (in secondi)</label>
+                <input type="number" class="input-rec" value="60">
+                <label>Link URL GIF (Opzionale)</label>
+                <input type="text" class="input-gif" placeholder="Lascia vuoto per icona standard">
+            `;
+            container.appendChild(nuovaRiga);
         }
 
-        async function caricaClienti() {
-            const select = document.getElementById('select-cliente');
-            // Prende i dati dalla tabella profili_clienti o utenti
-            const { data, error } = await db.from('profili_clienti').select('*');
+        async function aggiornaMisure() {
+            const emailCliente = document.getElementById('clienteEmail').value.trim();
+            const peso = document.getElementById('mPeso').value;
+            const petto = document.getElementById('mPetto').value;
+            const spalle = document.getElementById('mSpalle').value;
+            const braccio = document.getElementById('mBraccio').value;
+            const vita = document.getElementById('mVita').value;
+            const fianchi = document.getElementById('mFianchi').value;
+            const quadricipiti = document.getElementById('mQuadricipiti').value;
+            const polpacci = document.getElementById('mPolpacci').value;
+
+            if(!emailCliente) { alert("Inserisci prima l'email del cliente in alto!"); return; }
+
+            const { error } = await db.from('misure_clienti').insert([{ email_cliente: emailCliente, peso, petto, spalle, braccio, vita, fianchi, quadricipiti, polpacci }]);
+            if (error) { alert("Errore nel salvataggio: " + error.message); } 
+            else { alert("Misurazioni aggiornate con successo per " + emailCliente + "!"); }
+        }
+
+        async function pubblicaScheda() {
+            const emailCliente = document.getElementById('clienteEmail').value.trim();
+            const titolo = document.getElementById('giornoSessione').value;
+            const righe = document.querySelectorAll('.exercise-row');
             
-            if (error) {
-                console.error("Errore caricamento clienti:", error);
-                select.innerHTML = '<option value="">Errore caricamento clienti</option>';
-                return;
-            }
+            if(!emailCliente || !titolo) { alert("Inserisci l'email del cliente e il titolo della sessione!"); return; }
 
-            select.innerHTML = '<option value="">Seleziona un cliente...</option>';
-            if (data && data.length > 0) {
-                data.forEach(cliente => {
-                    let opt = document.createElement('option');
-                    opt.value = cliente.id || cliente.email;
-                    opt.textContent = cliente.nome || cliente.email;
-                    select.appendChild(opt);
-                });
-            } else {
-                select.innerHTML = '<option value="">Nessun cliente trovato</option>';
-            }
-        }
-
-        async function salvaScheda() {
-            const clienteId = document.getElementById('select-cliente').value;
-            const titolo = document.getElementById('titolo-scheda').value;
-            const dettagli = document.getElementById('dettagli-allenamento').value;
-
-            if (!clienteId || !titolo || !dettagli) {
-                alert("Compila tutti i campi prima di salvare.");
-                return;
-            }
-
-            const { error } = await db.from('schede_clienti').insert([
-                { cliente_id: clienteId, titolo: titolo, dettagli: dettagli, data_creazione: new Date() }
-            ]);
-
-            if (error) {
-                alert("Errore durante il salvataggio della scheda: " + error.message);
-            } else {
-                alert("Scheda assegnata con successo al cliente!");
-                document.getElementById('titolo-scheda').value = '';
-                document.getElementById('dettagli-allenamento').value = '';
-            }
-        }
-
-        async function caricaMisure() {
-            const tbody = document.querySelector('#tabella-misure tbody');
-            const { data, error } = await db.from('misure_clienti').select('*').order('created_at', { ascending: false }).limit(5);
-
-            if (!error && data && data.length > 0) {
-                tbody.innerHTML = '';
-                data.forEach(m => {
-                    let tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${m.cliente_email || 'Cliente'}</td><td>${new Date(m.created_at).toLocaleDateString()}</td><td>${m.peso || '-'} kg</td><td>${m.note || '-'}</td>`;
-                    tbody.appendChild(tr);
-                });
-            }
-        }
-
-        function esci() {
-            db.auth.signOut().then(() => {
-                window.location.href = "index.html";
+            let listaEsercizi = [];
+            righe.forEach(riga => {
+                const nome = riga.querySelector('.input-nome').value.trim();
+                const target = riga.querySelector('.input-target').value.trim();
+                const recupero = riga.querySelector('.input-rec').value;
+                const gif = riga.querySelector('.input-gif').value.trim();
+                
+                if(nome && target) {
+                    listaEsercizi.push({ nome, target, recupero, gif });
+                }
             });
-        }
 
-        initAdmin();
+            if(listaEsercizi.length === 0) { alert("Aggiungi almeno un esercizio."); return; }
+
+            const { error } = await db.from('schede_clienti').insert([{ email_cliente: emailCliente, titolo_sessione: titolo, dati_scheda: JSON.stringify(listaEsercizi) }]);
+            if (error) { alert("Errore durante il salvataggio: " + error.message); } 
+            else { alert(`Scheda "${titolo}" pubblicata con successo per ${emailCliente}!`); }
+        }
     </script>
 </body>
 </html>

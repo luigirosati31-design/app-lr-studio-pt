@@ -217,32 +217,38 @@
 
         async function caricaGifDaGitHub() {
             try {
-                const response = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/esercizi`);
-                if (!response.ok) return;
+                const resRoot = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/esercizi`);
+                if (!resRoot.ok) return;
 
-                const files = await response.json();
-                const gifFiles = files.filter(f => f.name.match(/\.(gif|webp|png|jpg|jpeg)$/i));
-
+                const items = await resRoot.json();
                 let gruppi = {};
 
-                gifFiles.forEach(file => {
-                    let nomeCompleto = file.name.replace(/\.[^/.]+$/, "");
-                    let parti = nomeCompleto.split('_');
-                    
-                    let gruppo = "Altri Esercizi";
-                    let nomeEsercizio = nomeCompleto.replace(/_/g, " ");
-
-                    if (parti.length > 1) {
-                        gruppo = parti[0].charAt(0).toUpperCase() + parti[0].slice(1).toLowerCase();
-                        nomeEsercizio = parti.slice(1).join(" ").toUpperCase();
+                for (const item of items) {
+                    if (item.type === 'dir') {
+                        const nomeGruppo = item.name.toUpperCase();
+                        const resSub = await fetch(item.url);
+                        if (resSub.ok) {
+                            const subFiles = await resSub.json();
+                            const subGifs = subFiles.filter(f => f.name.match(/\.(gif|webp|png|jpg|jpeg)$/i));
+                            
+                            if (!gruppi[nomeGruppo]) gruppi[nomeGruppo] = [];
+                            subGifs.forEach(f => {
+                                let nomeEx = f.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ").toUpperCase();
+                                gruppi[nomeGruppo].push({
+                                    nome: nomeEx,
+                                    percorso: `esercizi/${item.name}/${f.name}`
+                                });
+                            });
+                        }
+                    } else if (item.type === 'file' && item.name.match(/\.(gif|webp|png|jpg|jpeg)$/i)) {
+                        if (!gruppi["ALTRI"]) gruppi["ALTRI"] = [];
+                        let nomeEx = item.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ").toUpperCase();
+                        gruppi["ALTRI"].push({
+                            nome: nomeEx,
+                            percorso: `esercizi/${item.name}`
+                        });
                     }
-
-                    if (!gruppi[gruppo]) gruppi[gruppo] = [];
-                    gruppi[gruppo].push({
-                        nome: nomeEsercizio,
-                        percorso: `esercizi/${file.name}`
-                    });
-                });
+                }
 
                 let html = `<option value="">-- Nessuna GIF (Mostra Logo LR) --</option>`;
                 for (const [gruppo, lista] of Object.entries(gruppi)) {
@@ -262,7 +268,7 @@
                 });
 
             } catch (err) {
-                console.log("GitHub API non raggiungibile al momento:", err);
+                console.error("Errore nel caricamento delle cartelle GIF da GitHub:", err);
             }
         }
 

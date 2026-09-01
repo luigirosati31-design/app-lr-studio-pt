@@ -275,11 +275,14 @@
                     <div class="metric-box"><div class="metric-label">Petto</div><div class="metric-value">105 cm</div></div>
                     <div class="metric-box"><div class="metric-label">Spalle</div><div class="metric-value">122 cm</div></div>
                     <div class="metric-box"><div class="metric-label">Braccio</div><div class="metric-value">38.5 cm</div></div>
+                    <div class="metric-box"><div class="metric-label">Vita</div><div class="metric-value">80 cm</div></div>
+                    <div class="metric-box"><div class="metric-label">Fianchi</div><div class="metric-value">95 cm</div></div>
+                    <div class="metric-box"><div class="metric-label">Quadricipiti</div><div class="metric-value">60 cm</div></div>
+                    <div class="metric-box"><div class="metric-label">Polpacci</div><div class="metric-value">38 cm</div></div>
                 </div>
                 <div class="chart-container">
                     <canvas id="progressChart" height="150"></canvas>
                 </div>
-                <button class="action-btn btn-outline" onclick="alert('PDF scaricato')">📄 Piano Nutrizionale (PDF)</button>
             </div>
         </div>
 
@@ -415,7 +418,6 @@
                     
                     let esercizi = JSON.parse(sessione.dati_scheda);
                     esercizi.forEach(ex => {
-                        // Sistema ibrido GIF: se c'è l'URL mostra l'immagine, altrimenti mostra l'icona stilizzata LR
                         let gifHtml = ex.gif && ex.gif.trim() !== "" 
                             ? `<img src="${ex.gif}" alt="GIF">` 
                             : `LR`;

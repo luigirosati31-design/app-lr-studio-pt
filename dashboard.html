@@ -127,10 +127,25 @@
             margin-top: 15px;
             text-transform: uppercase;
         }
-        .btn-outline { background-color: transparent; color: #fff; border: 1px solid #555; }
         .btn-gold { background-color: #d4af37; color: #000; border: none; }
         .btn-whatsapp { background-color: #25D366; color: #fff; border: none; }
         
+        /* Select per la scelta della sessione */
+        .session-select {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            outline: none;
+            cursor: pointer;
+        }
+
         .exercise-block {
             margin-bottom: 20px;
             background-color: #0a0a0a;
@@ -297,7 +312,6 @@
 
     <div class="card-container">
         
-        <!-- SEZIONE PROFILO E PROGRESSI -->
         <div class="card">
             <div class="card-header" onclick="toggleSection('profilo-content', this)">
                 <h3>👤 Riepilogo e Progressi</h3>
@@ -347,21 +361,22 @@
             </div>
         </div>
 
-        <!-- SEZIONE ALLENAMENTO -->
         <div class="card">
             <div class="card-header" onclick="toggleSection('allenamento-content', this)">
                 <h3>🔥 Diario Allenamento</h3>
                 <span class="arrow" style="transform: rotate(-180deg);">▼</span>
             </div>
             <div id="allenamento-content" class="card-content" style="display: block;">
+                <select id="selettoreSessione" class="session-select" onchange="mostraSessioneSelezionata()" style="display: none;">
+                </select>
+
                 <div id="listaEserciziDinamica">
                     <p style="text-align: center; color: #888; font-size: 0.85rem;">Caricamento scheda in corso...</p>
                 </div>
-                <button class="action-btn btn-gold" onclick="alert('Sessione salvata con successo!')">Salva Sessione</button>
+                <button class="action-btn btn-gold" onclick="alert('Sessione completata con successo!')">Salva Sessione</button>
             </div>
         </div>
 
-        <!-- SEZIONE MASSAGGI -->
         <div class="card">
             <div class="card-header" onclick="toggleSection('massaggi-content', this)">
                 <h3>💆‍♂️ Massaggi Sportivi</h3>
@@ -385,6 +400,8 @@
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         let emailUtenteCorrente = "";
+        let pesoChartInstance = null;
+        let listaSchedeRicevute = [];
 
         async function faiLogout() {
             await db.auth.signOut();
@@ -431,24 +448,20 @@
 
         function toggleCheck(btn) {
             btn.classList.toggle('completed');
-            if(btn.classList.contains('completed')) {
-                btn.innerHTML = '✓';
-            } else {
-                btn.innerHTML = '';
-            }
+            btn.innerHTML = btn.classList.contains('completed') ? '✓' : '';
         }
 
         function aggiungiSerieTabella(buttonElement) {
             const tbody = buttonElement.previousElementSibling.querySelector('tbody');
             const numSerie = tbody.rows.length + 1;
-            const nuevaRiga = document.createElement('tr');
-            nuevaRiga.innerHTML = `
+            const nuovaRiga = document.createElement('tr');
+            nuovaRiga.innerHTML = `
                 <td class="set-num">${numSerie}</td>
                 <td><input type="text" class="log-input" placeholder="kg"></td>
                 <td><input type="text" class="log-input" placeholder="rip"></td>
                 <td><button class="check-btn" onclick="toggleCheck(this)"></button></td>
             `;
-            tbody.appendChild(nuevaRiga);
+            tbody.appendChild(nuovaRiga);
         }
 
         async function caricaUltimeMisure() {
@@ -458,8 +471,7 @@
                 .from('misure_clienti')
                 .select('*')
                 .eq('email_cliente', emailUtenteCorrente)
-                .order('id', { ascending: false })
-                .limit(1);
+                .order('id', { ascending: false });
 
             if (!error && data && data.length > 0) {
                 const m = data[0];
@@ -471,7 +483,50 @@
                 document.getElementById('val-fianchi').innerText = m.fianchi ? `${m.fianchi} cm` : '- cm';
                 document.getElementById('val-quadricipiti').innerText = m.quadricipiti ? `${m.quadricipiti} cm` : '- cm';
                 document.getElementById('val-polpacci').innerText = m.polpacci ? `${m.polpacci} cm` : '- cm';
+
+                const misureValide = data.filter(d => d.peso && !isNaN(parseFloat(d.peso))).slice(0, 6).reverse();
+                
+                const labels = misureValide.map(d => {
+                    if (d.created_at) {
+                        const date = new Date(d.created_at);
+                        return `${date.getDate()}/${date.getMonth() + 1}`;
+                    }
+                    return 'Reg.';
+                });
+                
+                const pesi = misureValide.map(d => parseFloat(d.peso));
+                aggiornaGrafico(labels, pesi);
             }
+        }
+
+        function aggiornaGrafico(labels, dati) {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            if (pesoChartInstance) pesoChartInstance.destroy();
+
+            pesoChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.length > 0 ? labels : ['Oggi'],
+                    datasets: [{
+                        label: 'Peso (kg)',
+                        data: dati.length > 0 ? dati : [0],
+                        borderColor: '#d4af37',
+                        backgroundColor: 'rgba(212, 175, 55, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#d4af37'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { ticks: { color: '#888' }, grid: { color: '#222' } },
+                        x: { ticks: { color: '#888' }, grid: { display: false } }
+                    }
+                }
+            });
         }
 
         async function caricaPacchettoMassaggi() {
@@ -492,10 +547,7 @@
         }
 
         async function inviaMisureCliente() {
-            if (!emailUtenteCorrente) {
-                alert("Errore: utente non identificato.");
-                return;
-            }
+            if (!emailUtenteCorrente) return;
 
             const peso = document.getElementById('upPeso').value;
             const petto = document.getElementById('upPetto').value;
@@ -528,6 +580,71 @@
             }
         }
 
+        // Funzione per visualizzare solo la sessione selezionata dal menu
+        function mostraSessioneSelezionata() {
+            const index = document.getElementById('selettoreSessione').value;
+            const sessione = listaSchedeRicevute[index];
+            const container = document.getElementById('listaEserciziDinamica');
+
+            if (!sessione) return;
+
+            let htmlContent = "";
+            let esercizi = JSON.parse(sessione.dati_scheda);
+            esercizi.forEach(ex => {
+                let gifHtml = ex.gif && ex.gif.trim() !== "" 
+                    ? `<img src="${ex.gif}" alt="GIF">` 
+                    : `LR`;
+
+                let numSerieDefault = 3;
+                if(ex.target && ex.target.includes('x')) {
+                    let parsed = parseInt(ex.target.split('x')[0]);
+                    if(!isNaN(parsed)) numSerieDefault = parsed;
+                }
+
+                let righeTabella = "";
+                for(let i = 1; i <= numSerieDefault; i++) {
+                    righeTabella += `
+                        <tr>
+                            <td class="set-num">${i}</td>
+                            <td><input type="text" class="log-input" placeholder="kg"></td>
+                            <td><input type="text" class="log-input" placeholder="rip"></td>
+                            <td><button class="check-btn" onclick="toggleCheck(this)"></button></td>
+                        </tr>
+                    `;
+                }
+
+                htmlContent += `
+                    <div class="exercise-block">
+                        <div class="exercise-top">
+                            <div class="exercise-gif">${gifHtml}</div>
+                            <div class="exercise-info">
+                                <div class="exercise-title">${ex.nome}</div>
+                                <div style="font-size: 0.8rem; color: #aaa;">Target: ${ex.target}</div>
+                            </div>
+                        </div>
+                        <button class="timer-btn" onclick="toggleTimer(this, ${ex.recupero || 90})">⏱️ Avvia Recupero (${ex.recupero || 90}s)</button>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Serie</th>
+                                    <th>Kg</th>
+                                    <th>Rip</th>
+                                    <th>✓</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${righeTabella}
+                            </tbody>
+                        </table>
+                        <button class="add-set-btn" onclick="aggiungiSerieTabella(this)">+ Aggiungi serie</button>
+                        <textarea class="coach-notes" rows="2" placeholder="Note per il coach..."></textarea>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = htmlContent;
+        }
+
         async function caricaSchedaCliente() {
             try {
                 const { data: { session }, error: sessionError } = await db.auth.getSession();
@@ -541,7 +658,6 @@
                 emailUtenteCorrente = user.email.trim();
                 document.getElementById('userEmailDisplay').innerText = emailUtenteCorrente;
 
-                // Carica misure, scheda e pacchetto massaggi
                 caricaUltimeMisure();
                 caricaPacchettoMassaggi();
 
@@ -551,71 +667,29 @@
                     .eq('email_cliente', emailUtenteCorrente);
 
                 const container = document.getElementById('listaEserciziDinamica');
+                const selectElement = document.getElementById('selettoreSessione');
                 
                 if (error || !data || data.length === 0) {
                     container.innerHTML = `<p style="text-align: center; color: #888; font-size: 0.85rem;">Nessuna scheda assegnata al momento.</p>`;
+                    selectElement.style.display = 'none';
                     return;
                 }
 
-                let htmlContent = "";
-                data.forEach(sessione => {
-                    htmlContent += `<h4 style="color: #d4af37; margin: 15px 0 10px 0; font-size: 0.95rem; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px;">📍 ${sessione.titolo_sessione}</h4>`;
-                    
-                    let esercizi = JSON.parse(sessione.dati_scheda);
-                    esercizi.forEach(ex => {
-                        let gifHtml = ex.gif && ex.gif.trim() !== "" 
-                            ? `<img src="${ex.gif}" alt="GIF">` 
-                            : `LR`;
+                listaSchedeRicevute = data;
 
-                        let numSerieDefault = 3;
-                        if(ex.target && ex.target.includes('x')) {
-                            let parsed = parseInt(ex.target.split('x')[0]);
-                            if(!isNaN(parsed)) numSerieDefault = parsed;
-                        }
-
-                        let righeTabella = "";
-                        for(let i = 1; i <= numSerieDefault; i++) {
-                            righeTabella += `
-                                <tr>
-                                    <td class="set-num">${i}</td>
-                                    <td><input type="text" class="log-input" placeholder="kg"></td>
-                                    <td><input type="text" class="log-input" placeholder="rip"></td>
-                                    <td><button class="check-btn" onclick="toggleCheck(this)"></button></td>
-                                </tr>
-                            `;
-                        }
-
-                        htmlContent += `
-                            <div class="exercise-block">
-                                <div class="exercise-top">
-                                    <div class="exercise-gif">${gifHtml}</div>
-                                    <div class="exercise-info">
-                                        <div class="exercise-title">${ex.nome}</div>
-                                        <div style="font-size: 0.8rem; color: #aaa;">Target: ${ex.target}</div>
-                                    </div>
-                                </div>
-                                <button class="timer-btn" onclick="toggleTimer(this, ${ex.recupero || 90})">⏱️ Avvia Recupero (${ex.recupero || 90}s)</button>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Serie</th>
-                                            <th>Kg</th>
-                                            <th>Rip</th>
-                                            <th>✓</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${righeTabella}
-                                    </tbody>
-                                </table>
-                                <button class="add-set-btn" onclick="aggiungiSerieTabella(this)">+ Aggiungi serie</button>
-                                <textarea class="coach-notes" rows="2" placeholder="Note per il coach..."></textarea>
-                            </div>
-                        `;
-                    });
+                // Popola il menu a tendina
+                selectElement.innerHTML = "";
+                data.forEach((s, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = idx;
+                    opt.innerText = `📍 ${s.titolo_sessione}`;
+                    selectElement.appendChild(opt);
                 });
 
-                container.innerHTML = htmlContent;
+                selectElement.style.display = data.length > 1 ? 'block' : 'none';
+
+                // Mostra la prima sessione di default
+                mostraSessioneSelezionata();
 
             } catch (err) {
                 console.error("Errore nel caricamento:", err);
@@ -624,23 +698,6 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             caricaSchedaCliente();
-
-            const ctx = document.getElementById('progressChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Giugno', 'Luglio', 'Agosto'],
-                    datasets: [{
-                        data: [81, 79.5, 78.5],
-                        borderColor: '#d4af37',
-                        backgroundColor: 'rgba(212, 175, 55, 0.2)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#888' }, grid: { color: '#222' } }, x: { ticks: { color: '#888' }, grid: { display: false } } } }
-            });
         });
     </script>
 </body>

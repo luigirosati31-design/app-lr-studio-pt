@@ -99,11 +99,6 @@
             color: #ddd;
             line-height: 1.5;
         }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
     </style>
 </head>
 <body>
@@ -122,34 +117,14 @@
             </div>
         </div>
 
-        <!-- SEZIONE AGGIORNAMENTO MISURE -->
+        <!-- SEZIONE AGGIORNAMENTO MISURE / CARICHI -->
         <div class="card">
-            <h3>Registra Misurazioni</h3>
-            
-            <div class="grid-2">
-                <div>
-                    <label for="peso-utente">Peso (kg)</label>
-                    <input type="number" step="0.1" id="peso-utente" placeholder="Es. 75.5">
-                </div>
-                <div>
-                    <label for="petto-utente">Petto (cm)</label>
-                    <input type="number" step="0.5" id="petto-utente" placeholder="Es. 105">
-                </div>
-            </div>
+            <h3>Registra i tuoi Progressi</h3>
+            <label for="peso-utente">Peso Attuale (kg)</label>
+            <input type="number" step="0.1" id="peso-utente" placeholder="Es. 75.5">
 
-            <div class="grid-2">
-                <div>
-                    <label for="spalle-utente">Spalle (cm)</label>
-                    <input type="number" step="0.5" id="spalle-utente" placeholder="Es. 120">
-                </div>
-                <div>
-                    <label for="braccio-utente">Braccio (cm)</label>
-                    <input type="number" step="0.5" id="braccio-utente" placeholder="Es. 38">
-                </div>
-            </div>
-
-            <label for="note-utente">Note / Sensazioni</label>
-            <textarea id="note-utente" rows="3" placeholder="Es. Ottime sensazioni sull'allenamento."></textarea>
+            <label for="note-utente">Note / Sensazioni sull'allenamento</label>
+            <textarea id="note-utente" rows="3" placeholder="Es. Ottime sensazioni sulla panca, aumentato il carico."></textarea>
 
             <button onclick="salvaMisure()">Invia al Coach</button>
         </div>
@@ -177,6 +152,7 @@
             const boxScheda = document.getElementById('contenuto-scheda');
             const titoloScheda = document.getElementById('titolo-scheda-corrente');
 
+            // Cerca la scheda associata all'id utente o all'email
             const { data, error } = await db.from('schede_clienti')
                 .select('*')
                 .or(`cliente_id.eq.${userId},cliente_id.eq.${userEmail}`)
@@ -193,19 +169,16 @@
                 titoloScheda.textContent = data[0].titolo || "La Tua Scheda";
                 boxScheda.textContent = data[0].dettagli;
             } else {
-                boxScheda.textContent = "Nessuna scheda assegnata al momento.";
+                boxScheda.textContent = "Nessuna scheda assegnata al momento. Il coach la caricherà presto!";
             }
         }
 
         async function salvaMisure() {
             const peso = document.getElementById('peso-utente').value;
-            const petto = document.getElementById('petto-utente').value;
-            const spalle = document.getElementById('spalle-utente').value;
-            const braccio = document.getElementById('braccio-utente').value;
             const note = document.getElementById('note-utente').value;
 
-            if (!peso && !petto && !spalle && !braccio && !note) {
-                alert("Inserisci almeno un valore.");
+            if (!peso && !note) {
+                alert("Inserisci almeno il peso o una nota.");
                 return;
             }
 
@@ -214,22 +187,16 @@
                     cliente_id: utenteCorrente.id, 
                     cliente_email: utenteCorrente.email,
                     peso: peso ? parseFloat(peso) : null, 
-                    petto: petto ? parseFloat(petto) : null,
-                    spalle: spalle ? parseFloat(spalle) : null,
-                    braccio: braccio ? parseFloat(braccio) : null,
                     note: note,
                     created_at: new Date() 
                 }
             ]);
 
             if (error) {
-                alert("Errore durante l'invio: " + error.message);
+                alert("Errore durante l'invio dei dati: " + error.message);
             } else {
-                alert("Misurazioni inviate con successo!");
+                alert("Dati inviati con successo al tuo coach!");
                 document.getElementById('peso-utente').value = '';
-                document.getElementById('petto-utente').value = '';
-                document.getElementById('spalle-utente').value = '';
-                document.getElementById('braccio-utente').value = '';
                 document.getElementById('note-utente').value = '';
             }
         }

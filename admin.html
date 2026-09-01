@@ -46,7 +46,7 @@
             font-size: 0.9rem;
             color: #ccc;
         }
-        input, textarea {
+        input, select, textarea {
             width: 100%;
             padding: 12px;
             margin: 8px 0 15px 0;
@@ -58,7 +58,7 @@
             font-family: 'Montserrat', sans-serif;
             box-sizing: border-box;
         }
-        input:focus, textarea:focus { border-color: #d4af37; }
+        input:focus, select:focus, textarea:focus { border-color: #d4af37; }
         button {
             width: 100%;
             padding: 14px;
@@ -109,18 +109,19 @@
             <button class="btn-logout" onclick="esci()">Esci</button>
         </div>
 
-        <!-- SEZIONE CREAZIONE SCHEDA CON EMAIL DIRETTA -->
+        <!-- SEZIONE CREAZIONE SCHEDA -->
         <div class="card">
             <h3>Assegna Nuova Scheda</h3>
-            
-            <label for="email-cliente">Email del Cliente</label>
-            <input type="email" id="email-cliente" placeholder="Es. cliente@email.com">
+            <label for="select-cliente">Seleziona Cliente</label>
+            <select id="select-cliente">
+                <option value="">Caricamento clienti...</option>
+            </select>
 
-            <label for="titolo-scheda">Nome Scheda</label>
+            <label for="titolo-scheda">Nome Scheda (es. Scheda Forza A)</label>
             <input type="text" id="titolo-scheda" placeholder="Es. Full Body Ipertrofia">
 
             <label for="dettagli-allenamento">Dettagli Esercizi / Note</label>
-            <textarea id="dettagli-allenamento" rows="6" placeholder="Inserisci i dettagli della scheda..."></textarea>
+            <textarea id="dettagli-allenamento" rows="6" placeholder="Es: 1. Panca Piana 4x8 90''&#10;2. Rematore 3x10 60''"></textarea>
 
             <button onclick="salvaScheda()">Salva e Assegna Scheda</button>
         </div>
@@ -154,34 +155,59 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+        // Controllo accesso admin all'avvio
         async function initAdmin() {
             const { data: { session } } = await db.auth.getSession();
             if (!session || session.user.email.toLowerCase() !== "luigirosati31@gmail.com") {
                 window.location.href = "index.html";
                 return;
             }
+            caricaClienti();
             caricaMisure();
         }
 
+        async function caricaClienti() {
+            const select = document.getElementById('select-cliente');
+            // Prende i dati dalla tabella profili_clienti o utenti
+            const { data, error } = await db.from('profili_clienti').select('*');
+            
+            if (error) {
+                console.error("Errore caricamento clienti:", error);
+                select.innerHTML = '<option value="">Errore caricamento clienti</option>';
+                return;
+            }
+
+            select.innerHTML = '<option value="">Seleziona un cliente...</option>';
+            if (data && data.length > 0) {
+                data.forEach(cliente => {
+                    let opt = document.createElement('option');
+                    opt.value = cliente.id || cliente.email;
+                    opt.textContent = cliente.nome || cliente.email;
+                    select.appendChild(opt);
+                });
+            } else {
+                select.innerHTML = '<option value="">Nessun cliente trovato</option>';
+            }
+        }
+
         async function salvaScheda() {
-            const emailCliente = document.getElementById('email-cliente').value.trim();
+            const clienteId = document.getElementById('select-cliente').value;
             const titolo = document.getElementById('titolo-scheda').value;
             const dettagli = document.getElementById('dettagli-allenamento').value;
 
-            if (!emailCliente || !titolo || !dettagli) {
+            if (!clienteId || !titolo || !dettagli) {
                 alert("Compila tutti i campi prima di salvare.");
                 return;
             }
 
             const { error } = await db.from('schede_clienti').insert([
-                { cliente_id: emailCliente, cliente_email: emailCliente, titolo: titolo, dettagli: dettagli, data_creazione: new Date() }
+                { cliente_id: clienteId, titolo: titolo, dettagli: dettagli, data_creazione: new Date() }
             ]);
 
             if (error) {
                 alert("Errore durante il salvataggio della scheda: " + error.message);
             } else {
-                alert("Scheda assegnata con successo!");
-                document.getElementById('email-cliente').value = '';
+                alert("Scheda assegnata con successo al cliente!");
                 document.getElementById('titolo-scheda').value = '';
                 document.getElementById('dettagli-allenamento').value = '';
             }

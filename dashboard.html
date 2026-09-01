@@ -3,315 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Area Privata - LR Studio PT</title>
+    <title>Area Cliente - LR Studio PT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { 
             background-color: #000000; 
             color: #ffffff; 
             font-family: 'Montserrat', sans-serif; 
-            margin: 0;
-            padding: 20px 20px 40px 20px; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin: 0; 
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
         }
         .header {
-            width: 100%;
-            max-width: 400px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            border-bottom: 1px solid #333;
             padding-bottom: 15px;
-            border-bottom: 1px solid #333333;
-        }
-        .header h1 {
-            color: #d4af37;
-            font-size: 1.2rem;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 700;
-        }
-        .logout-btn {
-            background-color: transparent;
-            color: #888888;
-            border: 1px solid #333333;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.8rem;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-        .welcome-banner {
-            width: 100%;
-            max-width: 400px;
-            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
-            border: 1px solid #d4af37;
-            border-radius: 12px;
-            padding: 20px;
             margin-bottom: 25px;
-            box-sizing: border-box;
         }
-        .welcome-banner h2 { margin: 0 0 5px 0; font-size: 1.3rem; }
-        .welcome-banner p { margin: 0; font-size: 0.9rem; color: #aaaaaa; }
-
-        .card-container {
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        h2, h3 { 
+            color: #d4af37; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0;
         }
         .card {
             background-color: #111111;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            overflow: hidden;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #d4af37;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1);
         }
-        .card-header {
-            padding: 18px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        label {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 15px 0;
+            border-radius: 6px;
+            border: 1px solid #333333;
+            background: #0a0a0a;
+            color: #ffffff;
+            outline: none;
+            font-family: 'Montserrat', sans-serif;
+            box-sizing: border-box;
+        }
+        input:focus, textarea:focus, select:focus { border-color: #d4af37; }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #d4af37;
+            color: #000000;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             cursor: pointer;
-            background-color: #161616;
+            font-family: 'Montserrat', sans-serif;
+            margin-top: 10px;
         }
-        .card-header h3 { color: #d4af37; margin: 0; font-size: 1.05rem; }
-        .arrow { font-size: 0.8rem; color: #d4af37; transition: transform 0.3s; }
-        .card-content { padding: 20px; display: none; border-top: 1px solid #222; }
-
-        .status-badge {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 10px;
+        button:hover { background-color: #b5952f; }
+        .btn-logout {
+            background-color: transparent;
+            color: #ff4d4d;
+            border: 1px solid #ff4d4d;
+            width: auto;
+            padding: 8px 15px;
+            font-size: 0.8rem;
+            margin-top: 0;
         }
-        .badge-warning { background-color: rgba(212, 175, 55, 0.1); color: #d4af37; border: 1px solid #d4af37; }
-        .badge-success { background-color: rgba(46, 204, 113, 0.1); color: #2ecc71; border: 1px solid #2ecc71; }
-        
-        .metrics-grid {
+        .btn-logout:hover {
+            background-color: #ff4d4d;
+            color: #fff;
+        }
+        .scheda-box {
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 0.95rem;
+            color: #ddd;
+            line-height: 1.5;
+        }
+        /* Stile Mappa Muscolare Interattiva */
+        .muscle-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            margin-top: 15px;
+            margin-bottom: 15px;
         }
-        .metric-box { background: #0a0a0a; border: 1px solid #222; border-radius: 8px; padding: 12px; text-align: center; }
-        .metric-label { font-size: 0.75rem; color: #888; text-transform: uppercase; margin-bottom: 4px; }
-        .metric-value { font-size: 1.1rem; color: #fff; font-weight: 700; }
-
-        .chart-container {
-            margin-top: 20px;
-            padding: 15px;
-            background: #0a0a0a;
-            border: 1px solid #222;
-            border-radius: 8px;
-        }
-
-        .action-btn {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 15px;
-            text-transform: uppercase;
-        }
-        .btn-outline { background-color: transparent; color: #fff; border: 1px solid #555; }
-        .btn-gold { background-color: #d4af37; color: #000; border: none; }
-        .btn-whatsapp { background-color: #25D366; color: #fff; border: none; }
-        
-        .exercise-block {
-            margin-bottom: 20px;
+        .muscle-btn {
             background-color: #0a0a0a;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #222;
-        }
-        .exercise-top {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 12px;
-        }
-        .exercise-gif {
-            width: 45px;
-            height: 45px;
-            background-color: #1a1a1a;
-            border-radius: 8px;
-            border: 1px solid #d4af37;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.65rem;
-            color: #d4af37;
-            font-weight: 700;
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-        .exercise-gif img { width: 100%; height: 100%; object-fit: cover; }
-        .exercise-info { flex-grow: 1; }
-        .exercise-title { font-size: 1rem; color: #ffffff; font-weight: 600; margin-bottom: 3px; }
-        
-        .timer-btn {
-            background-color: transparent;
-            color: #888888;
-            border: 1px solid #555;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            width: 100%;
-            text-align: left;
-            margin-bottom: 10px;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.5); }
-            70% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(212, 175, 55, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
-        }
-        .timer-active { animation: pulse 1s infinite; border-color: #d4af37 !important; color: #d4af37 !important; }
-
-        table { width: 100%; border-collapse: collapse; text-align: center; margin-top: 8px; }
-        th { color: #888; padding: 6px 4px; border-bottom: 1px solid #333; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; }
-        td { padding: 6px 4px; border-bottom: 1px solid #1a1a1a; font-size: 0.85rem; vertical-align: middle; }
-        .log-input {
-            width: 100%;
-            background: #161616;
+            color: #ccc;
             border: 1px solid #333;
-            color: #ffffff;
-            padding: 8px 4px;
-            text-align: center;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-        }
-        .log-input:focus { border-color: #d4af37; outline: none; }
-        
-        .set-num { font-weight: 600; color: #d4af37; font-size: 0.85rem; }
-        
-        .check-btn {
-            background: #161616;
-            border: 1px solid #333;
-            color: #555;
-            width: 28px;
-            height: 28px;
+            padding: 12px;
             border-radius: 6px;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-        }
-        .check-btn.completed { background: #d4af37; color: #000; border-color: #d4af37; }
-
-        .add-set-btn {
-            background-color: #161616;
-            color: #d4af37;
-            border: 1px dashed #d4af37;
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
             font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
             text-transform: uppercase;
-        }
-        .coach-notes {
-            width: 100%;
-            background: #111;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-family: 'Montserrat', sans-serif;
             font-size: 0.8rem;
-            box-sizing: border-box;
-            resize: none;
+            transition: all 0.3s ease;
+        }
+        .muscle-btn:hover {
+            border-color: #d4af37;
+            color: #ffffff;
+        }
+        .muscle-btn.active {
+            background-color: #d4af37;
+            color: #000000;
+            border-color: #d4af37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>LR Studio PT</h1>
-        <button class="logout-btn" onclick="faiLogout()">Esci</button>
-    </div>
+    <div class="container">
+        <div class="header">
+            <h2>Dashboard Cliente</h2>
+            <button class="btn-logout" onclick="esci()">Esci</button>
+        </div>
 
-    <div class="welcome-banner">
-        <h2>Bentornato!</h2>
-        <p id="userEmailDisplay">Caricamento...</p>
-    </div>
-
-    <div class="card-container">
-        
-        <!-- SEZIONE PROFILO E PROGRESSI -->
+        <!-- SEZIONE MAPPA MUSCOLARE INTERATTIVA -->
         <div class="card">
-            <div class="card-header" onclick="toggleSection('profilo-content', this)">
-                <h3>👤 Riepilogo e Progressi</h3>
-                <span class="arrow">▼</span>
+            <h3>Mappa Muscolare & Focus</h3>
+            <p style="font-size: 0.85rem; color: #888; margin-top: 0;">Seleziona un distretto per evidenziarlo e visualizzare i dettagli:</p>
+            <div class="muscle-grid">
+                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Spalle')">Spalle</button>
+                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Petto')">Petto</button>
+                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Dorso')">Dorso</button>
+                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Braccia')">Braccia</button>
+                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Gambe')">Gambe</button>
+                <button class="muscle-btn" onclick="selezionaMuscolo(this, 'Addome')">Addome</button>
             </div>
-            <div id="profilo-content" class="card-content">
-                <div class="status-badge badge-warning">
-                    <span>Abbonamento PT</span>
-                    <span>Scade: 15/09/2026</span>
-                </div>
-                <h4 style="margin: 15px 0 10px 0; font-size: 0.85rem; color: #888;">MISURAZIONI</h4>
-                <div class="metrics-grid">
-                    <div class="metric-box"><div class="metric-label">Peso</div><div class="metric-value">78.5 kg</div></div>
-                    <div class="metric-box"><div class="metric-label">Petto</div><div class="metric-value">105 cm</div></div>
-                    <div class="metric-box"><div class="metric-label">Spalle</div><div class="metric-value">122 cm</div></div>
-                    <div class="metric-box"><div class="metric-label">Braccio</div><div class="metric-value">38.5 cm</div></div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="progressChart" height="150"></canvas>
-                </div>
-                <button class="action-btn btn-outline" onclick="alert('PDF scaricato')">📄 Piano Nutrizionale (PDF)</button>
+            <div id="info-muscolo" style="background: #0a0a0a; padding: 12px; border-radius: 6px; border: 1px solid #222; font-size: 0.9rem; color: #d4af37; text-align: center;">
+                Nessun muscolo selezionato
             </div>
         </div>
 
-        <!-- SEZIONE ALLENAMENTO -->
+        <!-- SEZIONE SCHEDA ATTIVA -->
         <div class="card">
-            <div class="card-header" onclick="toggleSection('allenamento-content', this)">
-                <h3>🔥 Diario Allenamento</h3>
-                <span class="arrow" style="transform: rotate(-180deg);">▼</span>
-            </div>
-            <div id="allenamento-content" class="card-content" style="display: block;">
-                <div id="listaEserciziDinamica">
-                    <p style="text-align: center; color: #888; font-size: 0.85rem;">Caricamento scheda in corso...</p>
-                </div>
-                <button class="action-btn btn-gold" onclick="alert('Sessione salvata con successo!')">Salva Sessione</button>
+            <h3 id="titolo-scheda-corrente">La Tua Scheda</h3>
+            <div id="contenuto-scheda" class="scheda-box">
+                Caricamento scheda in corso...
             </div>
         </div>
 
-        <!-- SEZIONE MASSAGGI -->
+        <!-- SEZIONE AGGIORNAMENTO MISURE ANTROPOMETRICHE -->
         <div class="card">
-            <div class="card-header" onclick="toggleSection('massaggi-content', this)">
-                <h3>💆‍♂️ Massaggi Sportivi</h3>
-                <span class="arrow">▼</span>
-            </div>
-            <div id="massaggi-content" class="card-content">
-                <div class="status-badge badge-success">
-                    <span>Pacchetto Scarico</span>
-                    <span>2 Sedute Rimaste</span>
+            <h3>Registra Misurazioni & Progressi</h3>
+            
+            <div class="grid-2">
+                <div>
+                    <label for="peso-utente">Peso (kg)</label>
+                    <input type="number" step="0.1" id="peso-utente" placeholder="Es. 75.5">
                 </div>
-                <button class="action-btn btn-whatsapp" onclick="window.open('https://wa.me/?text=Ciao%20Luigi,%20vorrei%20prenotare%20una%20seduta%20di%20massaggio.', '_blank')">📲 Prenota Massaggio</button>
+                <div>
+                    <label for="petto-utente">Petto (cm)</label>
+                    <input type="number" step="0.5" id="petto-utente" placeholder="Es. 105">
+                </div>
             </div>
-        </div>
 
+            <div class="grid-2">
+                <div>
+                    <label for="spalle-utente">Spalle (cm)</label>
+                    <input type="number" step="0.5" id="spalle-utente" placeholder="Es. 120">
+                </div>
+                <div>
+                    <label for="braccio-utente">Braccio (cm)</label>
+                    <input type="number" step="0.5" id="braccio-utente" placeholder="Es. 38">
+                </div>
+            </div>
+
+            <label for="note-utente">Note / Sensazioni sull'allenamento</label>
+            <textarea id="note-utente" rows="3" placeholder="Es. Ottime sensazioni, carichi stabili."></textarea>
+
+            <button onclick="salvaMisure()">Salva e Invia al Coach</button>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -320,181 +207,95 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        async function faiLogout() {
-            await db.auth.signOut();
-            window.location.href = "index.html"; 
-        }
+        let utenteCorrente = null;
 
-        function toggleSection(id, headerElement) {
-            const content = document.getElementById(id);
-            const arrow = headerElement.querySelector('.arrow');
-            if (content.style.display === "none" || content.style.display === "") {
-                content.style.display = "block";
-                arrow.style.transform = "rotate(-180deg)";
-            } else {
-                content.style.display = "none";
-                arrow.style.transform = "rotate(0deg)";
-            }
-        }
-
-        function toggleTimer(bottone, secondi) {
-            if (bottone.dataset.running === "true") {
-                clearInterval(bottone.intervalId);
-                bottone.dataset.running = "false";
-                bottone.classList.remove("timer-active");
-                bottone.innerText = "⏱️ Interrotto";
-                setTimeout(() => { bottone.innerText = `⏱️ Avvia Recupero (${secondi}s)`; }, 2000);
+        async function initDashboard() {
+            const { data: { session } } = await db.auth.getSession();
+            if (!session) {
+                window.location.href = "index.html";
                 return;
             }
-            bottone.dataset.running = "true";
-            let tempoRimasto = secondi;
-            bottone.classList.add("timer-active");
-            bottone.innerText = `⏳ ${tempoRimasto}s`;
-            bottone.intervalId = setInterval(() => {
-                tempoRimasto--;
-                bottone.innerText = `⏳ ${tempoRimasto}s`;
-                if (tempoRimasto <= 0) {
-                    clearInterval(bottone.intervalId);
-                    bottone.dataset.running = "false";
-                    bottone.classList.remove("timer-active");
-                    bottone.innerText = "✅ Fatto!";
-                    setTimeout(() => { bottone.innerText = `⏱️ Avvia Recupero (${secondi}s)`; }, 4000);
-                }
-            }, 1000);
+            utenteCorrente = session.user;
+            caricaSchedaCliente(utenteCorrente.id, utenteCorrente.email);
         }
 
-        function toggleCheck(btn) {
-            btn.classList.toggle('completed');
-            if(btn.classList.contains('completed')) {
-                btn.innerHTML = '✓';
+        function selezionaMuscolo(elemento, nomeMuscolo) {
+            // Rimuovi la classe active da tutti i bottoni
+            document.querySelectorAll('.muscle-btn').forEach(btn => btn.classList.remove('active'));
+            // Attiva quello cliccato
+            elemento.classList.add('active');
+            // Mostra feedback visivo
+            document.getElementById('info-muscolo').textContent = `Focus selezionato: ${nomeMuscolo} (Pronto per il workout)`;
+        }
+
+        async function caricaSchedaCliente(userId, userEmail) {
+            const boxScheda = document.getElementById('contenuto-scheda');
+            const titoloScheda = document.getElementById('titolo-scheda-corrente');
+
+            const { data, error } = await db.from('schede_clienti')
+                .select('*')
+                .or(`cliente_id.eq.${userId},cliente_id.eq.${userEmail}`)
+                .order('data_creazione', { ascending: false })
+                .limit(1);
+
+            if (error) {
+                console.error("Errore caricamento scheda:", error);
+                boxScheda.textContent = "Errore nel caricamento della scheda.";
+                return;
+            }
+
+            if (data && data.length > 0) {
+                titoloScheda.textContent = data[0].titolo || "La Tua Scheda";
+                boxScheda.textContent = data[0].dettagli;
             } else {
-                btn.innerHTML = '';
+                boxScheda.textContent = "Nessuna scheda assegnata al momento. Il coach la caricherà presto!";
             }
         }
 
-        function aggiungiSerieTabella(buttonElement) {
-            const tbody = buttonElement.previousElementSibling.querySelector('tbody');
-            const numSerie = tbody.rows.length + 1;
-            const nuovaRiga = document.createElement('tr');
-            nuovaRiga.innerHTML = `
-                <td class="set-num">${numSerie}</td>
-                <td><input type="text" class="log-input" placeholder="kg"></td>
-                <td><input type="text" class="log-input" placeholder="rip"></td>
-                <td><button class="check-btn" onclick="toggleCheck(this)"></button></td>
-            `;
-            tbody.appendChild(nuovaRiga);
-        }
+        async function salvaMisure() {
+            const peso = document.getElementById('peso-utente').value;
+            const petto = document.getElementById('petto-utente').value;
+            const spalle = document.getElementById('spalle-utente').value;
+            const braccio = document.getElementById('braccio-utente').value;
+            const note = document.getElementById('note-utente').value;
 
-        async function caricaSchedaCliente() {
-            try {
-                const { data: { session }, error: sessionError } = await db.auth.getSession();
-                
-                if (sessionError || !session || !session.user) {
-                    window.location.href = "index.html";
-                    return;
+            if (!peso && !petto && !spalle && !braccio && !note) {
+                alert("Inserisci almeno un valore prima di salvare.");
+                return;
+            }
+
+            const { error } = await db.from('misure_clienti').insert([
+                { 
+                    cliente_id: utenteCorrente.id, 
+                    cliente_email: utenteCorrente.email,
+                    peso: peso ? parseFloat(peso) : null, 
+                    petto: petto ? parseFloat(petto) : null,
+                    spalle: spalle ? parseFloat(spalle) : null,
+                    braccio: braccio ? parseFloat(braccio) : null,
+                    note: note,
+                    created_at: new Date() 
                 }
+            ]);
 
-                const user = session.user;
-                document.getElementById('userEmailDisplay').innerText = user.email;
-
-                const { data, error } = await db
-                    .from('schede_clienti')
-                    .select('*')
-                    .eq('email_cliente', user.email.trim());
-
-                const container = document.getElementById('listaEserciziDinamica');
-                
-                if (error || !data || data.length === 0) {
-                    container.innerHTML = `<p style="text-align: center; color: #888; font-size: 0.85rem;">Nessuna scheda assegnata al momento.</p>`;
-                    return;
-                }
-
-                let htmlContent = "";
-                data.forEach(sessione => {
-                    htmlContent += `<h4 style="color: #d4af37; margin: 15px 0 10px 0; font-size: 0.95rem; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px;">📍 ${sessione.titolo_sessione}</h4>`;
-                    
-                    let esercizi = JSON.parse(sessione.dati_scheda);
-                    esercizi.forEach(ex => {
-                        // Sistema ibrido GIF: se c'è l'URL mostra l'immagine, altrimenti mostra l'icona stilizzata LR
-                        let gifHtml = ex.gif && ex.gif.trim() !== "" 
-                            ? `<img src="${ex.gif}" alt="GIF">` 
-                            : `LR`;
-
-                        let numSerieDefault = 3;
-                        if(ex.target && ex.target.includes('x')) {
-                            let parsed = parseInt(ex.target.split('x')[0]);
-                            if(!isNaN(parsed)) numSerieDefault = parsed;
-                        }
-
-                        let righeTabella = "";
-                        for(let i = 1; i <= numSerieDefault; i++) {
-                            righeTabella += `
-                                <tr>
-                                    <td class="set-num">${i}</td>
-                                    <td><input type="text" class="log-input" placeholder="kg"></td>
-                                    <td><input type="text" class="log-input" placeholder="rip"></td>
-                                    <td><button class="check-btn" onclick="toggleCheck(this)"></button></td>
-                                </tr>
-                            `;
-                        }
-
-                        htmlContent += `
-                            <div class="exercise-block">
-                                <div class="exercise-top">
-                                    <div class="exercise-gif">${gifHtml}</div>
-                                    <div class="exercise-info">
-                                        <div class="exercise-title">${ex.nome}</div>
-                                        <div style="font-size: 0.8rem; color: #aaa;">Target: ${ex.target}</div>
-                                    </div>
-                                </div>
-                                <button class="timer-btn" onclick="toggleTimer(this, ${ex.recupero || 90})">⏱️ Avvia Recupero (${ex.recupero || 90}s)</button>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Serie</th>
-                                            <th>Kg</th>
-                                            <th>Rip</th>
-                                            <th>✓</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${righeTabella}
-                                    </tbody>
-                                </table>
-                                <button class="add-set-btn" onclick="aggiungiSerieTabella(this)">+ Aggiungi serie</button>
-                                <textarea class="coach-notes" rows="2" placeholder="Note per il coach..."></textarea>
-                            </div>
-                        `;
-                    });
-                });
-
-                container.innerHTML = htmlContent;
-
-            } catch (err) {
-                console.error("Errore nel caricamento:", err);
+            if (error) {
+                alert("Errore durante l'invio dei dati: " + error.message);
+            } else {
+                alert("Misure registrate e inviate con successo!");
+                document.getElementById('peso-utente').value = '';
+                document.getElementById('petto-utente').value = '';
+                document.getElementById('spalle-utente').value = '';
+                document.getElementById('braccio-utente').value = '';
+                document.getElementById('note-utente').value = '';
             }
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            caricaSchedaCliente();
-
-            const ctx = document.getElementById('progressChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Giugno', 'Luglio', 'Agosto'],
-                    datasets: [{
-                        data: [81, 79.5, 78.5],
-                        borderColor: '#d4af37',
-                        backgroundColor: 'rgba(212, 175, 55, 0.2)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#888' }, grid: { color: '#222' } }, x: { ticks: { color: '#888' }, grid: { display: false } } } }
+        function esci() {
+            db.auth.signOut().then(() => {
+                window.location.href = "index.html";
             });
-        });
+        }
+
+        initDashboard();
     </script>
 </body>
 </html>

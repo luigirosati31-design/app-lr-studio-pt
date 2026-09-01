@@ -152,7 +152,6 @@
             const boxScheda = document.getElementById('contenuto-scheda');
             const titoloScheda = document.getElementById('titolo-scheda-corrente');
 
-            // Cerca la scheda associata all'id utente o all'email
             const { data, error } = await db.from('schede_clienti')
                 .select('*')
                 .or(`cliente_id.eq.${userId},cliente_id.eq.${userEmail}`)

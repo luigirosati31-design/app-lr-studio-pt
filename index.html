@@ -93,7 +93,7 @@
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         async function faiLogin() {
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             
             if(!email || !password) {
@@ -106,7 +106,8 @@
             if (error) {
                 alert("Credenziali non valide.");
             } else {
-                if(email.includes("admin")) {
+                // Controllo se l'utente che effettua l'accesso è l'amministratore
+                if(email.toLowerCase() === "luigirosati31@gmail.com") {
                     window.location.href = "admin.html";
                 } else {
                     window.location.href = "dashboard.html";

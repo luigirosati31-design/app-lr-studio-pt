@@ -148,8 +148,20 @@
             <input type="email" id="clienteEmail" placeholder="es. cliente@email.com">
         </div>
 
+        <!-- SEZIONE GESTIONE PACCHETTO MASSAGGI -->
         <div class="card">
-            <h3>2. Aggiorna Misurazioni Fisiche</h3>
+            <h3>2. Gestione Massaggi Sportivi</h3>
+            <label>Tipologia Pacchetto</label>
+            <input type="text" id="nomePacchetto" placeholder="es. Pacchetto Scarico / Decontratturante">
+            
+            <label>Sedute Rimaste</label>
+            <input type="number" id="seduteRimaste" placeholder="es. 3">
+            
+            <button class="admin-btn btn-secondary" onclick="aggiornaPacchettoMassaggi()">Salva Pacchetto Massaggi</button>
+        </div>
+
+        <div class="card">
+            <h3>3. Aggiorna Misurazioni Fisiche</h3>
             <div class="grid-2">
                 <div><label>Peso (kg)</label><input type="text" id="mPeso" placeholder="es. 78.5"></div>
                 <div><label>Petto (cm)</label><input type="text" id="mPetto" placeholder="es. 105"></div>
@@ -170,7 +182,7 @@
         </div>
 
         <div class="card">
-            <h3>3. Crea Scheda di Allenamento</h3>
+            <h3>4. Crea Scheda di Allenamento</h3>
             <label>Titolo Sessione / Gruppo Muscolare</label>
             <input type="text" id="giornoSessione" placeholder="es. Giorno A - Petto e Tricipiti">
 
@@ -196,7 +208,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const supabaseUrl = 'httpsxhgxosffgsuokrsycvyd.supabase.co'.replace('https', 'https://'); // fallback sicuro
         const fixedUrl = 'https://xhgxosffgsuokrsycvyd.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
         const db = window.supabase.createClient(fixedUrl, supabaseKey);
@@ -221,6 +232,29 @@
             container.appendChild(nuovaRiga);
         }
 
+        async function aggiornaPacchettoMassaggi() {
+            const emailCliente = document.getElementById('clienteEmail').value.trim();
+            const nomePacchetto = document.getElementById('nomePacchetto').value.trim();
+            const seduteRimaste = document.getElementById('seduteRimaste').value;
+
+            if(!emailCliente) { alert("Inserisci prima l'email del cliente in alto!"); return; }
+            if(!nomePacchetto || seduteRimaste === "") { alert("Compila tipologia pacchetto e numero sedute."); return; }
+
+            const { error } = await db.from('pacchetti_massaggi').insert([{ 
+                email_cliente: emailCliente, 
+                nome_pacchetto: nomePacchetto, 
+                sedute_rimaste: parseInt(seduteRimaste) 
+            }]);
+
+            if (error) { 
+                alert("Errore nel salvataggio del pacchetto: " + error.message); 
+            } else { 
+                alert(`Pacchetto massaggi salvato con successo per ${emailCliente}!`); 
+                document.getElementById('nomePacchetto').value = '';
+                document.getElementById('seduteRimaste').value = '';
+            }
+        }
+
         async function aggiornaMisure() {
             const emailCliente = document.getElementById('clienteEmail').value.trim();
             const peso = document.getElementById('mPeso').value;
@@ -234,7 +268,10 @@
 
             if(!emailCliente) { alert("Inserisci prima l'email del cliente in alto!"); return; }
 
-            const { error } = await db.from('misure_clienti').insert([{ email_cliente: emailCliente, peso, petto, spalle, braccio, vita, fianchi, quadricipiti, polpacci }]);
+            const { error } = await db.from('misure_clienti').insert([{ 
+                email_cliente: emailCliente, peso, petto, spalle, braccio, vita, fianchi, quadricipiti, polpacci 
+            }]);
+            
             if (error) { alert("Errore nel salvataggio: " + error.message); } 
             else { alert("Misurazioni aggiornate con successo per " + emailCliente + "!"); }
         }
@@ -260,7 +297,10 @@
 
             if(listaEsercizi.length === 0) { alert("Aggiungi almeno un esercizio."); return; }
 
-            const { error } = await db.from('schede_clienti').insert([{ email_cliente: emailCliente, titolo_sessione: titolo, dati_scheda: JSON.stringify(listaEsercizi) }]);
+            const { error } = await db.from('schede_clienti').insert([{ 
+                email_cliente: emailCliente, titolo_sessione: titolo, dati_scheda: JSON.stringify(listaEsercizi) 
+            }]);
+            
             if (error) { alert("Errore durante il salvataggio: " + error.message); } 
             else { alert(`Scheda "${titolo}" pubblicata con successo per ${emailCliente}!`); }
         }

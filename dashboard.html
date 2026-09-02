@@ -42,7 +42,11 @@
             letter-spacing: 2px;
             font-weight: 700;
         }
-        .logout-btn {
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .header-btn {
             background-color: transparent;
             color: #888888;
             border: 1px solid #333333;
@@ -52,6 +56,10 @@
             font-size: 0.8rem;
             cursor: pointer;
             text-transform: uppercase;
+        }
+        .header-btn-calc {
+            border-color: #d4af37;
+            color: #d4af37;
         }
         .welcome-banner {
             width: 100%;
@@ -135,7 +143,7 @@
         .btn-gold { background-color: #d4af37; color: #000; border: none; }
         .btn-whatsapp { background-color: #25D366; color: #fff; border: none; }
         
-        /* BARRA TAB GIORNI */
+        /* TABS SESSIONI */
         .sessions-tab-bar {
             display: flex;
             gap: 8px;
@@ -245,7 +253,7 @@
             font-weight: 600;
         }
 
-        .history-toggle-btn {
+        .history-toggle-btn, .video-link-btn {
             background: transparent;
             border: 1px solid #333;
             color: #aaa;
@@ -256,9 +264,10 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
+            text-decoration: none;
             font-family: 'Montserrat', sans-serif;
         }
-        .history-toggle-btn:hover { border-color: #d4af37; color: #d4af37; }
+        .history-toggle-btn:hover, .video-link-btn:hover { border-color: #d4af37; color: #d4af37; }
         
         .history-drawer {
             display: none;
@@ -403,13 +412,62 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
         }
+
+        /* MODAL CALCOLATORE DISCHI */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-box {
+            background: #161616;
+            border: 1px solid #d4af37;
+            border-radius: 12px;
+            padding: 22px;
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .modal-box h4 {
+            margin: 0 0 6px 0;
+            color: #d4af37;
+            font-size: 1.05rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .plate-results {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 0.8rem;
+        }
+        .plate-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #1c1c1c;
+        }
+        .plate-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>Studio PT</h1>
-        <button class="logout-btn" onclick="faiLogout()">Esci</button>
+        <div class="header-actions">
+            <button class="header-btn header-btn-calc" onclick="apriModalDischi()">🧮 Dischi</button>
+            <button class="header-btn" onclick="faiLogout()">Esci</button>
+        </div>
     </div>
 
     <div class="welcome-banner">
@@ -419,6 +477,7 @@
 
     <div class="card-container">
         
+        <!-- PROFILO E PROGRESSI -->
         <div class="card">
             <div class="card-header" onclick="toggleSection('profilo-content', this)">
                 <h3>👤 Riepilogo e Progressi</h3>
@@ -468,6 +527,7 @@
             </div>
         </div>
 
+        <!-- SEZIONE ALLENAMENTO -->
         <div class="card">
             <div class="card-header" onclick="toggleSection('allenamento-content', this)">
                 <h3>🔥 Diario Allenamento</h3>
@@ -484,6 +544,7 @@
             </div>
         </div>
 
+        <!-- MASSAGGI -->
         <div class="card">
             <div class="card-header" onclick="toggleSection('massaggi-content', this)">
                 <h3>💆‍♂️ Massaggi Sportivi</h3>
@@ -500,6 +561,22 @@
 
     </div>
 
+    <!-- MODAL CALCOLATORE DISCHI -->
+    <div id="modalDischi" class="modal-overlay" onclick="if(event.target === this) chiudiModalDischi()">
+        <div class="modal-box">
+            <h4>Calcola Dischi</h4>
+            <p style="font-size: 0.72rem; color: #888; margin: 0 0 15px 0;">Bilanciere standard 20 kg</p>
+            
+            <input type="number" id="targetBilanciereKg" class="log-input" placeholder="Peso totale kg (es. 75)" style="font-size: 1.1rem; font-weight: 700; padding: 10px;">
+            
+            <button class="action-btn btn-gold" style="margin-top: 10px; padding: 10px;" onclick="calcolaPiastre()">Calcola per lato</button>
+            
+            <div id="risultatoDischi" class="plate-results" style="display: none;"></div>
+            
+            <button class="history-toggle-btn" style="width: 100%; margin-top: 12px; justify-content: center; padding: 8px;" onclick="chiudiModalDischi()">Chiudi</button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const supabaseUrl = 'https://xhgxosffgsuokrsycvyd.supabase.co';
@@ -510,6 +587,87 @@
         let pesoChartInstance = null;
         let listaSchedeRicevute = [];
         let indiceSessioneAttiva = 0;
+
+        // BEEP AUDIO NATIVO
+        let audioCtx = null;
+        function playBeep(freq = 600, duration = 0.15) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio non supportato:", e);
+            }
+        }
+
+        // CALCOLATORE DISCHI
+        function apriModalDischi() {
+            document.getElementById('modalDischi').style.display = 'flex';
+            document.getElementById('targetBilanciereKg').focus();
+        }
+
+        function chiudiModalDischi() {
+            document.getElementById('modalDischi').style.display = 'none';
+            document.getElementById('risultatoDischi').style.display = 'none';
+            document.getElementById('targetBilanciereKg').value = '';
+        }
+
+        function calcolaPiastre() {
+            const totale = parseFloat(document.getElementById('targetBilanciereKg').value);
+            const box = document.getElementById('risultatoDischi');
+            
+            if (isNaN(totale) || totale < 20) {
+                box.innerHTML = `<span style="color: #ff6b6b;">Inserisci almeno 20 kg (peso del bilanciere).</span>`;
+                box.style.display = 'block';
+                return;
+            }
+
+            let pesoDaCaricare = (totale - 20) / 2;
+            
+            if (pesoDaCaricare === 0) {
+                box.innerHTML = `<span style="color: #d4af37;">Bilanciere scarico (nessun disco per lato).</span>`;
+                box.style.display = 'block';
+                return;
+            }
+
+            const tagliDischi = [20, 10, 5, 2.5, 1.25];
+            let breakdown = [];
+
+            for (let disco of tagliDischi) {
+                let conteggio = Math.floor(pesoDaCaricare / disco);
+                if (conteggio > 0) {
+                    breakdown.push({ disco, qta: conteggio });
+                    pesoDaCaricare = Math.round((pesoDaCaricare - (conteggio * disco)) * 100) / 100;
+                }
+            }
+
+            let outputHtml = `<div style="color: #d4af37; font-weight: 600; margin-bottom: 6px;">Carico per SINGOLO lato:</div>`;
+            breakdown.forEach(item => {
+                outputHtml += `
+                    <div class="plate-item">
+                        <span>Disco da <b>${item.disco} kg</b></span>
+                        <span style="color: #d4af37; font-weight: 700;">x ${item.qta}</span>
+                    </div>
+                `;
+            });
+
+            if (pesoDaCaricare > 0) {
+                outputHtml += `<div style="color: #aaa; font-size: 0.68rem; margin-top: 4px;">(+ ${pesoDaCaricare} kg non coperti da dischi standard)</div>`;
+            }
+
+            box.innerHTML = outputHtml;
+            box.style.display = 'block';
+        }
 
         async function faiLogout() {
             await db.auth.signOut();
@@ -537,6 +695,8 @@
         }
 
         function toggleTimer(bottone, secondi) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
             if (bottone.dataset.running === "true") {
                 clearInterval(bottone.intervalId);
                 bottone.dataset.running = "false";
@@ -545,19 +705,27 @@
                 setTimeout(() => { bottone.innerText = `⏱️ Avvia Recupero (${secondi}s)`; }, 2000);
                 return;
             }
+
             bottone.dataset.running = "true";
             let tempoRimasto = secondi;
             bottone.classList.add("timer-active");
             bottone.innerText = `⏳ ${tempoRimasto}s`;
+
             bottone.intervalId = setInterval(() => {
                 tempoRimasto--;
                 bottone.innerText = `⏳ ${tempoRimasto}s`;
+
+                if (tempoRimasto === 3 || tempoRimasto === 2 || tempoRimasto === 1) {
+                    playBeep(440, 0.1);
+                }
+
                 if (tempoRimasto <= 0) {
                     clearInterval(bottone.intervalId);
+                    playBeep(880, 0.35);
                     bottone.dataset.running = "false";
                     bottone.classList.remove("timer-active");
-                    bottone.innerText = "✅ Fatto!";
-                    setTimeout(() => { bottone.innerText = `⏱️ Avvia Recupero (${secondi}s)`; }, 4000);
+                    bottone.innerText = "✅ Recupero Terminato!";
+                    setTimeout(() => { bottone.innerText = `⏱️ Avvia Recupero (${secondi}s)`; }, 3500);
                 }
             }, 1000);
         }
@@ -602,7 +770,6 @@
                 document.getElementById('val-polpacci').innerText = m.polpacci ? `${m.polpacci} cm` : '- cm';
 
                 const misureValide = data.filter(d => d.peso && !isNaN(parseFloat(d.peso))).slice(0, 6).reverse();
-                
                 const labels = misureValide.map(d => {
                     if (d.created_at) {
                         const date = new Date(d.created_at);
@@ -610,7 +777,6 @@
                     }
                     return 'Reg.';
                 });
-                
                 const pesi = misureValide.map(d => parseFloat(d.peso));
                 aggiornaGrafico(labels, pesi);
             }
@@ -692,7 +858,6 @@
                 document.getElementById('upFianchi').value = '';
                 document.getElementById('upQuadricipiti').value = '';
                 document.getElementById('upPolpacci').value = '';
-                
                 caricaUltimeMisure();
             }
         }
@@ -710,21 +875,15 @@
                     return `<span class="last-weight-badge">⚖️ Ultimo: ${labelPeso}</span>`;
                 }
             }
-
-            if (fallbackPeso) {
-                return `<span class="last-weight-badge">⚖️ Ultimo: ${fallbackPeso} kg</span>`;
-            }
-
+            if (fallbackPeso) return `<span class="last-weight-badge">⚖️ Ultimo: ${fallbackPeso} kg</span>`;
             return `<span class="last-weight-badge" style="color: #666; border-color: #333;">⚖️ Primo allenamento</span>`;
         }
 
         function selezionaTabSessione(index) {
             indiceSessioneAttiva = index;
-            
             document.querySelectorAll('.tab-btn').forEach((btn, i) => {
                 btn.classList.toggle('active', i === index);
             });
-
             mostraSessioneCorrente();
         }
 
@@ -749,7 +908,6 @@
         function mostraSessioneCorrente() {
             const sessione = listaSchedeRicevute[indiceSessioneAttiva];
             const container = document.getElementById('listaEserciziDinamica');
-
             if (!sessione) return;
 
             let htmlContent = "";
@@ -769,6 +927,10 @@
                 const storico = Array.isArray(ex.storico) ? ex.storico : [];
                 const ultimaSessione = storico.length > 0 ? storico[storico.length - 1] : null;
                 const badgeUltimoPeso = formattaBadgeUltimoPeso(ultimaSessione, ex.ultimo_peso);
+
+                const videoBtnHtml = (ex.video && ex.video.trim() !== "")
+                    ? `<a href="${ex.video}" target="_blank" rel="noopener noreferrer" class="video-link-btn">▶ Video</a>`
+                    : ``;
 
                 let storicoHtml = "";
                 if (storico.length > 0) {
@@ -792,7 +954,6 @@
                 for (let i = 1; i <= numSerieDefault; i++) {
                     let prevKg = "kg";
                     let prevRip = "rip";
-                    
                     if (ultimaSessione && ultimaSessione.serie && ultimaSessione.serie[i - 1]) {
                         if (ultimaSessione.serie[i - 1].kg) prevKg = `${ultimaSessione.serie[i - 1].kg} kg`;
                         if (ultimaSessione.serie[i - 1].rip) prevRip = `${ultimaSessione.serie[i - 1].rip} rip`;
@@ -820,6 +981,7 @@
                                         <input type="text" class="target-input ex-target-val" value="${ex.target || '3x10'}">
                                     </div>
                                     ${badgeUltimoPeso}
+                                    ${videoBtnHtml}
                                     <button type="button" class="history-toggle-btn" onclick="toggleHistoricoDrawer(this)">📜 Storico Carichi</button>
                                 </div>
                             </div>
@@ -876,9 +1038,7 @@
                 righe.forEach(riga => {
                     const kg = riga.querySelector('.log-kg').value.trim();
                     const rip = riga.querySelector('.log-rip').value.trim();
-                    if (kg !== "" || rip !== "") {
-                        almenoUnaCompilata = true;
-                    }
+                    if (kg !== "" || rip !== "") almenoUnaCompilata = true;
                     if (kg !== "") pesoTrovato = kg;
                     serieDati.push({ kg: kg, rip: rip });
                 });
@@ -888,18 +1048,9 @@
                 }
 
                 if (almenoUnaCompilata && esercizi[idx]) {
-                    if (!Array.isArray(esercizi[idx].storico)) {
-                        esercizi[idx].storico = [];
-                    }
-                    
-                    esercizi[idx].storico.push({
-                        data: dataOggi,
-                        serie: serieDati
-                    });
-
-                    if (esercizi[idx].storico.length > 10) {
-                        esercizi[idx].storico.shift();
-                    }
+                    if (!Array.isArray(esercizi[idx].storico)) esercizi[idx].storico = [];
+                    esercizi[idx].storico.push({ data: dataOggi, serie: serieDati });
+                    if (esercizi[idx].storico.length > 10) esercizi[idx].storico.shift();
                 }
             });
 

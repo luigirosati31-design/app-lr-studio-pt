@@ -130,7 +130,6 @@
         .btn-gold { background-color: #d4af37; color: #000; border: none; }
         .btn-whatsapp { background-color: #25D366; color: #fff; border: none; }
         
-        /* Select per la scelta della sessione */
         .session-select {
             width: 100%;
             background: #0a0a0a;
@@ -176,8 +175,34 @@
         }
         .exercise-gif img { width: 100%; height: 100%; object-fit: cover; }
         .exercise-info { flex-grow: 1; }
-        .exercise-title { font-size: 1rem; color: #ffffff; font-weight: 600; margin-bottom: 3px; }
+        .exercise-title { font-size: 1rem; color: #ffffff; font-weight: 600; margin-bottom: 5px; }
         
+        .target-edit-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .target-edit-wrapper span {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+        }
+        .target-input {
+            background: #161616;
+            border: 1px solid #333;
+            color: #d4af37;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            width: 100px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .target-input:focus {
+            border-color: #d4af37;
+            outline: none;
+        }
+
         .timer-btn {
             background-color: transparent;
             color: #888888;
@@ -367,13 +392,12 @@
                 <span class="arrow" style="transform: rotate(-180deg);">▼</span>
             </div>
             <div id="allenamento-content" class="card-content" style="display: block;">
-                <select id="selettoreSessione" class="session-select" onchange="mostraSessioneSelezionata()" style="display: none;">
-                </select>
+                <select id="selettoreSessione" class="session-select" onchange="mostraSessioneSelezionata()" style="display: none;"></select>
 
                 <div id="listaEserciziDinamica">
                     <p style="text-align: center; color: #888; font-size: 0.85rem;">Caricamento scheda in corso...</p>
                 </div>
-                <button class="action-btn btn-gold" onclick="alert('Sessione completata con successo!')">Salva Sessione</button>
+                <button class="action-btn btn-gold" onclick="salvaSessioneCliente()">Salva Sessione e Target</button>
             </div>
         </div>
 
@@ -564,7 +588,7 @@
             }]);
 
             if (error) {
-                alert("Errore durante il salvataggio: " + error.message);
+                alert("Errore salvataggio: " + error.message);
             } else {
                 alert("Misure aggiornate con successo!");
                 document.getElementById('upPeso').value = '';
@@ -580,7 +604,6 @@
             }
         }
 
-        // Funzione per visualizzare solo la sessione selezionata dal menu
         function mostraSessioneSelezionata() {
             const index = document.getElementById('selettoreSessione').value;
             const sessione = listaSchedeRicevute[index];
@@ -590,7 +613,7 @@
 
             let htmlContent = "";
             let esercizi = JSON.parse(sessione.dati_scheda);
-            esercizi.forEach(ex => {
+            esercizi.forEach((ex, exIdx) => {
                 let gifHtml = ex.gif && ex.gif.trim() !== "" 
                     ? `<img src="${ex.gif}" alt="GIF">` 
                     : `LR`;
@@ -614,12 +637,15 @@
                 }
 
                 htmlContent += `
-                    <div class="exercise-block">
+                    <div class="exercise-block" data-index="${exIdx}">
                         <div class="exercise-top">
                             <div class="exercise-gif">${gifHtml}</div>
                             <div class="exercise-info">
                                 <div class="exercise-title">${ex.nome}</div>
-                                <div style="font-size: 0.8rem; color: #aaa;">Target: ${ex.target}</div>
+                                <div class="target-edit-wrapper">
+                                    <span>Target:</span>
+                                    <input type="text" class="target-input ex-target-val" value="${ex.target || '3x10'}">
+                                </div>
                             </div>
                         </div>
                         <button class="timer-btn" onclick="toggleTimer(this, ${ex.recupero || 90})">⏱️ Avvia Recupero (${ex.recupero || 90}s)</button>
@@ -643,6 +669,36 @@
             });
 
             container.innerHTML = htmlContent;
+        }
+
+        async function salvaSessioneCliente() {
+            const index = document.getElementById('selettoreSessione').value;
+            const sessione = listaSchedeRicevute[index];
+            if (!sessione) return;
+
+            let esercizi = JSON.parse(sessione.dati_scheda);
+            const blocchi = document.querySelectorAll('.exercise-block');
+
+            // Legge i target aggiornati inseriti dal cliente
+            blocchi.forEach((blocco, idx) => {
+                const targetModificato = blocco.querySelector('.ex-target-val').value.trim();
+                if (esercizi[idx] && targetModificato) {
+                    esercizi[idx].target = targetModificato;
+                }
+            });
+
+            // Salva le modifiche su Supabase
+            const { error } = await db
+                .from('schede_clienti')
+                .update({ dati_scheda: JSON.stringify(esercizi) })
+                .eq('id', sessione.id);
+
+            if (error) {
+                alert("Errore nel salvataggio: " + error.message);
+            } else {
+                sessione.dati_scheda = JSON.stringify(esercizi);
+                alert("Sessione e nuovi target salvati con successo!");
+            }
         }
 
         async function caricaSchedaCliente() {
@@ -677,7 +733,6 @@
 
                 listaSchedeRicevute = data;
 
-                // Popola il menu a tendina
                 selectElement.innerHTML = "";
                 data.forEach((s, idx) => {
                     const opt = document.createElement('option');
@@ -687,8 +742,6 @@
                 });
 
                 selectElement.style.display = data.length > 1 ? 'block' : 'none';
-
-                // Mostra la prima sessione di default
                 mostraSessioneSelezionata();
 
             } catch (err) {

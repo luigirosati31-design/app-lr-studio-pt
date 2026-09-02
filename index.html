@@ -3,87 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LR Studio PT</title>
+    <title>Accedi - Studio PT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Studio PT">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+
     <style>
-        body { 
-            background-color: #000000; 
-            color: #ffffff; 
-            font-family: 'Montserrat', sans-serif; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
-        .header-logo {
-            max-width: 140px; 
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+            background: #111111;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px 25px;
+            box-sizing: border-box;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+        .brand-logo {
+            width: 80px;
             height: auto;
-            margin-bottom: 30px; 
-            filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.4));
+            margin: 0 auto 15px auto;
+            display: block;
         }
-        .login-box { 
-            background-color: #111111; 
-            padding: 30px 25px; 
-            border-radius: 12px; 
-            width: 100%; 
-            max-width: 320px; 
-            text-align: center; 
-            border: 1px solid #d4af37; 
-            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.15); 
-            box-sizing: border-box;
-        }
-        h2 { 
-            color: #d4af37; 
-            margin-bottom: 25px; 
-            margin-top: 0;
-            font-weight: 700; 
-            letter-spacing: 2px; 
+        .login-card h1 {
+            color: #d4af37;
+            font-size: 1.3rem;
+            margin: 0 0 8px 0;
             text-transform: uppercase;
-            font-size: 1.1rem;
+            letter-spacing: 2px;
+            font-weight: 700;
         }
-        input { 
-            width: 100%; 
-            padding: 14px; 
-            margin: 10px 0; 
-            border-radius: 6px; 
-            border: 1px solid #333333; 
-            background: #0a0a0a; 
-            color: #ffffff; 
-            outline: none; 
+        .login-card p {
+            color: #888888;
+            font-size: 0.8rem;
+            margin: 0 0 25px 0;
+        }
+        .input-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-size: 0.7rem;
+            color: #aaaaaa;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+        input {
+            width: 100%;
+            background: #181818;
+            border: 1px solid #333333;
+            color: #ffffff;
+            padding: 12px;
+            border-radius: 8px;
             font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
             box-sizing: border-box;
         }
-        input:focus { border-color: #d4af37; }
-        button { 
-            width: 100%; 
-            padding: 14px; 
-            background-color: #d4af37; 
-            color: #000000; 
-            border: none; 
-            border-radius: 6px; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            cursor: pointer; 
-            margin-top: 20px; 
-            font-family: 'Montserrat', sans-serif;
-            box-sizing: border-box;
+        input:focus {
+            border-color: #d4af37;
+            outline: none;
         }
-        button:hover { background-color: #b5952f; }
+        .btn-gold {
+            width: 100%;
+            background: #d4af37;
+            color: #000000;
+            border: none;
+            padding: 13px;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-gold:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #alertBox {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            text-align: center;
+        }
+        .alert-error {
+            background: rgba(231, 76, 60, 0.15);
+            border: 1px solid #e74c3c;
+            color: #ff6b6b;
+        }
     </style>
 </head>
 <body>
-    <img src="logo-grande.png" alt="Icona LR" class="header-logo">
 
-    <div class="login-box">
-        <h2>LR Studio PT</h2>
-        <input type="email" placeholder="Email" id="email">
-        <input type="password" placeholder="Password" id="password">
-        <button onclick="faiLogin()">Accedi</button>
+    <div class="login-card">
+        <img src="logo.png" alt="Studio PT" class="brand-logo" onerror="this.style.display='none'">
+        <h1>Studio PT</h1>
+        <p>Area Riservata Clienti</p>
+
+        <form id="loginForm" onsubmit="eseguiLogin(event)">
+            <div class="input-group">
+                <label for="userEmail">Email</label>
+                <input type="email" id="userEmail" required placeholder="tuamail@esempio.com" autocomplete="email">
+            </div>
+
+            <div class="input-group">
+                <label for="userPass">Password</label>
+                <input type="password" id="userPass" required placeholder="••••••••" autocomplete="current-password">
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-gold">Accedi</button>
+            <div id="alertBox"></div>
+        </form>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -92,26 +147,51 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        async function faiLogin() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            
-            if(!email || !password) {
-                alert("Inserisci email e password.");
+        function mostraAvviso(messaggio) {
+            const box = document.getElementById('alertBox');
+            box.className = 'alert-error';
+            box.innerText = messaggio;
+            box.style.display = 'block';
+        }
+
+        async function eseguiLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const box = document.getElementById('alertBox');
+            box.style.display = 'none';
+
+            const email = document.getElementById('userEmail').value.trim();
+            const password = document.getElementById('userPass').value.trim();
+
+            if (!email || !password) {
+                mostraAvviso("Inserisci email e password.");
                 return;
             }
-            
-            const { data, error } = await db.auth.signInWithPassword({ email, password });
 
-            if (error) {
-                alert("Credenziali non valide.");
-            } else {
-                // Controllo se l'utente che effettua l'accesso è l'amministratore
-                if(email.toLowerCase() === "luigirosati31@gmail.com") {
-                    window.location.href = "admin.html";
-                } else {
-                    window.location.href = "dashboard.html";
+            btn.disabled = true;
+            btn.innerText = "Verifica in corso...";
+
+            try {
+                const { data, error } = await db.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    btn.disabled = false;
+                    btn.innerText = "Accedi";
+                    mostraAvviso("Errore: " + error.message);
+                } else if (data && data.session) {
+                    if (email.toLowerCase() === "luigirosati31@gmail.com") {
+                        window.location.href = "admin.html";
+                    } else {
+                        window.location.href = "dashboard.html";
+                    }
                 }
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerText = "Accedi";
+                mostraAvviso("Errore di connessione: " + err.message);
             }
         }
     </script>

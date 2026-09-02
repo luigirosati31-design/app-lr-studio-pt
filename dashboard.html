@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Area Privata - LR Studio PT</title>
+    <title>Area Privata - Studio PT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Studio PT">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { 
@@ -130,19 +135,37 @@
         .btn-gold { background-color: #d4af37; color: #000; border: none; }
         .btn-whatsapp { background-color: #25D366; color: #fff; border: none; }
         
-        .session-select {
-            width: 100%;
-            background: #0a0a0a;
-            border: 1px solid #d4af37;
-            color: #d4af37;
-            padding: 12px;
+        /* BARRA TAB GIORNI */
+        .sessions-tab-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #222;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .sessions-tab-bar::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            background: #161616;
+            color: #888;
+            border: 1px solid #333;
+            padding: 10px 16px;
             border-radius: 8px;
             font-family: 'Montserrat', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            margin-bottom: 20px;
-            outline: none;
+            white-space: nowrap;
             cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            background: #d4af37;
+            color: #000;
+            border-color: #d4af37;
+            font-weight: 700;
         }
 
         .exercise-block {
@@ -167,7 +190,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.65rem;
+            font-size: 0.8rem;
             color: #d4af37;
             font-weight: 700;
             flex-shrink: 0;
@@ -385,7 +408,7 @@
 <body>
 
     <div class="header">
-        <h1>LR Studio PT</h1>
+        <h1>Studio PT</h1>
         <button class="logout-btn" onclick="faiLogout()">Esci</button>
     </div>
 
@@ -403,8 +426,8 @@
             </div>
             <div id="profilo-content" class="card-content">
                 <div class="status-badge badge-warning">
-                    <span>Abbonamento PT</span>
-                    <span>Scade: 15/09/2026</span>
+                    <span>Percorso PT</span>
+                    <span>Stato: Attivo</span>
                 </div>
                 <h4 style="margin: 15px 0 10px 0; font-size: 0.85rem; color: #888;">MISURAZIONI ATTUALI</h4>
                 <div class="metrics-grid">
@@ -451,7 +474,8 @@
                 <span class="arrow" style="transform: rotate(-180deg);">▼</span>
             </div>
             <div id="allenamento-content" class="card-content" style="display: block;">
-                <select id="selettoreSessione" class="session-select" onchange="mostraSessioneSelezionata()" style="display: none;"></select>
+                
+                <div id="tabsBarSessioni" class="sessions-tab-bar" style="display: none;"></div>
 
                 <div id="listaEserciziDinamica">
                     <p style="text-align: center; color: #888; font-size: 0.85rem;">Caricamento scheda in corso...</p>
@@ -470,7 +494,7 @@
                     <span id="labelNomePacchetto">Nessun pacchetto attivo</span>
                     <span id="labelSeduteRimaste">0 Sedute Rimaste</span>
                 </div>
-                <button class="action-btn btn-whatsapp" onclick="window.open('https://wa.me/?text=Ciao%20Luigi,%20vorrei%20prenotare%20una%20seduta%20di%20massaggio.', '_blank')">📲 Prenota Massaggio</button>
+                <button class="action-btn btn-whatsapp" onclick="window.open('https://wa.me/?text=Ciao,%20vorrei%20prenotare%20una%20seduta%20di%20massaggio.', '_blank')">📲 Prenota Massaggio</button>
             </div>
         </div>
 
@@ -485,6 +509,7 @@
         let emailUtenteCorrente = "";
         let pesoChartInstance = null;
         let listaSchedeRicevute = [];
+        let indiceSessioneAttiva = 0;
 
         async function faiLogout() {
             await db.auth.signOut();
@@ -693,9 +718,36 @@
             return `<span class="last-weight-badge" style="color: #666; border-color: #333;">⚖️ Primo allenamento</span>`;
         }
 
-        function mostraSessioneSelezionata() {
-            const index = document.getElementById('selettoreSessione').value;
-            const sessione = listaSchedeRicevute[index];
+        function selezionaTabSessione(index) {
+            indiceSessioneAttiva = index;
+            
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            mostraSessioneCorrente();
+        }
+
+        function renderTabs() {
+            const tabsBar = document.getElementById('tabsBarSessioni');
+            if (!listaSchedeRicevute || listaSchedeRicevute.length <= 1) {
+                tabsBar.style.display = 'none';
+                return;
+            }
+
+            tabsBar.innerHTML = '';
+            listaSchedeRicevute.forEach((s, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `tab-btn ${idx === indiceSessioneAttiva ? 'active' : ''}`;
+                btn.innerText = s.titolo_sessione || `Giorno ${idx + 1}`;
+                btn.onclick = () => selezionaTabSessione(idx);
+                tabsBar.appendChild(btn);
+            });
+            tabsBar.style.display = 'flex';
+        }
+
+        function mostraSessioneCorrente() {
+            const sessione = listaSchedeRicevute[indiceSessioneAttiva];
             const container = document.getElementById('listaEserciziDinamica');
 
             if (!sessione) return;
@@ -706,7 +758,7 @@
             esercizi.forEach((ex, exIdx) => {
                 let gifHtml = ex.gif && ex.gif.trim() !== "" 
                     ? `<img src="${ex.gif}" alt="GIF">` 
-                    : `LR`;
+                    : `🏋️`;
 
                 let numSerieDefault = 3;
                 if (ex.target && ex.target.includes('x')) {
@@ -716,7 +768,6 @@
 
                 const storico = Array.isArray(ex.storico) ? ex.storico : [];
                 const ultimaSessione = storico.length > 0 ? storico[storico.length - 1] : null;
-
                 const badgeUltimoPeso = formattaBadgeUltimoPeso(ultimaSessione, ex.ultimo_peso);
 
                 let storicoHtml = "";
@@ -802,8 +853,7 @@
         }
 
         async function salvaSessioneCliente() {
-            const index = document.getElementById('selettoreSessione').value;
-            const sessione = listaSchedeRicevute[index];
+            const sessione = listaSchedeRicevute[indiceSessioneAttiva];
             if (!sessione) return;
 
             let esercizi = JSON.parse(sessione.dati_scheda);
@@ -862,8 +912,8 @@
                 alert("Errore nel salvataggio: " + error.message);
             } else {
                 sessione.dati_scheda = JSON.stringify(esercizi);
-                alert("Sessione completata! Pesi e storico aggiornati con successo.");
-                mostraSessioneSelezionata();
+                alert("Sessione salvata con successo!");
+                mostraSessioneCorrente();
             }
         }
 
@@ -889,26 +939,19 @@
                     .eq('email_cliente', emailUtenteCorrente);
 
                 const container = document.getElementById('listaEserciziDinamica');
-                const selectElement = document.getElementById('selettoreSessione');
+                const tabsBar = document.getElementById('tabsBarSessioni');
                 
                 if (error || !data || data.length === 0) {
                     container.innerHTML = `<p style="text-align: center; color: #888; font-size: 0.85rem;">Nessuna scheda assegnata al momento.</p>`;
-                    selectElement.style.display = 'none';
+                    tabsBar.style.display = 'none';
                     return;
                 }
 
                 listaSchedeRicevute = data;
+                indiceSessioneAttiva = 0;
 
-                selectElement.innerHTML = "";
-                data.forEach((s, idx) => {
-                    const opt = document.createElement('option');
-                    opt.value = idx;
-                    opt.innerText = `📍 ${s.titolo_sessione}`;
-                    selectElement.appendChild(opt);
-                });
-
-                selectElement.style.display = data.length > 1 ? 'block' : 'none';
-                mostraSessioneSelezionata();
+                renderTabs();
+                mostraSessioneCorrente();
 
             } catch (err) {
                 console.error("Errore nel caricamento:", err);

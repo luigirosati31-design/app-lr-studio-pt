@@ -21,7 +21,7 @@
         }
         .header {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -50,7 +50,7 @@
         }
         .welcome-banner {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
             border: 1px solid #d4af37;
             border-radius: 12px;
@@ -63,7 +63,7 @@
 
         .card-container {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -155,12 +155,12 @@
         .exercise-top {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 12px;
+            gap: 12px;
+            margin-bottom: 10px;
         }
         .exercise-gif {
-            width: 45px;
-            height: 45px;
+            width: 48px;
+            height: 48px;
             background-color: #1a1a1a;
             border-radius: 8px;
             border: 1px solid #d4af37;
@@ -175,41 +175,100 @@
         }
         .exercise-gif img { width: 100%; height: 100%; object-fit: cover; }
         .exercise-info { flex-grow: 1; }
-        .exercise-title { font-size: 1rem; color: #ffffff; font-weight: 600; margin-bottom: 5px; }
+        .exercise-title { font-size: 0.95rem; color: #ffffff; font-weight: 600; margin-bottom: 6px; }
         
-        .target-edit-wrapper {
+        .exercise-meta-row {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             gap: 6px;
         }
+        .target-edit-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #161616;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
         .target-edit-wrapper span {
-            font-size: 0.75rem;
+            font-size: 0.68rem;
             color: #888;
             text-transform: uppercase;
         }
         .target-input {
-            background: #161616;
-            border: 1px solid #333;
+            background: transparent;
+            border: none;
             color: #d4af37;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.8rem;
+            font-weight: 700;
+            width: 65px;
+            font-family: 'Montserrat', sans-serif;
+            text-align: center;
+        }
+        .target-input:focus { outline: none; }
+
+        .last-weight-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            color: #d4af37;
             padding: 3px 8px;
             border-radius: 4px;
-            width: 100px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .history-toggle-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: #aaa;
+            font-size: 0.72rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             font-family: 'Montserrat', sans-serif;
         }
-        .target-input:focus {
-            border-color: #d4af37;
-            outline: none;
+        .history-toggle-btn:hover { border-color: #d4af37; color: #d4af37; }
+        
+        .history-drawer {
+            display: none;
+            background: #141414;
+            border: 1px solid #2d2d2d;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.75rem;
+        }
+        .history-drawer.open { display: block; }
+        .history-entry {
+            border-bottom: 1px solid #222;
+            padding: 6px 0;
+        }
+        .history-entry:last-child { border-bottom: none; }
+        .history-date { color: #d4af37; font-weight: 600; margin-bottom: 4px; display: block; }
+        .history-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+        .history-pill {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #ccc;
         }
 
         .timer-btn {
             background-color: transparent;
             color: #888888;
-            border: 1px solid #555;
+            border: 1px solid #444;
             padding: 8px 12px;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
             width: 100%;
             text-align: left;
@@ -233,7 +292,7 @@
             padding: 8px 4px;
             text-align: center;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             box-sizing: border-box;
             font-family: 'Montserrat', sans-serif;
         }
@@ -397,7 +456,7 @@
                 <div id="listaEserciziDinamica">
                     <p style="text-align: center; color: #888; font-size: 0.85rem;">Caricamento scheda in corso...</p>
                 </div>
-                <button class="action-btn btn-gold" onclick="salvaSessioneCliente()">Salva Sessione e Target</button>
+                <button class="action-btn btn-gold" onclick="salvaSessioneCliente()">💾 Salva Sessione e Storico Pesi</button>
             </div>
         </div>
 
@@ -444,6 +503,14 @@
             }
         }
 
+        function toggleHistoricoDrawer(btn) {
+            const drawer = btn.closest('.exercise-block').querySelector('.history-drawer');
+            if (drawer) {
+                drawer.classList.toggle('open');
+                btn.innerHTML = drawer.classList.contains('open') ? '📜 Chiudi Storico' : '📜 Storico Carichi';
+            }
+        }
+
         function toggleTimer(bottone, secondi) {
             if (bottone.dataset.running === "true") {
                 clearInterval(bottone.intervalId);
@@ -475,14 +542,15 @@
             btn.innerHTML = btn.classList.contains('completed') ? '✓' : '';
         }
 
-        function aggiungiSerieTabella(buttonElement) {
+        function aggiungiSerieTabella(buttonElement, placeholderKg, placeholderRip) {
             const tbody = buttonElement.previousElementSibling.querySelector('tbody');
             const numSerie = tbody.rows.length + 1;
             const nuovaRiga = document.createElement('tr');
+            
             nuovaRiga.innerHTML = `
                 <td class="set-num">${numSerie}</td>
-                <td><input type="text" class="log-input" placeholder="kg"></td>
-                <td><input type="text" class="log-input" placeholder="rip"></td>
+                <td><input type="text" class="log-input log-kg" placeholder="${placeholderKg || 'kg'}"></td>
+                <td><input type="text" class="log-input log-rip" placeholder="${placeholderRip || 'rip'}"></td>
                 <td><button class="check-btn" onclick="toggleCheck(this)"></button></td>
             `;
             tbody.appendChild(nuovaRiga);
@@ -604,6 +672,27 @@
             }
         }
 
+        function formattaBadgeUltimoPeso(ultimaSessione, fallbackPeso) {
+            if (ultimaSessione && ultimaSessione.serie && ultimaSessione.serie.length > 0) {
+                const pesiValidi = ultimaSessione.serie
+                    .map(s => s.kg ? s.kg.trim() : "")
+                    .filter(k => k !== "");
+
+                if (pesiValidi.length > 0) {
+                    const minP = pesiValidi[0];
+                    const maxP = pesiValidi[pesiValidi.length - 1];
+                    const labelPeso = (minP === maxP) ? `${minP} kg` : `${minP}-${maxP} kg`;
+                    return `<span class="last-weight-badge">⚖️ Ultimo: ${labelPeso}</span>`;
+                }
+            }
+
+            if (fallbackPeso) {
+                return `<span class="last-weight-badge">⚖️ Ultimo: ${fallbackPeso} kg</span>`;
+            }
+
+            return `<span class="last-weight-badge" style="color: #666; border-color: #333;">⚖️ Primo allenamento</span>`;
+        }
+
         function mostraSessioneSelezionata() {
             const index = document.getElementById('selettoreSessione').value;
             const sessione = listaSchedeRicevute[index];
@@ -613,24 +702,56 @@
 
             let htmlContent = "";
             let esercizi = JSON.parse(sessione.dati_scheda);
+            
             esercizi.forEach((ex, exIdx) => {
                 let gifHtml = ex.gif && ex.gif.trim() !== "" 
                     ? `<img src="${ex.gif}" alt="GIF">` 
                     : `LR`;
 
                 let numSerieDefault = 3;
-                if(ex.target && ex.target.includes('x')) {
+                if (ex.target && ex.target.includes('x')) {
                     let parsed = parseInt(ex.target.split('x')[0]);
-                    if(!isNaN(parsed)) numSerieDefault = parsed;
+                    if (!isNaN(parsed)) numSerieDefault = parsed;
+                }
+
+                const storico = Array.isArray(ex.storico) ? ex.storico : [];
+                const ultimaSessione = storico.length > 0 ? storico[storico.length - 1] : null;
+
+                const badgeUltimoPeso = formattaBadgeUltimoPeso(ultimaSessione, ex.ultimo_peso);
+
+                let storicoHtml = "";
+                if (storico.length > 0) {
+                    const sessioniRecenti = [...storico].reverse().slice(0, 4);
+                    storicoHtml = sessioniRecenti.map(s => {
+                        const seriePills = s.serie.map((ser, i) => 
+                            `<span class="history-pill">S${i+1}: <b>${ser.kg || '-'} kg</b> × ${ser.rip || '-'}</span>`
+                        ).join("");
+                        return `
+                            <div class="history-entry">
+                                <span class="history-date">📅 ${s.data}</span>
+                                <div class="history-pills">${seriePills}</div>
+                            </div>
+                        `;
+                    }).join("");
+                } else {
+                    storicoHtml = `<p style="margin: 0; color: #666;">Nessuna sessione registrata in precedenza.</p>`;
                 }
 
                 let righeTabella = "";
-                for(let i = 1; i <= numSerieDefault; i++) {
+                for (let i = 1; i <= numSerieDefault; i++) {
+                    let prevKg = "kg";
+                    let prevRip = "rip";
+                    
+                    if (ultimaSessione && ultimaSessione.serie && ultimaSessione.serie[i - 1]) {
+                        if (ultimaSessione.serie[i - 1].kg) prevKg = `${ultimaSessione.serie[i - 1].kg} kg`;
+                        if (ultimaSessione.serie[i - 1].rip) prevRip = `${ultimaSessione.serie[i - 1].rip} rip`;
+                    }
+
                     righeTabella += `
                         <tr>
                             <td class="set-num">${i}</td>
-                            <td><input type="text" class="log-input" placeholder="kg"></td>
-                            <td><input type="text" class="log-input" placeholder="rip"></td>
+                            <td><input type="text" class="log-input log-kg" placeholder="${prevKg}"></td>
+                            <td><input type="text" class="log-input log-rip" placeholder="${prevRip}"></td>
                             <td><button class="check-btn" onclick="toggleCheck(this)"></button></td>
                         </tr>
                     `;
@@ -642,12 +763,21 @@
                             <div class="exercise-gif">${gifHtml}</div>
                             <div class="exercise-info">
                                 <div class="exercise-title">${ex.nome}</div>
-                                <div class="target-edit-wrapper">
-                                    <span>Target:</span>
-                                    <input type="text" class="target-input ex-target-val" value="${ex.target || '3x10'}">
+                                <div class="exercise-meta-row">
+                                    <div class="target-edit-wrapper">
+                                        <span>Target:</span>
+                                        <input type="text" class="target-input ex-target-val" value="${ex.target || '3x10'}">
+                                    </div>
+                                    ${badgeUltimoPeso}
+                                    <button type="button" class="history-toggle-btn" onclick="toggleHistoricoDrawer(this)">📜 Storico Carichi</button>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="history-drawer">
+                            ${storicoHtml}
+                        </div>
+
                         <button class="timer-btn" onclick="toggleTimer(this, ${ex.recupero || 90})">⏱️ Avvia Recupero (${ex.recupero || 90}s)</button>
                         <table>
                             <thead>
@@ -662,8 +792,8 @@
                                 ${righeTabella}
                             </tbody>
                         </table>
-                        <button class="add-set-btn" onclick="aggiungiSerieTabella(this)">+ Aggiungi serie</button>
-                        <textarea class="coach-notes" rows="2" placeholder="Note per il coach..."></textarea>
+                        <button class="add-set-btn" onclick="aggiungiSerieTabella(this, '', '')">+ Aggiungi serie</button>
+                        <textarea class="coach-notes" rows="2" placeholder="Note su carichi, sensazioni..."></textarea>
                     </div>
                 `;
             });
@@ -679,15 +809,50 @@
             let esercizi = JSON.parse(sessione.dati_scheda);
             const blocchi = document.querySelectorAll('.exercise-block');
 
-            // Legge i target aggiornati inseriti dal cliente
+            const oggi = new Date();
+            const dataOggi = `${oggi.getDate().toString().padStart(2, '0')}/${(oggi.getMonth() + 1).toString().padStart(2, '0')}/${oggi.getFullYear()}`;
+
             blocchi.forEach((blocco, idx) => {
                 const targetModificato = blocco.querySelector('.ex-target-val').value.trim();
                 if (esercizi[idx] && targetModificato) {
                     esercizi[idx].target = targetModificato;
                 }
+
+                const righe = blocco.querySelectorAll('tbody tr');
+                let serieDati = [];
+                let almenoUnaCompilata = false;
+                let pesoTrovato = "";
+
+                righe.forEach(riga => {
+                    const kg = riga.querySelector('.log-kg').value.trim();
+                    const rip = riga.querySelector('.log-rip').value.trim();
+                    if (kg !== "" || rip !== "") {
+                        almenoUnaCompilata = true;
+                    }
+                    if (kg !== "") pesoTrovato = kg;
+                    serieDati.push({ kg: kg, rip: rip });
+                });
+
+                if (pesoTrovato !== "" && esercizi[idx]) {
+                    esercizi[idx].ultimo_peso = pesoTrovato;
+                }
+
+                if (almenoUnaCompilata && esercizi[idx]) {
+                    if (!Array.isArray(esercizi[idx].storico)) {
+                        esercizi[idx].storico = [];
+                    }
+                    
+                    esercizi[idx].storico.push({
+                        data: dataOggi,
+                        serie: serieDati
+                    });
+
+                    if (esercizi[idx].storico.length > 10) {
+                        esercizi[idx].storico.shift();
+                    }
+                }
             });
 
-            // Salva le modifiche su Supabase
             const { error } = await db
                 .from('schede_clienti')
                 .update({ dati_scheda: JSON.stringify(esercizi) })
@@ -697,7 +862,8 @@
                 alert("Errore nel salvataggio: " + error.message);
             } else {
                 sessione.dati_scheda = JSON.stringify(esercizi);
-                alert("Sessione e nuovi target salvati con successo!");
+                alert("Sessione completata! Pesi e storico aggiornati con successo.");
+                mostraSessioneSelezionata();
             }
         }
 

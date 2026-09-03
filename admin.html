@@ -72,7 +72,7 @@
             font-size: 0.85rem;
             box-sizing: border-box;
         }
-        input:focus { border-color: #d4af37; outline: none; }
+        input:focus, select:focus { border-color: #d4af37; outline: none; }
         
         .autocomplete-dropdown {
             display: none;
@@ -200,11 +200,10 @@
             background: #141414;
             border: 1px solid #222;
             border-radius: 6px;
-            padding: 6px 10px;
+            padding: 10px;
             margin-bottom: 10px;
         }
-        .preview-box img { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; border: 1px solid #d4af37; background: #000; }
-        .preview-path { font-size: 0.72rem; color: #888; word-break: break-all; }
+        .preview-box img { width: 42px; height: 42px; object-fit: cover; border-radius: 4px; border: 1px solid #d4af37; background: #000; flex-shrink: 0; }
         .btn-add-ex {
             width: 100%;
             background: #161616;
@@ -369,6 +368,27 @@
             }
         }
 
+        function popolaSelectGifManuale(selectEl, selectedPath = "") {
+            selectEl.innerHTML = '<option value="">-- Seleziona GIF manualmente --</option>';
+            archivioGifEsercizi.forEach(ex => {
+                const opt = document.createElement('option');
+                opt.value = ex.percorso;
+                opt.innerText = ex.nome;
+                if (ex.percorso === selectedPath) opt.selected = true;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function aggiornaGifManuale(selectEl) {
+            const card = selectEl.closest('.ex-card');
+            const percorso = selectEl.value;
+            const hiddenInput = card.querySelector('.input-gif-hidden');
+            const previewImg = card.querySelector('.img-preview');
+
+            hiddenInput.value = percorso;
+            previewImg.src = percorso ? percorso : 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>';
+        }
+
         function creaCardEsercizio(dati = {}, index = null) {
             const container = document.getElementById('listaEserciziEditor');
             const currentIndex = (index !== null) ? index : container.children.length;
@@ -383,8 +403,8 @@
                     <button type="button" class="btn-remove-ex" onclick="this.closest('.ex-card').remove(); rinumeraEsercizi();">✕ Rimuovi</button>
                 </div>
                 <div class="form-group" style="position: relative;">
-                    <label>Nome Esercizio (Inizia a scrivere per cercare la GIF)</label>
-                    <input type="text" class="input-nome" placeholder="es. Chest Press, Lat Machine..." value="${dati.nome || ''}" oninput="gestisciAutocompletamento(this)" autocomplete="off">
+                    <label>Nome Esercizio (Scrivi liberamente, es. Rematore 1 arm / TRX)</label>
+                    <input type="text" class="input-nome" placeholder="es. Rematore 1 arm / TRX" value="${dati.nome || ''}" oninput="gestisciAutocompletamento(this)" autocomplete="off">
                     <div class="autocomplete-dropdown"></div>
                 </div>
                 <div class="grid-2">
@@ -399,9 +419,11 @@
                 </div>
                 <div class="preview-box">
                     <img class="img-preview" src="${dati.gif || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" alt="Preview">
-                    <div>
-                        <div style="font-size: 0.68rem; color: #aaa;">GIF Associata:</div>
-                        <span class="preview-path">${dati.gif || 'Nessuna GIF selezionata'}</span>
+                    <div style="flex-grow: 1;">
+                        <label style="margin-bottom: 3px;">Associa GIF Manualmente</label>
+                        <select class="select-gif-manuale" onchange="aggiornaGifManuale(this)">
+                            <option value="">-- Seleziona GIF --</option>
+                        </select>
                     </div>
                 </div>
                 <input type="hidden" class="input-gif-hidden" value="${dati.gif || ''}">
@@ -411,6 +433,10 @@
                 </div>
             `;
             container.appendChild(card);
+
+            // Popola il selettore manuale della GIF per questa card
+            const selectEl = card.querySelector('.select-gif-manuale');
+            popolaSelectGifManuale(selectEl, dati.gif || "");
         }
 
         function gestisciAutocompletamento(inputEl) {
@@ -418,8 +444,8 @@
             const card = inputEl.closest('.ex-card');
             const dropdown = card.querySelector('.autocomplete-dropdown');
             const previewImg = card.querySelector('.img-preview');
-            const previewPathText = card.querySelector('.preview-path');
             const hiddenGifInput = card.querySelector('.input-gif-hidden');
+            const selectEl = card.querySelector('.select-gif-manuale');
 
             if (!testo) {
                 dropdown.style.display = 'none';
@@ -436,10 +462,11 @@
                     item.className = 'autocomplete-item';
                     item.innerText = ex.nome;
                     item.onclick = () => {
+                        // Seleziona in automatico sia il nome che la GIF correlata
                         inputEl.value = ex.nome;
                         hiddenGifInput.value = ex.percorso;
-                        previewPathText.innerText = ex.percorso;
                         previewImg.src = ex.percorso;
+                        selectEl.value = ex.percorso;
                         dropdown.style.display = 'none';
                     };
                     dropdown.appendChild(item);
@@ -448,9 +475,6 @@
             } else {
                 dropdown.style.display = 'none';
                 dropdown.innerHTML = '';
-                hiddenGifInput.value = "";
-                previewPathText.innerText = "Esercizio personalizzato (senza GIF)";
-                previewImg.src = "";
             }
         }
 
@@ -494,6 +518,11 @@
                         }
                     }
                 }
+                // Aggiorna tutte le select già create nel caso fossero vuote
+                document.querySelectorAll('.select-gif-manuale').forEach(sel => {
+                    const currentVal = sel.value;
+                    popolaSelectGifManuale(sel, currentVal);
+                });
             } catch (e) {}
         }
 

@@ -93,12 +93,21 @@
         .tab-btn.active { background: #d4af37; color: #000; border-color: #d4af37; font-weight: 700; }
 
         .exercise-block { margin-bottom: 20px; background-color: #0a0a0a; padding: 15px; border-radius: 10px; border: 1px solid #222; }
-        .exercise-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .exercise-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+        
+        /* Carosello orizzontale per GIF multiple */
+        .gif-carousel {
+            display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory;
+            max-width: 130px; padding-bottom: 4px; flex-shrink: 0;
+        }
+        .gif-carousel::-webkit-scrollbar { height: 3px; }
+        .gif-carousel::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 3px; }
         .exercise-gif {
-            width: 48px; height: 48px; background-color: #1a1a1a; border-radius: 8px; border: 1px solid #d4af37;
-            display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #d4af37; font-weight: 700; flex-shrink: 0; overflow: hidden;
+            flex: 0 0 auto; width: 48px; height: 48px; background-color: #1a1a1a; border-radius: 8px; border: 1px solid #d4af37;
+            display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #d4af37; font-weight: 700; overflow: hidden; scroll-snap-align: start;
         }
         .exercise-gif img { width: 100%; height: 100%; object-fit: cover; }
+        
         .exercise-info { flex-grow: 1; }
         .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .exercise-title { font-size: 0.95rem; color: #fff; font-weight: 600; }
@@ -154,7 +163,6 @@
         .add-set-btn { background: #161616; color: #d4af37; border: 1px dashed #d4af37; width: 100%; padding: 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
         .coach-notes { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 0.8rem; box-sizing: border-box; resize: none; }
 
-        /* Step navigation controls */
         .step-nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .step-nav-btn { background: #1c1c1c; border: 1px solid #444; color: #d4af37; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; text-transform: uppercase; }
         .step-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -302,7 +310,7 @@
         let pesoChartInstance = null;
         let listaSchedeRicevute = [];
         let indiceSessioneAttiva = 0;
-        let visualizzazioneModo = 'list'; // 'list' o 'step'
+        let visualizzazioneModo = 'list';
         let indiceStepCorrente = 0;
 
         function faiLogoutAtleta() {
@@ -609,11 +617,11 @@
         }
 
         function generaHtmlEsercizio(ex, exIdx) {
-            
+            // Carosello orizzontale GIF multiple o singole (con classi originali intatte)
             let listaGifs = ex.gifs || (ex.gif ? [ex.gif] : []);
             let gifHtml = "";
             if (listaGifs.length > 0) {
-                gifHtml = listaGifs.map(g => `<div class="exercise-gif" style="width:48px;height:48px;display:inline-block;margin-right:4px;"><img src="${g}" alt="GIF" style="width:100%;height:100%;object-fit:cover;border-radius:6px;border:1px solid #d4af37;"></div>`).join('');
+                gifHtml = `<div class="gif-carousel">` + listaGifs.map(g => `<div class="exercise-gif"><img src="${g}" alt="GIF"></div>`).join('') + `</div>`;
             } else {
                 gifHtml = `<div class="exercise-gif">🏋️</div>`;
             }
@@ -649,7 +657,7 @@
             return `
                 <div class="exercise-block" data-index="${exIdx}">
                     <div class="exercise-top">
-                        <div class="exercise-gif">${gifHtml}</div>
+                        ${gifHtml}
                         <div class="exercise-info">
                             <div class="title-row">
                                 <div class="exercise-title">${ex.nome}</div>

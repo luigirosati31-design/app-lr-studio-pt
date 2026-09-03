@@ -83,31 +83,10 @@
             border-color: #d4af37;
             outline: none;
         }
-        .magic-link-box {
-            background: #161616;
-            border: 1px dashed #d4af37;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 15px;
-            display: none;
-        }
-        .magic-link-box p {
-            margin: 0 0 8px 0;
-            font-size: 0.75rem;
-            color: #ccc;
-        }
-        .btn-copy-link {
-            background: #d4af37;
-            color: #000;
-            border: none;
-            padding: 10px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-family: 'Montserrat', sans-serif;
-            width: 100%;
+        .grid-pin {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
         }
         .btn-load {
             width: 100%;
@@ -292,26 +271,24 @@
 
     <div class="admin-panel">
         <div class="header">
-            <h1>Studio PT - Pannello Schede</h1>
+            <h1>Studio PT - Gestione Schede</h1>
             <button class="header-btn" onclick="window.location.href='index.html'">Esci</button>
         </div>
 
-        <div class="form-group">
-            <label for="clienteNomeCognome">Nome e Cognome Cliente</label>
-            <input type="text" id="clienteNomeCognome" placeholder="es. Enrico Lombardi" oninput="generaIdCliente()">
+        <div class="grid-pin">
+            <div class="form-group">
+                <label for="clienteNomeCognome">Nome e Cognome Atleta</label>
+                <input type="text" id="clienteNomeCognome" placeholder="es. Enrico Lombardi" oninput="generaIdCliente()">
+            </div>
+            <div class="form-group">
+                <label for="clientePin">PIN Atleta (4 cifre)</label>
+                <input type="text" id="clientePin" placeholder="es. 1234" maxlength="4" style="text-align: center; font-weight: 700; color: #d4af37; font-size: 1.1rem;">
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="clientId">ID Link Personale</label>
-            <input type="text" id="clientId" placeholder="es. enrico-lombardi" style="color: #d4af37; font-weight: 700;">
-        </div>
+        <input type="hidden" id="clientId">
 
-        <div id="magicLinkBox" class="magic-link-box">
-            <p>🔗 <b>Link Unico da Inviare al Cliente:</b><br><span id="txtMagicLink" style="color:#d4af37; font-size:0.75rem;"></span></p>
-            <button type="button" class="btn-copy-link" onclick="copiaLinkCliente()">📲 Copia Link WhatsApp</button>
-        </div>
-
-        <button type="button" class="btn-load" onclick="caricaSchedaEsistente()">🔍 Carica Scheda Già Esistente</button>
+        <button type="button" class="btn-load" onclick="caricaSchedaEsistente()">🔍 Carica Scheda Esistente</button>
         <div id="statusBadge" class="badge-status badge-info"></div>
 
         <div class="days-tab-bar">
@@ -326,9 +303,9 @@
 
         <div id="listaEserciziEditor"></div>
 
-        <button type="button" class="btn-add-ex" onclick="aggiungiNuovoEsercizioCard()">+ Aggiungi Esercizio a Questo Giorno</button>
+        <button type="button" class="btn-add-ex" onclick="aggiungiNuovoEsercizioCard()">+ Aggiungi Esercizio</button>
 
-        <button type="button" id="btnSalvaScheda" class="btn-submit" onclick="salvaTuttoIlProgramma()">💾 Salva Tutto il Programma (1 Solo Clic)</button>
+        <button type="button" id="btnSalvaScheda" class="btn-submit" onclick="salvaTuttoIlProgramma()">💾 Salva Scheda Completa</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -338,7 +315,6 @@
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         let archivioGifEsercizi = [];
-
         let programmaSettimanale = [
             { titolo: "Giorno A", esercizi: [] },
             { titolo: "Giorno B", esercizi: [] }
@@ -360,27 +336,6 @@
                 .replace(/\s+/g, '-');
             
             document.getElementById('clientId').value = cleanSlug;
-            aggiornaBoxMagicLink(cleanSlug);
-        }
-
-        function aggiornaBoxMagicLink(slug) {
-            const box = document.getElementById('magicLinkBox');
-            const txt = document.getElementById('txtMagicLink');
-            if (!slug) {
-                box.style.display = 'none';
-                return;
-            }
-            const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            const fullUrl = `${baseUrl}/dashboard.html?id=${slug}`;
-            txt.innerText = fullUrl;
-            box.style.display = 'block';
-        }
-
-        function copiaLinkCliente() {
-            const txt = document.getElementById('txtMagicLink').innerText;
-            navigator.clipboard.writeText(txt).then(() => {
-                alert("✅ Link copiato negli appunti! Incollalo su WhatsApp al cliente.");
-            });
         }
 
         function renderTabsGiorni() {
@@ -420,7 +375,7 @@
                 alert("Devi mantenere almeno un giorno nella scheda.");
                 return;
             }
-            if (confirm(`Vuoi davvero eliminare "${programmaSettimanale[indiceGiornoAttivo].titolo}"?`)) {
+            if (confirm(`Vuoi eliminare "${programmaSettimanale[indiceGiornoAttivo].titolo}"?`)) {
                 programmaSettimanale.splice(indiceGiornoAttivo, 1);
                 indiceGiornoAttivo = Math.max(0, indiceGiornoAttivo - 1);
                 renderTabsGiorni();
@@ -621,24 +576,29 @@
         }
 
         async function caricaSchedaEsistente() {
+            generaIdCliente();
             const clientId = document.getElementById('clientId').value.trim();
             if (!clientId) {
-                alert("Inserisci Nome e Cognome del cliente per caricare.");
+                alert("Inserisci Nome e Cognome dell'atleta per caricare la scheda.");
                 return;
             }
 
-            mostraAvviso("Ricerca programma in corso...");
+            mostraAvviso("Ricerca scheda in corso...");
 
             try {
                 const { data, error } = await db
                     .from('schede_clienti')
                     .select('*')
-                    .eq('client_id', clientId);
+                    .or(`client_id.eq.${clientId},email_cliente.eq.${clientId}`);
 
                 if (error) throw error;
                 if (!data || data.length === 0) {
-                    mostraAvviso("Nessuna scheda trovata per questo cliente. Creane una nuova.");
+                    mostraAvviso("Nessuna scheda trovata. Puoi crearne una nuova.");
                     return;
+                }
+
+                if (data[0].pin) {
+                    document.getElementById('clientePin').value = data[0].pin;
                 }
 
                 if (data.length === 1 && data[0].titolo_sessione === "PROGRAMMA_COMPLETO") {
@@ -652,7 +612,6 @@
 
                 indiceGiornoAttivo = 0;
                 renderTabsGiorni();
-                aggiornaBoxMagicLink(clientId);
                 mostraAvviso(`✅ Scheda di "${clientId}" caricata con successo!`, 'badge-success');
 
             } catch (err) {
@@ -662,12 +621,19 @@
 
         async function salvaTuttoIlProgramma() {
             salvaDatiFormNelGiornoAttivo();
+            generaIdCliente();
 
             const clientId = document.getElementById('clientId').value.trim();
+            const pin = document.getElementById('clientePin').value.trim();
             const btn = document.getElementById('btnSalvaScheda');
 
             if (!clientId) {
-                alert("Inserisci il Nome e Cognome del cliente prima di salvare!");
+                alert("Inserisci Nome e Cognome dell'atleta!");
+                return;
+            }
+
+            if (!pin || pin.length !== 4) {
+                alert("Assegna un PIN numerico di 4 cifre per l'atleta (es. 1234).");
                 return;
             }
 
@@ -675,24 +641,24 @@
             btn.innerText = "Salvataggio in corso...";
 
             try {
-                await db.from('schede_clienti').delete().eq('client_id', clientId);
+                await db.from('schede_clienti').delete().or(`client_id.eq.${clientId},email_cliente.eq.${clientId}`);
 
                 const { error } = await db.from('schede_clienti').insert([{
                     client_id: clientId,
                     email_cliente: clientId,
+                    pin: pin,
                     titolo_sessione: "PROGRAMMA_COMPLETO",
                     dati_scheda: JSON.stringify(programmaSettimanale)
                 }]);
 
                 if (error) throw error;
 
-                alert("✅ Tutto il programma della settimana è stato salvato con successo!");
-                aggiornaBoxMagicLink(clientId);
+                alert(`✅ Scheda salvata con successo!\nPIN assegnato ad ${clientId}: ${pin}`);
             } catch (err) {
                 alert("Errore salvataggio: " + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "💾 Salva Tutto il Programma (1 Solo Clic)";
+                btn.innerText = "💾 Salva Scheda Completa";
             }
         }
 

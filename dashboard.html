@@ -538,6 +538,7 @@
         <h1>Studio PT</h1>
         <div class="header-actions">
             <button class="header-btn header-btn-calc" onclick="apriModalDischi()">🧮 Dischi</button>
+            <button class="header-btn" onclick="faiLogoutAtleta()">Esci</button>
         </div>
     </div>
 
@@ -665,6 +666,12 @@
         let indiceSessioneAttiva = 0;
         let isProgrammaCompletoSingolo = false;
         let interoProgrammaRaw = [];
+
+        function faiLogoutAtleta() {
+            localStorage.removeItem('studio_pt_client_id');
+            localStorage.removeItem('studio_pt_client_pin');
+            window.location.href = "index.html";
+        }
 
         function interpretaTarget(targetString) {
             let numSerie = 3;
@@ -1365,7 +1372,6 @@
             ripristinaBozzaLocaleSePresente();
         }
 
-        // ================= CONTROLLO DI ESISTENZA RIGOROSO =================
         async function caricaSchedaCliente() {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -1389,17 +1395,16 @@
 
                 if (error || !data || data.length === 0) {
                     localStorage.removeItem('studio_pt_client_id');
+                    localStorage.removeItem('studio_pt_client_pin');
                     document.body.innerHTML = `
                         <div style="text-align: center; padding: 50px 20px; font-family: 'Montserrat', sans-serif;">
                             <h2 style="color: #ff6b6b; font-size: 1.2rem;">ACCESSO NON AUTORIZZATO</h2>
-                            <p style="color: #888; font-size: 0.85rem; margin-top: 10px;">Nessun programma attivo trovato per questo codice.</p>
-                            <a href="index.html" style="color: #d4af37; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-block; margin-top: 20px; border: 1px solid #d4af37; padding: 10px 18px; border-radius: 8px;">Torna alla Home</a>
+                            <p style="color: #888; font-size: 0.85rem; margin-top: 10px;">Nessun programma attivo trovato per questo profilo.</p>
+                            <a href="index.html" style="color: #d4af37; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-block; margin-top: 20px; border: 1px solid #d4af37; padding: 10px 18px; border-radius: 8px;">Torna alla Schermata di Accesso</a>
                         </div>
                     `;
                     return;
                 }
-
-                localStorage.setItem('studio_pt_client_id', clientIdCorrente);
 
                 const nomeVisualizzato = clientIdCorrente.replace(/-/g, ' ');
                 document.getElementById('userEmailDisplay').innerText = nomeVisualizzato;

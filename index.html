@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Studio PT - Accesso</title>
+    <title>Studio PT - Accesso Atleta</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Studio PT">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
     <style>
         body {
             background-color: #000000;
@@ -20,44 +23,34 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 90vh;
+            min-height: 92vh;
         }
         .login-card {
             width: 100%;
             max-width: 380px;
             background: #111111;
             border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 35px 25px;
+            border-radius: 14px;
+            padding: 32px 24px;
             box-sizing: border-box;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.85);
             text-align: center;
         }
         h1 {
             color: #d4af37;
             font-size: 1.4rem;
-            margin: 0 0 8px 0;
+            margin: 0 0 6px 0;
             text-transform: uppercase;
             letter-spacing: 2px;
             font-weight: 700;
         }
         p {
-            color: #888;
+            color: #888888;
             font-size: 0.8rem;
-            margin: 0 0 25px 0;
-        }
-        .info-box {
-            background: #161616;
-            border: 1px solid #262626;
-            border-radius: 8px;
-            padding: 15px;
-            font-size: 0.8rem;
-            color: #ccc;
-            line-height: 1.5;
-            margin-bottom: 20px;
+            margin: 0 0 24px 0;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
             text-align: left;
         }
         label {
@@ -80,7 +73,17 @@
             font-size: 0.9rem;
             box-sizing: border-box;
         }
-        input:focus { border-color: #d4af37; outline: none; }
+        input:focus {
+            border-color: #d4af37;
+            outline: none;
+        }
+        .pin-input {
+            font-size: 1.3rem;
+            letter-spacing: 8px;
+            text-align: center;
+            font-weight: 700;
+            color: #d4af37;
+        }
         .btn-gold {
             width: 100%;
             background: #d4af37;
@@ -94,47 +97,137 @@
             text-transform: uppercase;
             font-family: 'Montserrat', sans-serif;
             letter-spacing: 1px;
+            margin-top: 8px;
+            transition: opacity 0.2s;
         }
-        .admin-toggle {
+        .btn-gold:active { opacity: 0.8; }
+        .divider {
+            margin: 22px 0 12px 0;
+            border-top: 1px solid #222;
+        }
+        .admin-link {
             color: #555;
             font-size: 0.72rem;
             text-decoration: none;
             cursor: pointer;
-            margin-top: 25px;
             display: inline-block;
         }
-        .admin-toggle:hover { color: #d4af37; }
+        .admin-link:hover { color: #d4af37; }
+        .error-msg {
+            display: none;
+            background: rgba(231, 76, 60, 0.15);
+            border: 1px solid #e74c3c;
+            color: #ff6b6b;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            margin-bottom: 14px;
+        }
     </style>
 </head>
 <body>
 
     <div class="login-card">
         <h1>Studio PT</h1>
-        <p>Area Riservata Clienti</p>
+        <p>Area Riservata Atleti</p>
 
-        <div class="info-box">
-            📲 <b>Sei un atleta seguito?</b><br>
-            Accedi direttamente dal link personale che ti ha inviato il Coach su WhatsApp.
+        <div id="erroreBox" class="error-msg"></div>
+
+        <div class="form-group">
+            <label for="nomeInput">Nome e Cognome</label>
+            <input type="text" id="nomeInput" placeholder="es. Enrico Lombardi" autocomplete="name">
         </div>
 
-        <a class="admin-toggle" onclick="mostraLoginAdmin()">Area Riservata Coach</a>
+        <div class="form-group">
+            <label for="pinInput">PIN di Sicurezza (4 cifre)</label>
+            <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*">
+        </div>
 
-        <div id="boxAccessoAdmin" style="display: none; margin-top: 15px;">
+        <button class="btn-gold" id="btnAccedi" onclick="validaAccessoCliente()">Entra nella Scheda</button>
+
+        <div class="divider"></div>
+        <a class="admin-link" onclick="mostraLoginAdmin()">Area Riservata Coach</a>
+
+        <div id="boxAccessoAdmin" style="display: none; margin-top: 14px;">
             <div class="form-group">
-                <label>PIN Coach</label>
-                <input type="password" id="adminPin" placeholder="Inserisci PIN">
+                <label>PIN Master Coach</label>
+                <input type="password" id="adminPin" class="pin-input" placeholder="••••" style="letter-spacing: normal; font-size: 1rem;">
             </div>
-            <button class="btn-gold" style="background:#222; color:#d4af37; border:1px solid #d4af37;" onclick="entraComeAdmin()">Entra come Coach</button>
+            <button class="btn-gold" style="background:#222; color:#d4af37; border:1px solid #d4af37;" onclick="entraComeAdmin()">Accedi Pannello Coach</button>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        const supabaseUrl = 'https://xhgxosffgsuokrsycvyd.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
+        const db = window.supabase.createClient(supabaseUrl, supabaseKey);
+
         document.addEventListener("DOMContentLoaded", () => {
             const tokenSalvato = localStorage.getItem('studio_pt_client_id');
-            if (tokenSalvato) {
+            const pinSalvato = localStorage.getItem('studio_pt_client_pin');
+            if (tokenSalvato && pinSalvato) {
                 window.location.href = `dashboard.html?id=${tokenSalvato}`;
             }
         });
+
+        function mostraErrore(testo) {
+            const box = document.getElementById('erroreBox');
+            box.innerText = testo;
+            box.style.display = 'block';
+        }
+
+        async function validaAccessoCliente() {
+            const nomeRaw = document.getElementById('nomeInput').value.trim();
+            const pinRaw = document.getElementById('pinInput').value.trim();
+            const btn = document.getElementById('btnAccedi');
+
+            if (!nomeRaw || !pinRaw) {
+                mostraErrore("Compila sia il Nome e Cognome che il PIN.");
+                return;
+            }
+
+            if (pinRaw.length !== 4) {
+                mostraErrore("Il PIN deve essere esattamente di 4 cifre.");
+                return;
+            }
+
+            const slug = nomeRaw.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+
+            btn.disabled = true;
+            btn.innerText = "Verifica in corso...";
+
+            try {
+                const { data, error } = await db
+                    .from('schede_clienti')
+                    .select('client_id, pin')
+                    .or(`client_id.eq.${slug},email_cliente.eq.${slug}`);
+
+                if (error || !data || data.length === 0) {
+                    mostraErrore("Nessuna scheda trovata per questo atleta. Contatta il Coach.");
+                    return;
+                }
+
+                const clienteRecord = data[0];
+                const pinRegistrato = (clienteRecord.pin || "").toString().trim();
+
+                if (pinRegistrato !== "" && pinRegistrato !== pinRaw) {
+                    mostraErrore("PIN errato. Riprova.");
+                    return;
+                }
+
+                localStorage.setItem('studio_pt_client_id', slug);
+                localStorage.setItem('studio_pt_client_pin', pinRaw);
+
+                window.location.href = `dashboard.html?id=${slug}`;
+
+            } catch (err) {
+                mostraErrore("Errore di connessione: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Entra nella Scheda";
+            }
+        }
 
         function mostraLoginAdmin() {
             const box = document.getElementById('boxAccessoAdmin');
@@ -144,6 +237,7 @@
         function entraComeAdmin() {
             const pin = document.getElementById('adminPin').value.trim();
             if (pin === "studio2026" || pin === "1234") {
+                localStorage.setItem('studio_pt_admin_logged', 'true');
                 window.location.href = "admin.html";
             } else {
                 alert("PIN Coach non corretto.");

@@ -289,7 +289,7 @@
 
         function generaIdCliente() {
             const nomeCompleto = document.getElementById('clienteNomeCognome').value.trim();
-            document.getElementById('clientId').value = nomeCompleto.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+            document.getElementById('clientId').value = nomeCompleto.toLowerCase().replace(/\s+/g, '').replace(/[^\w-]/g, '');
         }
 
         function renderTabsGiorni() {
@@ -434,7 +434,6 @@
             `;
             container.appendChild(card);
 
-            // Popola il selettore manuale della GIF per questa card
             const selectEl = card.querySelector('.select-gif-manuale');
             popolaSelectGifManuale(selectEl, dati.gif || "");
         }
@@ -462,7 +461,6 @@
                     item.className = 'autocomplete-item';
                     item.innerText = ex.nome;
                     item.onclick = () => {
-                        // Seleziona in automatico sia il nome che la GIF correlata
                         inputEl.value = ex.nome;
                         hiddenGifInput.value = ex.percorso;
                         previewImg.src = ex.percorso;
@@ -518,7 +516,6 @@
                         }
                     }
                 }
-                // Aggiorna tutte le select già create nel caso fossero vuote
                 document.querySelectorAll('.select-gif-manuale').forEach(sel => {
                     const currentVal = sel.value;
                     popolaSelectGifManuale(sel, currentVal);

@@ -125,7 +125,7 @@
         <div id="erroreBox" class="error-msg"></div>
         <div class="form-group">
             <label for="nomeInput">Nome e Cognome</label>
-            <input type="text" id="nomeInput" placeholder="es. Enrico Lombardi">
+            <input type="text" id="nomeInput" placeholder="es. Mario Rossi">
         </div>
         <div class="form-group">
             <label for="pinInput">PIN di Sicurezza (4 cifre)</label>
@@ -173,7 +173,7 @@
                 return;
             }
 
-            const slug = nomeRaw.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+            const slug = nomeRaw.toLowerCase().replace(/\s+/g, '').replace(/[^\w-]/g, '');
             btn.disabled = true;
             btn.innerText = "Verifica...";
 

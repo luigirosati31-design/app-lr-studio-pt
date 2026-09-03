@@ -1365,6 +1365,7 @@
             ripristinaBozzaLocaleSePresente();
         }
 
+        // ================= CONTROLLO DI ESISTENZA RIGOROSO =================
         async function caricaSchedaCliente() {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -1372,20 +1373,33 @@
 
                 if (idTrovato) {
                     clientIdCorrente = idTrovato.trim().toLowerCase();
-                    localStorage.setItem('studio_pt_client_id', clientIdCorrente);
                 } else {
                     clientIdCorrente = localStorage.getItem('studio_pt_client_id');
                 }
 
                 if (!clientIdCorrente) {
-                    document.getElementById('listaEserciziDinamica').innerHTML = `
-                        <div style="text-align: center; padding: 30px 10px;">
-                            <p style="color: #d4af37; font-weight: 700; margin-bottom: 8px;">Nessun profilo trovato</p>
-                            <p style="color: #888; font-size: 0.8rem;">Apri il link completo inviato dal tuo Personal Trainer su WhatsApp.</p>
+                    window.location.href = "index.html";
+                    return;
+                }
+
+                const { data, error } = await db
+                    .from('schede_clienti')
+                    .select('*')
+                    .or(`client_id.eq.${clientIdCorrente},email_cliente.eq.${clientIdCorrente}`);
+
+                if (error || !data || data.length === 0) {
+                    localStorage.removeItem('studio_pt_client_id');
+                    document.body.innerHTML = `
+                        <div style="text-align: center; padding: 50px 20px; font-family: 'Montserrat', sans-serif;">
+                            <h2 style="color: #ff6b6b; font-size: 1.2rem;">ACCESSO NON AUTORIZZATO</h2>
+                            <p style="color: #888; font-size: 0.85rem; margin-top: 10px;">Nessun programma attivo trovato per questo codice.</p>
+                            <a href="index.html" style="color: #d4af37; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-block; margin-top: 20px; border: 1px solid #d4af37; padding: 10px 18px; border-radius: 8px;">Torna alla Home</a>
                         </div>
                     `;
                     return;
                 }
+
+                localStorage.setItem('studio_pt_client_id', clientIdCorrente);
 
                 const nomeVisualizzato = clientIdCorrente.replace(/-/g, ' ');
                 document.getElementById('userEmailDisplay').innerText = nomeVisualizzato;
@@ -1393,20 +1407,6 @@
                 avviaLoopTimerSessione();
                 caricaUltimeMisure();
                 caricaPacchettoMassaggi();
-
-                const { data, error } = await db
-                    .from('schede_clienti')
-                    .select('*')
-                    .or(`client_id.eq.${clientIdCorrente},email_cliente.eq.${clientIdCorrente}`);
-
-                const container = document.getElementById('listaEserciziDinamica');
-                const tabsBar = document.getElementById('tabsBarSessioni');
-                
-                if (error || !data || data.length === 0) {
-                    container.innerHTML = `<p style="text-align: center; color: #888; font-size: 0.85rem;">Nessuna scheda attiva trovata per "${nomeVisualizzato}".</p>`;
-                    tabsBar.style.display = 'none';
-                    return;
-                }
 
                 if (data.length === 1 && data[0].titolo_sessione === "PROGRAMMA_COMPLETO") {
                     isProgrammaCompletoSingolo = true;

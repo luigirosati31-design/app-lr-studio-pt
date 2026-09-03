@@ -28,7 +28,7 @@
             background: #111111;
             border: 1px solid #2a2a2a;
             border-radius: 12px;
-            padding: 30px 22px;
+            padding: 35px 25px;
             box-sizing: border-box;
             box-shadow: 0 8px 30px rgba(0,0,0,0.8);
             text-align: center;
@@ -45,6 +45,16 @@
             color: #888;
             font-size: 0.8rem;
             margin: 0 0 25px 0;
+        }
+        .info-box {
+            background: #161616;
+            border: 1px solid #262626;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 0.8rem;
+            color: #ccc;
+            line-height: 1.5;
+            margin-bottom: 20px;
         }
         .form-group {
             margin-bottom: 15px;
@@ -70,10 +80,7 @@
             font-size: 0.9rem;
             box-sizing: border-box;
         }
-        input:focus {
-            border-color: #d4af37;
-            outline: none;
-        }
+        input:focus { border-color: #d4af37; outline: none; }
         .btn-gold {
             width: 100%;
             background: #d4af37;
@@ -87,65 +94,47 @@
             text-transform: uppercase;
             font-family: 'Montserrat', sans-serif;
             letter-spacing: 1px;
-            margin-top: 10px;
         }
-        .divider {
-            margin: 25px 0 15px 0;
-            border-top: 1px solid #222;
-        }
-        .admin-link {
-            color: #666;
-            font-size: 0.75rem;
+        .admin-toggle {
+            color: #555;
+            font-size: 0.72rem;
             text-decoration: none;
             cursor: pointer;
+            margin-top: 25px;
+            display: inline-block;
         }
-        .admin-link:hover { color: #d4af37; }
+        .admin-toggle:hover { color: #d4af37; }
     </style>
 </head>
 <body>
 
     <div class="login-card">
         <h1>Studio PT</h1>
-        <p>Allenamento & Massaggio Sportivo</p>
+        <p>Area Riservata Clienti</p>
 
-        <div id="boxAccessoCliente">
-            <div class="form-group">
-                <label>Nome e Cognome Cliente</label>
-                <input type="text" id="nomeClienteInput" placeholder="es. Enrico Lombardi">
-            </div>
-            <button class="btn-gold" onclick="entraComeCliente()">Accedi alla Scheda</button>
+        <div class="info-box">
+            📲 <b>Sei un atleta seguito?</b><br>
+            Accedi direttamente dal link personale che ti ha inviato il Coach su WhatsApp.
         </div>
 
-        <div class="divider"></div>
-        <a class="admin-link" onclick="mostraLoginAdmin()">Area Riservata Coach</a>
+        <a class="admin-toggle" onclick="mostraLoginAdmin()">Area Riservata Coach</a>
 
         <div id="boxAccessoAdmin" style="display: none; margin-top: 15px;">
             <div class="form-group">
-                <label>Codice Sicurezza Coach</label>
-                <input type="password" id="adminPin" placeholder="PIN di accesso">
+                <label>PIN Coach</label>
+                <input type="password" id="adminPin" placeholder="Inserisci PIN">
             </div>
-            <button class="btn-gold" style="background:#222; color:#d4af37; border:1px solid #d4af37;" onclick="entraComeAdmin()">Accedi Pannello</button>
+            <button class="btn-gold" style="background:#222; color:#d4af37; border:1px solid #d4af37;" onclick="entraComeAdmin()">Entra come Coach</button>
         </div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const salvato = localStorage.getItem('studio_pt_client_id');
-            if (salvato) {
-                window.location.href = `dashboard.html?id=${salvato}`;
+            const tokenSalvato = localStorage.getItem('studio_pt_client_id');
+            if (tokenSalvato) {
+                window.location.href = `dashboard.html?id=${tokenSalvato}`;
             }
         });
-
-        function entraComeCliente() {
-            const raw = document.getElementById('nomeClienteInput').value.trim();
-            if (!raw) {
-                alert("Inserisci il tuo Nome e Cognome.");
-                return;
-            }
-            const slug = raw.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-            localStorage.setItem('studio_pt_client_id', slug);
-            window.location.href = `dashboard.html?id=${slug}`;
-        }
 
         function mostraLoginAdmin() {
             const box = document.getElementById('boxAccessoAdmin');
@@ -155,10 +144,9 @@
         function entraComeAdmin() {
             const pin = document.getElementById('adminPin').value.trim();
             if (pin === "studio2026" || pin === "1234") {
-                localStorage.setItem('studio_pt_admin_logged', 'true');
                 window.location.href = "admin.html";
             } else {
-                alert("Codice Coach non valido.");
+                alert("PIN Coach non corretto.");
             }
         }
     </script>

@@ -69,7 +69,7 @@
         .welcome-banner h2 { margin: 0 0 5px 0; font-size: 1.3rem; }
         .welcome-banner p { margin: 0; font-size: 0.9rem; color: #aaaaaa; }
 
-        /* BARRA WORKOUT TIMER GENERALE */
+        /* BARRA WORKOUT TIMER */
         .session-timer-bar {
             background: #161616;
             border: 1px solid #333;
@@ -320,8 +320,8 @@
             align-items: center;
             gap: 4px;
             background: #161616;
-            padding: 2px 6px;
-            border-radius: 4px;
+            padding: 3px 8px;
+            border-radius: 5px;
             border: 1px solid #333;
         }
         .target-edit-wrapper span {
@@ -333,11 +333,11 @@
             background: transparent;
             border: none;
             color: #d4af37;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 700;
-            width: 65px;
+            min-width: 90px;
             font-family: 'Montserrat', sans-serif;
-            text-align: center;
+            text-align: left;
         }
         .target-input:focus { outline: none; }
 
@@ -482,7 +482,7 @@
             resize: none;
         }
 
-        /* NOTIFICA TOAST SALVATAGGIO RAPIDO */
+        /* NOTIFICA TOAST */
         #toastSave {
             display: none;
             position: fixed;
@@ -589,7 +589,7 @@
                     <canvas id="progressChart" height="150"></canvas>
                 </div>
 
-                <!-- FORM INSERIMENTO/MODIFICA MISURE -->
+                <!-- FORM AGGIORNAMENTO MISURE -->
                 <div class="update-misure-box">
                     <h4>Aggiorna le tue Misure</h4>
                     <div class="grid-2">
@@ -622,7 +622,7 @@
             </div>
             <div id="allenamento-content" class="card-content" style="display: block;">
                 
-                <!-- TIMER DURATA SESSIONE ALLENAMENTO -->
+                <!-- TIMER ALLENAMENTO SESSIONE -->
                 <div class="session-timer-bar">
                     <div>
                         <span class="timer-status-label" id="sessionTimerLabel">Durata Allenamento</span>
@@ -687,7 +687,51 @@
         let listaSchedeRicevute = [];
         let indiceSessioneAttiva = 0;
 
-        // GESTIONE TIMER GENERALE ALLENAMENTO (PERSISTENTE IN LOCALSTORAGE)
+        // ================= PARSER TARGET COMPLETO (2 set per 3, x3, 4x10, ecc.) =================
+        function interpretaTarget(targetString) {
+            let numSerie = 3;
+            let placeholderRip = "rip";
+
+            if (!targetString) return { numSerie, placeholderRip };
+            const raw = targetString.trim().toLowerCase();
+
+            // Es: "2 set per 3" oppure "2 set x 3" (2 giri per 3 volte = 3 serie di lavoro)
+            const matchSetPer = raw.match(/(\d+)\s*(?:set|serie|round|giri?)\s*(?:per|x)\s*(\d+)/i);
+            if (matchSetPer) {
+                numSerie = parseInt(matchSetPer[2]);
+                placeholderRip = "fatto";
+                return { numSerie, placeholderRip };
+            }
+
+            // Es: "4x10", "3x8", "3xMAX"
+            if (raw.includes('x')) {
+                const parti = raw.split('x');
+                const p0 = parseInt(parti[0]);
+                if (!isNaN(p0) && p0 > 0) numSerie = p0;
+
+                const restoRip = parti.slice(1).join('x').trim();
+                placeholderRip = restoRip !== "" ? restoRip : "rip";
+                return { numSerie, placeholderRip };
+            }
+
+            // Es: "x3", "per 3", "3 set", "3 serie"
+            const matchGenerico = raw.match(/(?:x|per|set|serie)\s*(\d+)/i) || raw.match(/(\d+)\s*(?:set|serie|round)/i);
+            if (matchGenerico && matchGenerico[1]) {
+                numSerie = parseInt(matchGenerico[1]);
+                placeholderRip = "rip";
+                return { numSerie, placeholderRip };
+            }
+
+            // Numero isolato
+            const parsedNum = parseInt(raw);
+            if (!isNaN(parsedNum) && parsedNum > 0) {
+                numSerie = parsedNum;
+            }
+
+            return { numSerie, placeholderRip };
+        }
+
+        // GESTIONE TIMER SESSIONE
         let sessionTimerInterval = null;
 
         function formattaSecondi(totaleSec) {
@@ -731,12 +775,10 @@
             const startTimestamp = localStorage.getItem(startKey);
 
             if (!startTimestamp) {
-                // Avvia nuovo allenamento
                 localStorage.setItem(startKey, Date.now().toString());
                 avviaLoopTimerSessione();
                 mostraToast("⏱️ Allenamento avviato!");
             } else {
-                // Metti in pausa o azzera
                 if (confirm("Vuoi fermare o azzerare il timer della sessione?")) {
                     localStorage.removeItem(startKey);
                     if (sessionTimerInterval) clearInterval(sessionTimerInterval);
@@ -922,7 +964,7 @@
             salvaBozzaLocale();
         }
 
-        // AUTO-SAVE LOCALE ANTI-RICARICA
+        // AUTO-SAVE LOCALE
         function getChiaveBozza() {
             const sessione = listaSchedeRicevute[indiceSessioneAttiva];
             return sessione ? `bozza_allenamento_${emailUtenteCorrente}_${sessione.id}` : null;
@@ -980,11 +1022,11 @@
                     }
                 });
             } catch (e) {
-                console.error("Errore lettura bozza locale:", e);
+                console.error("Errore lettura bozza:", e);
             }
         }
 
-        // SALVATAGGIO MISURE CLIENTE
+        // SALVATAGGIO MISURE
         async function inviaMisureCliente() {
             if (!emailUtenteCorrente) {
                 alert("Utente non autenticato.");
@@ -1011,7 +1053,7 @@
             }]);
 
             if (error) {
-                alert("Errore salvataggio misure: " + error.message);
+                alert("Errore salvataggio: " + error.message);
             } else {
                 alert("Misure aggiornate con successo!");
                 document.getElementById('upPeso').value = '';
@@ -1026,7 +1068,7 @@
             }
         }
 
-        // SALVATAGGIO ALLENAMENTO CON CALCOLO TEMPO SESSIONE
+        // SALVATAGGIO ALLENAMENTO
         async function salvaSessioneCliente(silenzioso = false) {
             const sessione = listaSchedeRicevute[indiceSessioneAttiva];
             if (!sessione) return;
@@ -1099,7 +1141,6 @@
                     let messaggioConclusione = "Sessione completata e salvata con successo!";
                     if (durataCalcolata) {
                         messaggioConclusione += `\n⏱️ Tempo totale: ${durataCalcolata}`;
-                        // Resetta il timer di sessione concluso
                         localStorage.removeItem(`session_start_${emailUtenteCorrente}`);
                         if (sessionTimerInterval) clearInterval(sessionTimerInterval);
                         aggiornaUIOrologioSessione();
@@ -1247,11 +1288,11 @@
                     ? `<img src="${ex.gif}" alt="GIF">` 
                     : `🏋️`;
 
-                let numSerieDefault = 3;
-                if (ex.target && ex.target.includes('x')) {
-                    let parsed = parseInt(ex.target.split('x')[0]);
-                    if (!isNaN(parsed)) numSerieDefault = parsed;
-                }
+                // Testo originario intatto e calcolo intelligente delle righe
+                const targetOriginale = ex.target || '3x10';
+                const parsedTarget = interpretaTarget(targetOriginale);
+                const numSerieDefault = parsedTarget.numSerie;
+                const hintRipetizioni = parsedTarget.placeholderRip;
 
                 const storico = Array.isArray(ex.storico) ? ex.storico : [];
                 const ultimaSessione = storico.length > 0 ? storico[storico.length - 1] : null;
@@ -1286,7 +1327,8 @@
                 let righeTabella = "";
                 for (let i = 1; i <= numSerieDefault; i++) {
                     let prevKg = "kg";
-                    let prevRip = "rip";
+                    let prevRip = hintRipetizioni;
+                    
                     if (ultimaSessione && ultimaSessione.serie && ultimaSessione.serie[i - 1]) {
                         if (ultimaSessione.serie[i - 1].kg) prevKg = `${ultimaSessione.serie[i - 1].kg} kg`;
                         if (ultimaSessione.serie[i - 1].rip) prevRip = `${ultimaSessione.serie[i - 1].rip} rip`;
@@ -1314,7 +1356,7 @@
                                 <div class="exercise-meta-row">
                                     <div class="target-edit-wrapper">
                                         <span>Target:</span>
-                                        <input type="text" class="target-input ex-target-val" value="${ex.target || '3x10'}" oninput="salvaBozzaLocale()">
+                                        <input type="text" class="target-input ex-target-val" value="${targetOriginale}" oninput="salvaBozzaLocale()">
                                     </div>
                                     ${badgeUltimoPeso}
                                     ${videoBtnHtml}
@@ -1341,7 +1383,7 @@
                                 ${righeTabella}
                             </tbody>
                         </table>
-                        <button class="add-set-btn" onclick="aggiungiSerieTabella(this, '', '')">+ Aggiungi serie</button>
+                        <button class="add-set-btn" onclick="aggiungiSerieTabella(this, '', '${hintRipetizioni}')">+ Aggiungi serie</button>
                         <textarea class="coach-notes" rows="2" placeholder="Note su carichi, sensazioni..." oninput="salvaBozzaLocale()"></textarea>
                     </div>
                 `;
@@ -1364,9 +1406,7 @@
                 emailUtenteCorrente = user.email.trim();
                 document.getElementById('userEmailDisplay').innerText = emailUtenteCorrente;
 
-                // Controlla se c'è un timer allenamento attivo e ripristinalo
                 avviaLoopTimerSessione();
-
                 caricaUltimeMisure();
                 caricaPacchettoMassaggi();
 

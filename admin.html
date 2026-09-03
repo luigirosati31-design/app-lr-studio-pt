@@ -20,7 +20,7 @@
         }
         .admin-panel {
             width: 100%;
-            max-width: 600px;
+            max-width: 620px;
             background: #111111;
             border: 1px solid #2a2a2a;
             border-radius: 12px;
@@ -42,6 +42,7 @@
             margin: 0;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 700;
         }
         .logout-btn {
             background: transparent;
@@ -77,6 +78,9 @@
             font-size: 0.85rem;
             box-sizing: border-box;
         }
+        select {
+            cursor: pointer;
+        }
         input:focus, select:focus {
             border-color: #d4af37;
             outline: none;
@@ -86,14 +90,14 @@
             background: #1e1e1e;
             color: #d4af37;
             border: 1px solid #d4af37;
-            padding: 10px;
+            padding: 11px;
             border-radius: 8px;
             font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
             cursor: pointer;
             margin-top: 5px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-family: 'Montserrat', sans-serif;
             transition: all 0.2s;
         }
@@ -103,13 +107,14 @@
         }
         .badge-status {
             display: none;
-            padding: 8px 12px;
+            padding: 10px 14px;
             border-radius: 6px;
             font-size: 0.75rem;
             margin-bottom: 15px;
             text-align: center;
         }
         .badge-info { background: rgba(212, 175, 55, 0.15); color: #d4af37; border: 1px solid #d4af37; }
+        .badge-success { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid #2ecc71; }
         
         .section-title {
             color: #d4af37;
@@ -122,25 +127,24 @@
             justify-content: space-between;
             align-items: center;
         }
-        
-        /* CARD SINGOLO ESERCIZIO NELL'EDITOR */
+
+        /* CARD ESERCIZIO CON MENÙ A TENDINA */
         .ex-card {
             background: #0d0d0d;
             border: 1px solid #222;
             border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
-            position: relative;
+            padding: 14px;
+            margin-bottom: 14px;
         }
         .ex-card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         .ex-index {
             color: #d4af37;
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             font-weight: 700;
         }
         .btn-remove-ex {
@@ -154,15 +158,38 @@
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .preview-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #141414;
+            border: 1px solid #222;
+            border-radius: 6px;
+            padding: 6px 10px;
+            margin-bottom: 10px;
+        }
+        .preview-box img {
+            width: 36px;
+            height: 36px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #d4af37;
+            background: #000;
+        }
+        .preview-path {
+            font-size: 0.72rem;
+            color: #888;
+            word-break: break-all;
         }
         .btn-add-ex {
             width: 100%;
             background: #161616;
             color: #888;
             border: 1px dashed #444;
-            padding: 10px;
+            padding: 12px;
             border-radius: 8px;
             font-size: 0.8rem;
             font-weight: 600;
@@ -170,6 +197,7 @@
             text-transform: uppercase;
             margin-bottom: 20px;
             font-family: 'Montserrat', sans-serif;
+            transition: all 0.2s;
         }
         .btn-add-ex:hover {
             color: #d4af37;
@@ -180,7 +208,7 @@
             background: #d4af37;
             color: #000;
             border: none;
-            padding: 13px;
+            padding: 14px;
             border-radius: 8px;
             font-size: 0.9rem;
             font-weight: 700;
@@ -203,7 +231,7 @@
             <button class="logout-btn" onclick="faiLogout()">Esci</button>
         </div>
 
-        <!-- SELEZIONE CLIENTE E SESSIONE -->
+        <!-- SELEZIONE CLIENTE E GIORNO -->
         <div class="form-group">
             <label for="clienteEmail">Email Cliente</label>
             <input type="email" id="clienteEmail" placeholder="es. cliente@email.com" required>
@@ -211,22 +239,23 @@
 
         <div class="form-group">
             <label for="titoloSessione">Nome Sessione / Giorno</label>
-            <input type="text" id="titoloSessione" placeholder="es. Giorno A (Petto - Tricipiti)" value="Giorno A">
+            <input type="text" id="titoloSessione" placeholder="es. Giorno A" value="Giorno A">
         </div>
 
-        <!-- TASTO DI CARICAMENTO AUTOMATICO SCHEDA ESISTENTE -->
+        <!-- CARICA SCHEDA ESISTENTE -->
         <button type="button" class="btn-load" onclick="caricaSchedaEsistente()">🔍 Carica Scheda Già Salvata</button>
         
         <div id="statusBadge" class="badge-status badge-info"></div>
 
-        <!-- EDITOR DEGLI ESERCIZI -->
+        <!-- LISTA DEGLI ESERCIZI -->
         <div class="section-title">
-            <span>Esercizi nella Scheda</span>
+            <span>Esercizi Assegnati</span>
+            <span id="counterGif" style="font-size: 0.7rem; color: #888;">Caricamento GIF...</span>
         </div>
 
         <div id="listaEserciziEditor"></div>
 
-        <button type="button" class="btn-add-ex" onclick="aggiungiNuovoEsercizioCard()">+ Aggiungi Nuovo Esercizio</button>
+        <button type="button" class="btn-add-ex" onclick="aggiungiNuovoEsercizioCard()">+ Aggiungi Esercizio</button>
 
         <button type="button" id="btnSalvaScheda" class="btn-submit" onclick="salvaSchedaSuSupabase()">💾 Invia / Aggiorna Scheda</button>
     </div>
@@ -237,77 +266,128 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        let schedaAttivaCaricataId = null; 
-        let storicoEserciziEsistente = []; // Memorizza lo storico carichi per non cancellarlo
+        let schedaAttivaCaricataId = null;
+        let storicoEserciziEsistente = [];
+        let archivioGifEsercizi = []; // Conterrà tutti gli esercizi trovati su GitHub
 
         async function faiLogout() {
             await db.auth.signOut();
             window.location.href = "index.html";
         }
 
-        function mostraAvviso(testo) {
+        function mostraAvviso(testo, tipo = 'badge-info') {
             const badge = document.getElementById('statusBadge');
+            badge.className = `badge-status ${tipo}`;
             badge.innerText = testo;
             badge.style.display = 'block';
         }
 
-        // ================= FUNZIONE CHIAVE: CARICA LA SCHEDA ESISTENTE =================
-        async function caricaSchedaEsistente() {
-            const email = document.getElementById('clienteEmail').value.trim();
-            const titolo = document.getElementById('titoloSessione').value.trim();
-
-            if (!email) {
-                alert("Inserisci l'email del cliente per cercare la scheda.");
-                return;
-            }
-
-            mostraAvviso("Ricerca scheda in corso...");
-
+        // ================= RECUPERO DINAMICO DEGLI 85+ FILE DA GITHUB =================
+        // Legge sia dalla repo locale (se hostata su GitHub Pages) che da fallback
+        async function popolaArchivioGifDaGitHub() {
+            const counter = document.getElementById('counterGif');
             try {
-                // Cerca la scheda con quella email e quel giorno/titolo
-                let query = db.from('schede_clienti').select('*').eq('email_cliente', email);
-                if (titolo) query = query.eq('titolo_sessione', titolo);
+                // Ricava owner e repo dall'URL corrente se su github.io, altrimenti usa i dati del progetto
+                let owner = "luigirosati";
+                let repo = "studio-pt";
 
-                const { data, error } = await query;
-
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    mostraAvviso("Nessuna scheda trovata per questo giorno. Puoi crearne una nuova.");
-                    schedaAttivaCaricataId = null;
-                    storicoEserciziEsistente = [];
-                    return;
+                if (window.location.hostname.includes("github.io")) {
+                    owner = window.location.hostname.split('.')[0];
+                    repo = window.location.pathname.split('/')[1] || repo;
                 }
 
-                // Scheda trovata!
-                const scheda = data[0];
-                schedaAttivaCaricataId = scheda.id;
-                document.getElementById('titoloSessione').value = scheda.titolo_sessione || "Giorno A";
+                // Cerca dentro la cartella esercizi
+                const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/esercizi`);
+                if (!res.ok) throw new Error("Impossibile caricare direttamente da API GitHub");
+                
+                const items = await res.json();
+                archivioGifEsercizi = [];
 
-                const esercizi = JSON.parse(scheda.dati_scheda);
-                const container = document.getElementById('listaEserciziEditor');
-                container.innerHTML = "";
+                for (const item of items) {
+                    // Se è un file GIF/video diretto
+                    if (item.type === "file" && item.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
+                        archivioGifEsercizi.push({
+                            nome: item.name.replace(/\.[^/.]+$/, ""), // mantiene i trattini bassi esatti
+                            percorso: item.path
+                        });
+                    } 
+                    // Se hai organizzato in sottocartelle (PETTO, DORSO, ecc.)
+                    else if (item.type === "dir") {
+                        try {
+                            const subRes = await fetch(item.url);
+                            if (subRes.ok) {
+                                const subItems = await subRes.json();
+                                subItems.forEach(sub => {
+                                    if (sub.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
+                                        archivioGifEsercizi.push({
+                                            nome: sub.name.replace(/\.[^/.]+$/, ""),
+                                            percorso: sub.path
+                                        });
+                                    }
+                                });
+                            }
+                        } catch (errSub) {
+                            console.warn("Errore sottocartella:", errSub);
+                        }
+                    }
+                }
 
-                storicoEserciziEsistente = esercizi.map(ex => ({
-                    ultimo_peso: ex.ultimo_peso || "",
-                    storico: ex.storico || []
-                }));
+                counter.innerText = `${archivioGifEsercizi.length} GIF caricate nel menù`;
+                aggiornaTuttiIMenuTendina();
 
-                // Precompila tutte le card con i dati già salvati
-                esercizi.forEach((ex, idx) => {
-                    creaCardEsercizio(ex, idx);
-                });
-
-                mostraAvviso(`✅ Scheda caricata! Modifica le GIF o gli esercizi e premi "Aggiorna".`);
-
-            } catch (err) {
-                alert("Errore nel recupero scheda: " + err.message);
+            } catch (e) {
+                console.warn("Recupero GitHub:", e);
+                counter.innerText = `Menù pronto (modalità standard)`;
             }
         }
 
+        function aggiornaTuttiIMenuTendina() {
+            document.querySelectorAll('.ex-card').forEach(card => {
+                const select = card.querySelector('.select-esercizio');
+                const valoreCorrente = select.dataset.selected || select.value;
+                costruisciOpzioniSelect(select, valoreCorrente);
+            });
+        }
+
+        function costruisciOpzioniSelect(selectElement, selezionato = "") {
+            selectElement.innerHTML = `<option value="">-- Seleziona Esercizio dalla cartella --</option>`;
+            
+            // Ordina gli esercizi alfabeticamente
+            const listaOrdinata = [...archivioGifEsercizi].sort((a, b) => a.nome.localeCompare(b.nome));
+
+            let trovato = false;
+            listaOrdinata.forEach(ex => {
+                const opt = document.createElement('option');
+                opt.value = ex.nome;
+                opt.dataset.path = ex.percorso;
+                opt.innerText = ex.nome; // Nome con trattini esatti
+                if (ex.nome === selezionato || ex.percorso === selezionato) {
+                    opt.selected = true;
+                    trovato = true;
+                }
+                selectElement.appendChild(opt);
+            });
+
+            // Se l'esercizio della scheda non è ancora nella lista o è personalizzato, mantienilo
+            if (selezionato && !trovato) {
+                const optCustom = document.createElement('option');
+                optCustom.value = selezionato;
+                optCustom.innerText = selezionato;
+                optCustom.selected = true;
+                selectElement.appendChild(optCustom);
+            }
+        }
+
+        // ================= GESTIONE CARD ESERCIZIO CON SELECT =================
         function creaCardEsercizio(dati = {}, index = null) {
             const container = document.getElementById('listaEserciziEditor');
             const currentIndex = (index !== null) ? index : container.children.length;
+
+            const nomeEsistente = dati.nome || "";
+            const gifEsistente = dati.gif || "";
+            const targetEsistente = dati.target || "3x10";
+            const recEsistente = dati.recupero || 90;
+            const videoEsistente = dati.video || "";
 
             const card = document.createElement('div');
             card.className = "ex-card";
@@ -316,30 +396,64 @@
                     <span class="ex-index">Esercizio #${currentIndex + 1}</span>
                     <button type="button" class="btn-remove-ex" onclick="this.closest('.ex-card').remove(); rinumeraEsercizi();">✕ Rimuovi</button>
                 </div>
-                <div class="form-group" style="margin-bottom: 8px;">
-                    <label>Nome Esercizio</label>
-                    <input type="text" class="input-nome" placeholder="es. PANCA PIANA BILANCIERE" value="${dati.nome || ''}">
+
+                <!-- TENDINA DI SELEZIONE -->
+                <div class="form-group">
+                    <label>Seleziona Esercizio</label>
+                    <select class="select-esercizio" data-selected="${nomeEsistente}" onchange="gestisciCambioEsercizio(this)">
+                    </select>
                 </div>
+
                 <div class="grid-2">
                     <div>
-                        <label>Target (Serie x Rip)</label>
-                        <input type="text" class="input-target" placeholder="es. 4x8 o 3x10" value="${dati.target || '3x10'}">
+                        <label>Target (es. 2 set per 3, 4x10)</label>
+                        <input type="text" class="input-target" value="${targetEsistente}">
                     </div>
                     <div>
                         <label>Recupero (secondi)</label>
-                        <input type="number" class="input-recupero" placeholder="90" value="${dati.recupero || 90}">
+                        <input type="number" class="input-recupero" value="${recEsistente}">
                     </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 8px;">
-                    <label>Percorso / URL GIF</label>
-                    <input type="text" class="input-gif" placeholder="es. esercizi/PETTO/panca_piana.gif o link web" value="${dati.gif || ''}">
+
+                <!-- ANTEPRIMA E PERCORSO GIF AUTOMATICO -->
+                <div class="preview-box">
+                    <img class="img-preview" src="${gifEsistente || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" alt="Preview">
+                    <div>
+                        <div style="font-size: 0.68rem; color: #aaa; text-transform: uppercase;">File GIF collegato:</div>
+                        <span class="preview-path">${gifEsistente || 'Nessuna GIF selezionata'}</span>
+                    </div>
                 </div>
+                <input type="hidden" class="input-gif-hidden" value="${gifEsistente}">
+
                 <div class="form-group" style="margin-bottom: 0;">
                     <label>Link Video Esecuzione (Opzionale)</label>
-                    <input type="text" class="input-video" placeholder="https://youtube.com/..." value="${dati.video || ''}">
+                    <input type="text" class="input-video" placeholder="https://youtube.com/..." value="${videoEsistente}">
                 </div>
             `;
+
             container.appendChild(card);
+            const selectCreato = card.querySelector('.select-esercizio');
+            costruisciOpzioniSelect(selectCreato, nomeEsistente);
+        }
+
+        function gestisciCambioEsercizio(selectEl) {
+            const card = selectEl.closest('.ex-card');
+            const selectedOpt = selectEl.options[selectEl.selectedIndex];
+            const percorso = selectedOpt.dataset.path || "";
+
+            const previewImg = card.querySelector('.img-preview');
+            const previewPathText = card.querySelector('.preview-path');
+            const hiddenGifInput = card.querySelector('.input-gif-hidden');
+
+            if (percorso) {
+                hiddenGifInput.value = percorso;
+                previewPathText.innerText = percorso;
+                previewImg.src = percorso;
+            } else {
+                hiddenGifInput.value = "";
+                previewPathText.innerText = "Nessuna GIF selezionata";
+                previewImg.src = "";
+            }
         }
 
         function aggiungiNuovoEsercizioCard() {
@@ -352,32 +466,83 @@
             });
         }
 
-        // ================= SALVATAGGIO / AGGIORNAMENTO SU SUPABASE =================
+        // ================= CARICA SCHEDA ESISTENTE DA SUPABASE =================
+        async function caricaSchedaEsistente() {
+            const email = document.getElementById('clienteEmail').value.trim();
+            const titolo = document.getElementById('titoloSessione').value.trim();
+
+            if (!email) {
+                alert("Inserisci l'email del cliente per cercare la scheda.");
+                return;
+            }
+
+            mostraAvviso("Ricerca scheda salvata in corso...");
+
+            try {
+                let query = db.from('schede_clienti').select('*').eq('email_cliente', email);
+                if (titolo) query = query.eq('titolo_sessione', titolo);
+
+                const { data, error } = await query;
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    mostraAvviso("Nessuna scheda trovata per questa sessione. Puoi compilarne una nuova.");
+                    schedaAttivaCaricataId = null;
+                    storicoEserciziEsistente = [];
+                    return;
+                }
+
+                const scheda = data[0];
+                schedaAttivaCaricataId = scheda.id;
+                document.getElementById('titoloSessione').value = scheda.titolo_sessione || "Giorno A";
+
+                const esercizi = JSON.parse(scheda.dati_scheda);
+                const container = document.getElementById('listaEserciziEditor');
+                container.innerHTML = "";
+
+                // Mantiene intatto lo storico registrato dal cliente
+                storicoEserciziEsistente = esercizi.map(ex => ({
+                    ultimo_peso: ex.ultimo_peso || "",
+                    storico: ex.storico || []
+                }));
+
+                esercizi.forEach((ex, idx) => {
+                    creaCardEsercizio(ex, idx);
+                });
+
+                mostraAvviso(`✅ Scheda di "${email}" caricata! Modifica dai menù a tendina e premi Salva.`, 'badge-success');
+
+            } catch (err) {
+                alert("Errore nel recupero della scheda: " + err.message);
+            }
+        }
+
+        // ================= SALVATAGGIO / AGGIORNAMENTO =================
         async function salvaSchedaSuSupabase() {
             const email = document.getElementById('clienteEmail').value.trim();
             const titolo = document.getElementById('titoloSessione').value.trim() || "Giorno A";
             const btn = document.getElementById('btnSalvaScheda');
 
             if (!email) {
-                alert("Inserisci l'email del cliente!");
+                alert("Inserisci l'email del cliente prima di salvare!");
                 return;
             }
 
             const cards = document.querySelectorAll('.ex-card');
             if (cards.length === 0) {
-                alert("Aggiungi almeno un esercizio prima di salvare.");
+                alert("Aggiungi almeno un esercizio.");
                 return;
             }
 
             let eserciziArray = [];
             cards.forEach((card, idx) => {
-                const nome = card.querySelector('.input-nome').value.trim().toUpperCase();
+                const selectEl = card.querySelector('.select-esercizio');
+                const nome = selectEl.value.trim(); // Nome con i trattini bassi originali
                 const target = card.querySelector('.input-target').value.trim() || "3x10";
                 const recupero = parseInt(card.querySelector('.input-recupero').value) || 90;
-                const gif = card.querySelector('.input-gif').value.trim();
+                const gif = card.querySelector('.input-gif-hidden').value.trim();
                 const video = card.querySelector('.input-video').value.trim();
 
-                // Mantiene lo storico dei pesi se già presente, altrimenti inizializza vuoto
                 const fallbackStorico = storicoEserciziEsistente[idx] || {};
 
                 if (nome !== "") {
@@ -393,12 +558,16 @@
                 }
             });
 
+            if (eserciziArray.length === 0) {
+                alert("Seleziona almeno un esercizio valido dai menù a tendina.");
+                return;
+            }
+
             btn.disabled = true;
             btn.innerText = "Salvataggio in corso...";
 
             try {
                 if (schedaAttivaCaricataId) {
-                    // MODIFICA DELLA SCHEDA ESISTENTE
                     const { error } = await db
                         .from('schede_clienti')
                         .update({
@@ -408,9 +577,8 @@
                         .eq('id', schedaAttivaCaricataId);
 
                     if (error) throw error;
-                    alert("✅ Scheda aggiornata con successo con le nuove GIF!");
+                    alert("✅ Scheda aggiornata con successo!");
                 } else {
-                    // CREAZIONE NUOVA SCHEDA
                     const { error } = await db
                         .from('schede_clienti')
                         .insert([{
@@ -420,7 +588,7 @@
                         }]);
 
                     if (error) throw error;
-                    alert("✅ Nuova scheda creata e inviata con successo!");
+                    alert("✅ Nuova scheda inviata con successo!");
                 }
             } catch (err) {
                 alert("Errore salvataggio: " + err.message);
@@ -430,9 +598,9 @@
             }
         }
 
-        // Crea una prima card vuota all'avvio
         document.addEventListener("DOMContentLoaded", function() {
-            aggiungiNuovoEsercizioCard();
+            creaCardEsercizio();
+            popolaArchivioGifDaGitHub();
         });
     </script>
 </body>

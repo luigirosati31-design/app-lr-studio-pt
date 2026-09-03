@@ -42,10 +42,7 @@
             letter-spacing: 2px;
             font-weight: 700;
         }
-        .header-actions {
-            display: flex;
-            gap: 8px;
-        }
+        .header-actions { display: flex; gap: 8px; }
         .header-btn {
             background-color: transparent;
             color: #888888;
@@ -57,10 +54,8 @@
             cursor: pointer;
             text-transform: uppercase;
         }
-        .header-btn-calc {
-            border-color: #d4af37;
-            color: #d4af37;
-        }
+        .header-btn-calc { border-color: #d4af37; color: #d4af37; }
+        
         .welcome-banner {
             width: 100%;
             max-width: 420px;
@@ -206,7 +201,30 @@
         }
         .exercise-gif img { width: 100%; height: 100%; object-fit: cover; }
         .exercise-info { flex-grow: 1; }
-        .exercise-title { font-size: 0.95rem; color: #ffffff; font-weight: 600; margin-bottom: 6px; }
+        
+        .title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .exercise-title { font-size: 0.95rem; color: #ffffff; font-weight: 600; }
+        .save-exercise-btn {
+            background: #181818;
+            border: 1px solid #333;
+            color: #d4af37;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Montserrat', sans-serif;
+            transition: background 0.2s;
+        }
+        .save-exercise-btn:active { background: #d4af37; color: #000; }
         
         .exercise-meta-row {
             display: flex;
@@ -373,44 +391,22 @@
             box-sizing: border-box;
             resize: none;
         }
-        .update-misure-box {
-            margin-top: 20px;
-            background: #0a0a0a;
-            border: 1px solid #222;
-            border-radius: 8px;
-            padding: 15px;
-        }
-        .update-misure-box h4 {
-            color: #d4af37;
-            margin-top: 0;
-            margin-bottom: 12px;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-        }
-        .update-misure-box label {
-            display: block;
-            font-size: 0.7rem;
-            color: #888;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-            margin-top: 8px;
-        }
-        .update-misure-box input {
-            width: 100%;
-            background: #161616;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 8px;
-            border-radius: 6px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.85rem;
-            box-sizing: border-box;
-        }
-        .update-misure-box input:focus { border-color: #d4af37; outline: none; }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
+
+        /* NOTIFICA TOAST SALVATAGGIO RAPIDO */
+        #toastSave {
+            display: none;
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #d4af37;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            z-index: 2000;
         }
 
         /* MODAL CALCOLATORE DISCHI */
@@ -502,28 +498,6 @@
                 <div class="chart-container">
                     <canvas id="progressChart" height="150"></canvas>
                 </div>
-
-                <div class="update-misure-box">
-                    <h4>Aggiorna le tue Misure</h4>
-                    <div class="grid-2">
-                        <div><label>Peso (kg)</label><input type="text" id="upPeso" placeholder="es. 80"></div>
-                        <div><label>Petto (cm)</label><input type="text" id="upPetto" placeholder="es. 105"></div>
-                    </div>
-                    <div class="grid-2">
-                        <div><label>Spalle (cm)</label><input type="text" id="upSpalle" placeholder="es. 122"></div>
-                        <div><label>Braccio (cm)</label><input type="text" id="upBraccio" placeholder="es. 38.5"></div>
-                    </div>
-                    <div class="grid-2">
-                        <div><label>Vita (cm)</label><input type="text" id="upVita" placeholder="es. 80"></div>
-                        <div><label>Fianchi (cm)</label><input type="text" id="upFianchi" placeholder="es. 95"></div>
-                    </div>
-                    <div class="grid-2">
-                        <div><label>Quadricipiti (cm)</label><input type="text" id="upQuadricipiti" placeholder="es. 60"></div>
-                        <div><label>Polpacci (cm)</label><input type="text" id="upPolpacci" placeholder="es. 38"></div>
-                    </div>
-                    <button class="action-btn btn-gold" style="margin-top: 12px;" onclick="inviaMisureCliente()">Salva Nuove Misure</button>
-                </div>
-
             </div>
         </div>
 
@@ -540,7 +514,7 @@
                 <div id="listaEserciziDinamica">
                     <p style="text-align: center; color: #888; font-size: 0.85rem;">Caricamento scheda in corso...</p>
                 </div>
-                <button class="action-btn btn-gold" onclick="salvaSessioneCliente()">💾 Salva Sessione e Storico Pesi</button>
+                <button class="action-btn btn-gold" onclick="salvaSessioneCliente(false)">💾 Concludi e Salva Sessione</button>
             </div>
         </div>
 
@@ -560,6 +534,9 @@
         </div>
 
     </div>
+
+    <!-- TOAST DI CONFERMA -->
+    <div id="toastSave">💾 Esercizio salvato!</div>
 
     <!-- MODAL CALCOLATORE DISCHI -->
     <div id="modalDischi" class="modal-overlay" onclick="if(event.target === this) chiudiModalDischi()">
@@ -587,6 +564,13 @@
         let pesoChartInstance = null;
         let listaSchedeRicevute = [];
         let indiceSessioneAttiva = 0;
+
+        function mostraToast(testo) {
+            const toast = document.getElementById('toastSave');
+            toast.innerText = testo || '💾 Salvato!';
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
 
         // BEEP AUDIO NATIVO
         let audioCtx = null;
@@ -633,7 +617,6 @@
             }
 
             let pesoDaCaricare = (totale - 20) / 2;
-            
             if (pesoDaCaricare === 0) {
                 box.innerHTML = `<span style="color: #d4af37;">Bilanciere scarico (nessun disco per lato).</span>`;
                 box.style.display = 'block';
@@ -733,6 +716,7 @@
         function toggleCheck(btn) {
             btn.classList.toggle('completed');
             btn.innerHTML = btn.classList.contains('completed') ? '✓' : '';
+            salvaBozzaLocale();
         }
 
         function aggiungiSerieTabella(buttonElement, placeholderKg, placeholderRip) {
@@ -742,11 +726,144 @@
             
             nuovaRiga.innerHTML = `
                 <td class="set-num">${numSerie}</td>
-                <td><input type="text" class="log-input log-kg" placeholder="${placeholderKg || 'kg'}"></td>
-                <td><input type="text" class="log-input log-rip" placeholder="${placeholderRip || 'rip'}"></td>
+                <td><input type="text" class="log-input log-kg" placeholder="${placeholderKg || 'kg'}" oninput="salvaBozzaLocale()"></td>
+                <td><input type="text" class="log-input log-rip" placeholder="${placeholderRip || 'rip'}" oninput="salvaBozzaLocale()"></td>
                 <td><button class="check-btn" onclick="toggleCheck(this)"></button></td>
             `;
             tbody.appendChild(nuovaRiga);
+            salvaBozzaLocale();
+        }
+
+        // ================= AUTO-SAVE LOCALE ANTI-RICARICA =================
+        function getChiaveBozza() {
+            const sessione = listaSchedeRicevute[indiceSessioneAttiva];
+            return sessione ? `bozza_allenamento_${emailUtenteCorrente}_${sessione.id}` : null;
+        }
+
+        function salvaBozzaLocale() {
+            const chiave = getChiaveBozza();
+            if (!chiave) return;
+
+            let bozza = [];
+            const blocchi = document.querySelectorAll('.exercise-block');
+            blocchi.forEach(blocco => {
+                const target = blocco.querySelector('.ex-target-val').value;
+                const note = blocco.querySelector('.coach-notes').value;
+                let serie = [];
+                blocco.querySelectorAll('tbody tr').forEach(r => {
+                    serie.push({
+                        kg: r.querySelector('.log-kg').value,
+                        rip: r.querySelector('.log-rip').value,
+                        check: r.querySelector('.check-btn').classList.contains('completed')
+                    });
+                });
+                bozza.push({ target, note, serie });
+            });
+
+            localStorage.setItem(chiave, JSON.stringify(bozza));
+        }
+
+        function ripristinaBozzaLocaleSePresente() {
+            const chiave = getChiaveBozza();
+            if (!chiave) return;
+
+            const salvato = localStorage.getItem(chiave);
+            if (!salvato) return;
+
+            try {
+                const bozza = JSON.parse(salvato);
+                const blocchi = document.querySelectorAll('.exercise-block');
+                blocchi.forEach((blocco, idx) => {
+                    if (bozza[idx]) {
+                        if (bozza[idx].target) blocco.querySelector('.ex-target-val').value = bozza[idx].target;
+                        if (bozza[idx].note) blocco.querySelector('.coach-notes').value = bozza[idx].note;
+                        
+                        const righe = blocco.querySelectorAll('tbody tr');
+                        bozza[idx].serie.forEach((s, sIdx) => {
+                            if (righe[sIdx]) {
+                                if (s.kg) righe[sIdx].querySelector('.log-kg').value = s.kg;
+                                if (s.rip) righe[sIdx].querySelector('.log-rip').value = s.rip;
+                                if (s.check) {
+                                    righe[sIdx].querySelector('.check-btn').classList.add('completed');
+                                    righe[sIdx].querySelector('.check-btn').innerHTML = '✓';
+                                }
+                            }
+                        });
+                    }
+                });
+            } catch (e) {
+                console.error("Errore lettura bozza locale:", e);
+            }
+        }
+
+        // ================= SALVATAGGIO CLOUD E GESTIONE STORICO GIORNATA =================
+        async function salvaSessioneCliente(silenzioso = false) {
+            const sessione = listaSchedeRicevute[indiceSessioneAttiva];
+            if (!sessione) return;
+
+            let esercizi = JSON.parse(sessione.dati_scheda);
+            const blocchi = document.querySelectorAll('.exercise-block');
+
+            const oggi = new Date();
+            const dataOggi = `${oggi.getDate().toString().padStart(2, '0')}/${(oggi.getMonth() + 1).toString().padStart(2, '0')}/${oggi.getFullYear()}`;
+
+            blocchi.forEach((blocco, idx) => {
+                const targetModificato = blocco.querySelector('.ex-target-val').value.trim();
+                if (esercizi[idx] && targetModificato) {
+                    esercizi[idx].target = targetModificato;
+                }
+
+                const righe = blocco.querySelectorAll('tbody tr');
+                let serieDati = [];
+                let almenoUnaCompilata = false;
+                let pesoTrovato = "";
+
+                righe.forEach(riga => {
+                    const kg = riga.querySelector('.log-kg').value.trim();
+                    const rip = riga.querySelector('.log-rip').value.trim();
+                    if (kg !== "" || rip !== "") almenoUnaCompilata = true;
+                    if (kg !== "") pesoTrovato = kg;
+                    serieDati.push({ kg: kg, rip: rip });
+                });
+
+                if (pesoTrovato !== "" && esercizi[idx]) {
+                    esercizi[idx].ultimo_peso = pesoTrovato;
+                }
+
+                if (almenoUnaCompilata && esercizi[idx]) {
+                    if (!Array.isArray(esercizi[idx].storico)) esercizi[idx].storico = [];
+                    
+                    // CONTROLLO DUPLICATI: se esiste già una voce con la data odierna, aggiornala!
+                    const indiceGiornoEsistente = esercizi[idx].storico.findIndex(s => s.data === dataOggi);
+                    if (indiceGiornoEsistente !== -1) {
+                        esercizi[idx].storico[indiceGiornoEsistente].serie = serieDati;
+                    } else {
+                        esercizi[idx].storico.push({ data: dataOggi, serie: serieDati });
+                    }
+
+                    if (esercizi[idx].storico.length > 10) esercizi[idx].storico.shift();
+                }
+            });
+
+            const { error } = await db
+                .from('schede_clienti')
+                .update({ dati_scheda: JSON.stringify(esercizi) })
+                .eq('id', sessione.id);
+
+            if (error) {
+                alert("Errore nel salvataggio: " + error.message);
+            } else {
+                sessione.dati_scheda = JSON.stringify(esercizi);
+                if (silenzioso) {
+                    mostraToast("💾 Esercizio salvato!");
+                } else {
+                    // Se clicca il tasto finale di fine seduta, ripulisce la bozza locale
+                    const chiave = getChiaveBozza();
+                    if (chiave) localStorage.removeItem(chiave);
+                    alert("Sessione completata e salvata con successo!");
+                    mostraSessioneCorrente();
+                }
+            }
         }
 
         async function caricaUltimeMisure() {
@@ -826,39 +943,6 @@
                 const p = data[0];
                 document.getElementById('labelNomePacchetto').innerText = p.nome_pacchetto || 'Pacchetto Massaggi';
                 document.getElementById('labelSeduteRimaste').innerText = `${p.sedute_rimaste} Sedute Rimaste`;
-            }
-        }
-
-        async function inviaMisureCliente() {
-            if (!emailUtenteCorrente) return;
-
-            const peso = document.getElementById('upPeso').value;
-            const petto = document.getElementById('upPetto').value;
-            const spalle = document.getElementById('upSpalle').value;
-            const braccio = document.getElementById('upBraccio').value;
-            const vita = document.getElementById('upVita').value;
-            const fianchi = document.getElementById('upFianchi').value;
-            const quadricipiti = document.getElementById('upQuadricipiti').value;
-            const polpacci = document.getElementById('upPolpacci').value;
-
-            const { error } = await db.from('misure_clienti').insert([{ 
-                email_cliente: emailUtenteCorrente, 
-                peso, petto, spalle, braccio, vita, fianchi, quadricipiti, polpacci 
-            }]);
-
-            if (error) {
-                alert("Errore salvataggio: " + error.message);
-            } else {
-                alert("Misure aggiornate con successo!");
-                document.getElementById('upPeso').value = '';
-                document.getElementById('upPetto').value = '';
-                document.getElementById('upSpalle').value = '';
-                document.getElementById('upBraccio').value = '';
-                document.getElementById('upVita').value = '';
-                document.getElementById('upFianchi').value = '';
-                document.getElementById('upQuadricipiti').value = '';
-                document.getElementById('upPolpacci').value = '';
-                caricaUltimeMisure();
             }
         }
 
@@ -962,8 +1046,8 @@
                     righeTabella += `
                         <tr>
                             <td class="set-num">${i}</td>
-                            <td><input type="text" class="log-input log-kg" placeholder="${prevKg}"></td>
-                            <td><input type="text" class="log-input log-rip" placeholder="${prevRip}"></td>
+                            <td><input type="text" class="log-input log-kg" placeholder="${prevKg}" oninput="salvaBozzaLocale()"></td>
+                            <td><input type="text" class="log-input log-rip" placeholder="${prevRip}" oninput="salvaBozzaLocale()"></td>
                             <td><button class="check-btn" onclick="toggleCheck(this)"></button></td>
                         </tr>
                     `;
@@ -974,15 +1058,18 @@
                         <div class="exercise-top">
                             <div class="exercise-gif">${gifHtml}</div>
                             <div class="exercise-info">
-                                <div class="exercise-title">${ex.nome}</div>
+                                <div class="title-row">
+                                    <div class="exercise-title">${ex.nome}</div>
+                                    <button class="save-exercise-btn" onclick="salvaSessioneCliente(true)">💾 Salva</button>
+                                </div>
                                 <div class="exercise-meta-row">
                                     <div class="target-edit-wrapper">
                                         <span>Target:</span>
-                                        <input type="text" class="target-input ex-target-val" value="${ex.target || '3x10'}">
+                                        <input type="text" class="target-input ex-target-val" value="${ex.target || '3x10'}" oninput="salvaBozzaLocale()">
                                     </div>
                                     ${badgeUltimoPeso}
                                     ${videoBtnHtml}
-                                    <button type="button" class="history-toggle-btn" onclick="toggleHistoricoDrawer(this)">📜 Storico Carichi</button>
+                                    <button type="button" class="history-toggle-btn" onclick="toggleHistoricoDrawer(this)">📜 Storico</button>
                                 </div>
                             </div>
                         </div>
@@ -1006,66 +1093,13 @@
                             </tbody>
                         </table>
                         <button class="add-set-btn" onclick="aggiungiSerieTabella(this, '', '')">+ Aggiungi serie</button>
-                        <textarea class="coach-notes" rows="2" placeholder="Note su carichi, sensazioni..."></textarea>
+                        <textarea class="coach-notes" rows="2" placeholder="Note su carichi, sensazioni..." oninput="salvaBozzaLocale()"></textarea>
                     </div>
                 `;
             });
 
             container.innerHTML = htmlContent;
-        }
-
-        async function salvaSessioneCliente() {
-            const sessione = listaSchedeRicevute[indiceSessioneAttiva];
-            if (!sessione) return;
-
-            let esercizi = JSON.parse(sessione.dati_scheda);
-            const blocchi = document.querySelectorAll('.exercise-block');
-
-            const oggi = new Date();
-            const dataOggi = `${oggi.getDate().toString().padStart(2, '0')}/${(oggi.getMonth() + 1).toString().padStart(2, '0')}/${oggi.getFullYear()}`;
-
-            blocchi.forEach((blocco, idx) => {
-                const targetModificato = blocco.querySelector('.ex-target-val').value.trim();
-                if (esercizi[idx] && targetModificato) {
-                    esercizi[idx].target = targetModificato;
-                }
-
-                const righe = blocco.querySelectorAll('tbody tr');
-                let serieDati = [];
-                let almenoUnaCompilata = false;
-                let pesoTrovato = "";
-
-                righe.forEach(riga => {
-                    const kg = riga.querySelector('.log-kg').value.trim();
-                    const rip = riga.querySelector('.log-rip').value.trim();
-                    if (kg !== "" || rip !== "") almenoUnaCompilata = true;
-                    if (kg !== "") pesoTrovato = kg;
-                    serieDati.push({ kg: kg, rip: rip });
-                });
-
-                if (pesoTrovato !== "" && esercizi[idx]) {
-                    esercizi[idx].ultimo_peso = pesoTrovato;
-                }
-
-                if (almenoUnaCompilata && esercizi[idx]) {
-                    if (!Array.isArray(esercizi[idx].storico)) esercizi[idx].storico = [];
-                    esercizi[idx].storico.push({ data: dataOggi, serie: serieDati });
-                    if (esercizi[idx].storico.length > 10) esercizi[idx].storico.shift();
-                }
-            });
-
-            const { error } = await db
-                .from('schede_clienti')
-                .update({ dati_scheda: JSON.stringify(esercizi) })
-                .eq('id', sessione.id);
-
-            if (error) {
-                alert("Errore nel salvataggio: " + error.message);
-            } else {
-                sessione.dati_scheda = JSON.stringify(esercizi);
-                alert("Sessione salvata con successo!");
-                mostraSessioneCorrente();
-            }
+            ripristinaBozzaLocaleSePresente();
         }
 
         async function caricaSchedaCliente() {

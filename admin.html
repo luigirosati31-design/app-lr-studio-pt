@@ -78,8 +78,7 @@
             font-size: 0.85rem;
             box-sizing: border-box;
         }
-        select { cursor: pointer; }
-        input:focus, select:focus {
+        input:focus {
             border-color: #d4af37;
             outline: none;
         }
@@ -357,7 +356,7 @@
 
         function cambiaGiorno(nuovoIndice) {
             salvaDatiFormNelGiornoAttivo();
-            indiceGiornoAttivo = nuovoIndice;
+            indiceGiornoAttivo = nuevoIndice;
             renderTabsGiorni();
         }
 
@@ -393,8 +392,7 @@
             let eserciziArray = [];
 
             cards.forEach(card => {
-                const selectEl = card.querySelector('.select-esercizio');
-                const nome = selectEl.value.trim();
+                const nome = card.querySelector('.input-nome').value.trim();
                 const target = card.querySelector('.input-target').value.trim() || "3x10";
                 const recupero = parseInt(card.querySelector('.input-recupero').value) || 90;
                 const gif = card.querySelector('.input-gif-hidden').value.trim();
@@ -424,6 +422,7 @@
             }
         }
 
+        // ================= CAMPO DI TESTO LIBERO CON ASSISTENTE GIF AUTOMATICO =================
         function creaCardEsercizio(dati = {}, index = null) {
             const container = document.getElementById('listaEserciziEditor');
             const currentIndex = (index !== null) ? index : container.children.length;
@@ -440,9 +439,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Seleziona o Scrivi Esercizio</label>
-                    <select class="select-esercizio" data-selected="${dati.nome || ''}" onchange="gestisciCambioEsercizio(this)">
-                    </select>
+                    <label>Nome Esercizio (Scrivi liberamente a mano)</label>
+                    <input type="text" class="input-nome" placeholder="es. Lat Machine Avanti" value="${dati.nome || ''}" oninput="cercaGifAutentica(this)">
                 </div>
 
                 <div class="grid-2">
@@ -459,8 +457,8 @@
                 <div class="preview-box">
                     <img class="img-preview" src="${dati.gif || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" alt="Preview">
                     <div>
-                        <div style="font-size: 0.68rem; color: #aaa; text-transform: uppercase;">File collegato:</div>
-                        <span class="preview-path">${dati.gif || 'Nessuna GIF selezionata'}</span>
+                        <div style="font-size: 0.68rem; color: #aaa; text-transform: uppercase;">GIF collegata automaticamente:</div>
+                        <span class="preview-path">${dati.gif || 'Nessuna GIF trovata per questo nome'}</span>
                     </div>
                 </div>
                 <input type="hidden" class="input-gif-hidden" value="${dati.gif || ''}">
@@ -472,26 +470,40 @@
             `;
 
             container.appendChild(card);
-            const selectCreato = card.querySelector('.select-esercizio');
-            costruisciOpzioniSelect(selectCreato, dati.nome || "");
         }
 
-        function gestisciCambioEsercizio(selectEl) {
-            const card = selectEl.closest('.ex-card');
-            const selectedOpt = selectEl.options[selectEl.selectedIndex];
-            const percorso = selectedOpt.dataset.path || "";
-
+        // Funzione intelligente: mentre scrivi a mano, cerca se esiste un file compatibile su GitHub
+        function cercaGifAutentica(inputEl) {
+            const testoDigitato = inputEl.value.trim().toLowerCase();
+            const card = inputEl.closest('.ex-card');
             const previewImg = card.querySelector('.img-preview');
             const previewPathText = card.querySelector('.preview-path');
             const hiddenGifInput = card.querySelector('.input-gif-hidden');
 
-            if (percorso) {
-                hiddenGifInput.value = percorso;
-                previewPathText.innerText = percorso;
-                previewImg.src = percorso;
-            } else {
+            if (!testoDigitato) {
                 hiddenGifInput.value = "";
-                previewPathText.innerText = "Nessuna GIF selezionata";
+                previewPathText.innerText = "Nessuna GIF collegata";
+                previewImg.src = "";
+                return;
+            }
+
+            // Pulisce il testo digitato per confrontarlo con i nomi dei file (sostituisce spazi con trattini bassi)
+            const slugInput = testoDigitato.replace(/\s+/g, '_');
+
+            // Cerca nell'archivio degli 85+ esercizi
+            const trovato = archivioGifEsercizi.find(ex => {
+                const nomePulitoFile = ex.nome.toLowerCase();
+                return nomePulitoFile.includes(slugInput) || slugInput.includes(nomePulitoFile);
+            });
+
+            if (trovato) {
+                hiddenGifInput.value = trovato.percorso;
+                previewPathText.innerText = trovato.percorso;
+                previewImg.src = trovato.percorso;
+            } else {
+                // Se scrivi un esercizio personalizzato che non ha la GIF, ti lascia comunque scrivere
+                hiddenGifInput.value = "";
+                previewPathText.innerText = "Esercizio personalizzato (nessuna GIF in archivio)";
                 previewImg.src = "";
             }
         }
@@ -504,49 +516,6 @@
             document.querySelectorAll('.ex-card').forEach((card, idx) => {
                 card.querySelector('.ex-index').innerText = `Esercizio #${idx + 1}`;
             });
-        }
-
-        // ================= GESTIONE GRUPPI E TENDINA ORDINATA =================
-        function costruisciOpzioniSelect(selectElement, selezionato = "") {
-            selectElement.innerHTML = `<option value="">-- Seleziona o digita esercizio --</option>`;
-            
-            // Raggruppa gli esercizi per categoria/cartella se presenti, altrimenti in "Esercizi Generali"
-            const categorie = {};
-            archivioGifEsercizi.forEach(ex => {
-                let cat = ex.categoria || "Esercizi";
-                if (!categorie[cat]) categorie[cat] = [];
-                categorie[cat].push(ex);
-            });
-
-            let trovato = false;
-
-            for (const cat in categorie) {
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = cat.toUpperCase();
-
-                // Ordina alfabeticamente gli esercizi dentro la categoria
-                categorie[cat].sort((a, b) => a.nome.localeCompare(b.nome)).forEach(ex => {
-                    const opt = document.createElement('option');
-                    opt.value = ex.nome;
-                    opt.dataset.path = ex.percorso;
-                    opt.innerText = ex.nome;
-                    if (ex.nome === selezionato || ex.percorso === selezionato) {
-                        opt.selected = true;
-                        trovato = true;
-                    }
-                    optgroup.appendChild(opt);
-                });
-                selectElement.appendChild(optgroup);
-            }
-
-            // Se l'esercizio salvato non è nella lista standard, aggiungilo come opzione libera
-            if (selezionato && !trovato) {
-                const optCustom = document.createElement('option');
-                optCustom.value = selezionato;
-                optCustom.innerText = selezionato;
-                optCustom.selected = true;
-                selectElement.appendChild(optCustom);
-            }
         }
 
         async function popolaArchivioGifDaGitHub() {
@@ -569,8 +538,7 @@
                     if (item.type === "file" && item.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
                         archivioGifEsercizi.push({
                             nome: item.name.replace(/\.[^/.]+$/, ""),
-                            percorso: item.path,
-                            categoria: "Esercizi"
+                            percorso: item.path
                         });
                     } else if (item.type === "dir") {
                         const subRes = await fetch(item.url);
@@ -580,21 +548,18 @@
                                 if (sub.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
                                     archivioGifEsercizi.push({
                                         nome: sub.name.replace(/\.[^/.]+$/, ""),
-                                        percorso: sub.path,
-                                        categoria: item.name // Nome della cartella (es. PETTO, DORSO)
+                                        percorso: sub.path
                                     });
                                 }
                             });
                         }
                     }
                 }
-                renderTabsGiorni();
             } catch (e) {
-                renderTabsGiorni();
+                console.warn("Archivio GIF non caricato da GitHub");
             }
         }
 
-        // ================= CARICAMENTO COMPATIBILE CON VECCHIO E NUOVO FORMATO =================
         async function caricaSchedaEsistente() {
             generaIdCliente();
             const clientId = document.getElementById('clientId').value.trim();
@@ -621,7 +586,6 @@
                     document.getElementById('clientePin').value = data[0].pin;
                 }
 
-                // Legge sia il formato unificato recente sia il vecchio formato con righe separate per giorno
                 if (data.length === 1 && data[0].titolo_sessione === "PROGRAMMA_COMPLETO") {
                     programmaSettimanale = JSON.parse(data[0].dati_scheda);
                 } else {
@@ -636,7 +600,7 @@
                 mostraAvviso(`✅ Scheda di "${clientId}" caricata con successo!`, 'badge-success');
 
             } catch (err) {
-                alert("Errore caricamento: " + err.message);
+                alert("Errore: " + err.message);
             }
         }
 
@@ -677,6 +641,8 @@
                 alert(`✅ Scheda salvata con successo per ${clientId}!`);
             } catch (err) {
                 alert("Errore salvataggio: " + err.message);
+            } catch (err2) {
+                alert("Errore generico: " + err2.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "💾 Salva Scheda Completa";

@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Admin - Gestione Schede - Studio PT</title>
+    <title>Admin - Studio PT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <style>
         body {
             background-color: #0a0a0a;
@@ -41,7 +40,6 @@
             font-size: 1.2rem;
             margin: 0;
             text-transform: uppercase;
-            letter-spacing: 1px;
             font-weight: 700;
         }
         .header-btn {
@@ -53,18 +51,14 @@
             font-size: 0.75rem;
             cursor: pointer;
             text-transform: uppercase;
-            font-family: 'Montserrat', sans-serif;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
+        .form-group { margin-bottom: 15px; }
         label {
             display: block;
             font-size: 0.72rem;
             color: #aaa;
             text-transform: uppercase;
             margin-bottom: 6px;
-            letter-spacing: 1px;
             font-weight: 600;
         }
         input, select {
@@ -78,15 +72,8 @@
             font-size: 0.85rem;
             box-sizing: border-box;
         }
-        input:focus {
-            border-color: #d4af37;
-            outline: none;
-        }
-        .grid-pin {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 10px;
-        }
+        input:focus { border-color: #d4af37; outline: none; }
+        .grid-pin { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
         .btn-load {
             width: 100%;
             background: #1e1e1e;
@@ -98,9 +85,7 @@
             font-weight: 700;
             text-transform: uppercase;
             cursor: pointer;
-            margin-top: 5px;
             margin-bottom: 15px;
-            font-family: 'Montserrat', sans-serif;
         }
         .badge-status {
             display: none;
@@ -112,7 +97,6 @@
         }
         .badge-info { background: rgba(212, 175, 55, 0.15); color: #d4af37; border: 1px solid #d4af37; }
         .badge-success { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid #2ecc71; }
-
         .days-tab-bar {
             display: flex;
             gap: 8px;
@@ -121,39 +105,28 @@
             margin-top: 20px;
             margin-bottom: 15px;
             border-bottom: 1px solid #222;
-            align-items: center;
-            scrollbar-width: none;
         }
-        .days-tab-bar::-webkit-scrollbar { display: none; }
         .day-tab-btn {
             background: #161616;
             color: #888;
             border: 1px solid #333;
             padding: 8px 14px;
             border-radius: 6px;
-            font-family: 'Montserrat', sans-serif;
             font-size: 0.8rem;
             font-weight: 600;
-            white-space: nowrap;
             cursor: pointer;
+            white-space: nowrap;
         }
-        .day-tab-btn.active {
-            background: #d4af37;
-            color: #000;
-            border-color: #d4af37;
-            font-weight: 700;
-        }
+        .day-tab-btn.active { background: #d4af37; color: #000; border-color: #d4af37; }
         .btn-add-day {
             background: transparent;
             color: #d4af37;
             border: 1px dashed #d4af37;
             padding: 8px 14px;
             border-radius: 6px;
-            font-family: 'Montserrat', sans-serif;
             font-size: 0.8rem;
             font-weight: 700;
             cursor: pointer;
-            white-space: nowrap;
         }
         .day-title-editor {
             display: flex;
@@ -165,10 +138,7 @@
             border-radius: 8px;
             border: 1px solid #262626;
         }
-        .day-title-editor input {
-            font-weight: 700;
-            color: #d4af37;
-        }
+        .day-title-editor input { font-weight: 700; color: #d4af37; }
         .btn-delete-day {
             background: rgba(231, 76, 60, 0.15);
             border: 1px solid #e74c3c;
@@ -178,10 +148,7 @@
             font-size: 0.75rem;
             font-weight: 700;
             cursor: pointer;
-            white-space: nowrap;
-            font-family: 'Montserrat', sans-serif;
         }
-
         .ex-card {
             background: #0d0d0d;
             border: 1px solid #222;
@@ -196,20 +163,8 @@
             margin-bottom: 10px;
         }
         .ex-index { color: #d4af37; font-size: 0.82rem; font-weight: 700; }
-        .btn-remove-ex {
-            background: transparent;
-            border: none;
-            color: #e74c3c;
-            font-size: 0.8rem;
-            cursor: pointer;
-            font-weight: 700;
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
+        .btn-remove-ex { background: transparent; border: none; color: #e74c3c; font-size: 0.8rem; cursor: pointer; font-weight: 700; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .preview-box {
             display: flex;
             align-items: center;
@@ -220,19 +175,8 @@
             padding: 6px 10px;
             margin-bottom: 10px;
         }
-        .preview-box img {
-            width: 36px;
-            height: 36px;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid #d4af37;
-            background: #000;
-        }
-        .preview-path {
-            font-size: 0.72rem;
-            color: #888;
-            word-break: break-all;
-        }
+        .preview-box img { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; border: 1px solid #d4af37; background: #000; }
+        .preview-path { font-size: 0.72rem; color: #888; word-break: break-all; }
         .btn-add-ex {
             width: 100%;
             background: #161616;
@@ -245,10 +189,7 @@
             cursor: pointer;
             text-transform: uppercase;
             margin-bottom: 20px;
-            font-family: 'Montserrat', sans-serif;
-            transition: all 0.2s;
         }
-        .btn-add-ex:hover { color: #d4af37; border-color: #d4af37; }
         .btn-submit {
             width: 100%;
             background: #d4af37;
@@ -260,50 +201,45 @@
             font-weight: 700;
             text-transform: uppercase;
             cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
             letter-spacing: 1px;
         }
-        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
     <div class="admin-panel">
         <div class="header">
-            <h1>Studio PT - Gestione Schede</h1>
+            <h1>Studio PT - Admin</h1>
             <button class="header-btn" onclick="window.location.href='index.html'">Esci</button>
         </div>
 
         <div class="grid-pin">
             <div class="form-group">
-                <label for="clienteNomeCognome">Nome e Cognome Atleta</label>
+                <label for="clienteNomeCognome">Nome Atleta</label>
                 <input type="text" id="clienteNomeCognome" placeholder="es. Enrico Lombardi" oninput="generaIdCliente()">
             </div>
             <div class="form-group">
-                <label for="clientePin">PIN Atleta (4 cifre)</label>
-                <input type="text" id="clientePin" placeholder="es. 1234" maxlength="4" style="text-align: center; font-weight: 700; color: #d4af37; font-size: 1.1rem;">
+                <label for="clientePin">PIN (4 cifre)</label>
+                <input type="text" id="clientePin" placeholder="1234" maxlength="4" style="text-align: center; font-weight: 700; color: #d4af37; font-size: 1.1rem;">
             </div>
         </div>
-
         <input type="hidden" id="clientId">
 
-        <button type="button" class="btn-load" onclick="caricaSchedaEsistente()">🔍 Carica Scheda Esistente</button>
+        <button type="button" class="btn-load" onclick="caricaSchedaEsistente()">🔍 Carica Scheda</button>
         <div id="statusBadge" class="badge-status badge-info"></div>
 
         <div class="days-tab-bar">
             <div id="tabsContainer" style="display:flex; gap:8px;"></div>
-            <button type="button" class="btn-add-day" onclick="aggiungiNuovoGiorno()">+ Aggiungi Giorno</button>
+            <button type="button" class="btn-add-day" onclick="aggiungiNuovoGiorno()">+ Giorno</button>
         </div>
 
         <div class="day-title-editor">
             <input type="text" id="activeDayTitle" placeholder="Nome Giorno (es. Giorno A)" oninput="aggiornaTitoloGiornoCorrente(this.value)">
-            <button type="button" class="btn-delete-day" onclick="eliminaGiornoCorrente()">Elimina Giorno</button>
+            <button type="button" class="btn-delete-day" onclick="eliminaGiornoCorrente()">Elimina</button>
         </div>
 
         <div id="listaEserciziEditor"></div>
-
         <button type="button" class="btn-add-ex" onclick="aggiungiNuovoEsercizioCard()">+ Aggiungi Esercizio</button>
-
         <button type="button" id="btnSalvaScheda" class="btn-submit" onclick="salvaTuttoIlProgramma()">💾 Salva Scheda Completa</button>
     </div>
 
@@ -314,10 +250,7 @@
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         let archivioGifEsercizi = [];
-        let programmaSettimanale = [
-            { titolo: "Giorno A", esercizi: [] },
-            { titolo: "Giorno B", esercizi: [] }
-        ];
+        let programmaSettimanale = [{ titolo: "Giorno A", esercizi: [] }, { titolo: "Giorno B", esercizi: [] }];
         let indiceGiornoAttivo = 0;
 
         function mostraAvviso(testo, tipo = 'badge-info') {
@@ -329,18 +262,12 @@
 
         function generaIdCliente() {
             const nomeCompleto = document.getElementById('clienteNomeCognome').value.trim();
-            const cleanSlug = nomeCompleto
-                .toLowerCase()
-                .replace(/[^\w\s-]/g, '')
-                .replace(/\s+/g, '-');
-            
-            document.getElementById('clientId').value = cleanSlug;
+            document.getElementById('clientId').value = nomeCompleto.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
         }
 
         function renderTabsGiorni() {
             const container = document.getElementById('tabsContainer');
             container.innerHTML = "";
-
             programmaSettimanale.forEach((giorno, idx) => {
                 const btn = document.createElement('button');
                 btn.type = "button";
@@ -349,14 +276,13 @@
                 btn.onclick = () => cambiaGiorno(idx);
                 container.appendChild(btn);
             });
-
             document.getElementById('activeDayTitle').value = programmaSettimanale[indiceGiornoAttivo].titolo;
             renderEserciziGiornoAttivo();
         }
 
         function cambiaGiorno(nuovoIndice) {
             salvaDatiFormNelGiornoAttivo();
-            indiceGiornoAttivo = nuevoIndice;
+            indiceGiornoAttivo = nuovoIndice;
             renderTabsGiorni();
         }
 
@@ -371,14 +297,12 @@
 
         function eliminaGiornoCorrente() {
             if (programmaSettimanale.length <= 1) {
-                alert("Devi mantenere almeno un giorno nella scheda.");
+                alert("Devi mantenere almeno un giorno.");
                 return;
             }
-            if (confirm(`Vuoi eliminare "${programmaSettimanale[indiceGiornoAttivo].titolo}"?`)) {
-                programmaSettimanale.splice(indiceGiornoAttivo, 1);
-                indiceGiornoAttivo = Math.max(0, indiceGiornoAttivo - 1);
-                renderTabsGiorni();
-            }
+            programmaSettimanale.splice(indiceGiornoAttivo, 1);
+            indiceGiornoAttivo = Math.max(0, indiceGiornoAttivo - 1);
+            renderTabsGiorni();
         }
 
         function aggiornaTitoloGiornoCorrente(nuovoTitolo) {
@@ -390,7 +314,6 @@
         function salvaDatiFormNelGiornoAttivo() {
             const cards = document.querySelectorAll('.ex-card');
             let eserciziArray = [];
-
             cards.forEach(card => {
                 const nome = card.querySelector('.input-nome').value.trim();
                 const target = card.querySelector('.input-target').value.trim() || "3x10";
@@ -404,7 +327,6 @@
                     eserciziArray.push({ nome, target, recupero, gif, video, ultimo_peso, storico });
                 }
             });
-
             programmaSettimanale[indiceGiornoAttivo].esercizi = eserciziArray;
         }
 
@@ -412,21 +334,16 @@
             const container = document.getElementById('listaEserciziEditor');
             container.innerHTML = "";
             const giorno = programmaSettimanale[indiceGiornoAttivo];
-
             if (!giorno.esercizi || giorno.esercizi.length === 0) {
                 creaCardEsercizio();
             } else {
-                giorno.esercizi.forEach((ex, idx) => {
-                    creaCardEsercizio(ex, idx);
-                });
+                giorno.esercizi.forEach((ex, idx) => creaCardEsercizio(ex, idx));
             }
         }
 
-        // ================= CAMPO DI TESTO LIBERO CON ASSISTENTE GIF AUTOMATICO =================
         function creaCardEsercizio(dati = {}, index = null) {
             const container = document.getElementById('listaEserciziEditor');
             const currentIndex = (index !== null) ? index : container.children.length;
-
             const card = document.createElement('div');
             card.className = "ex-card";
             card.dataset.ultimoPeso = dati.ultimo_peso || "";
@@ -437,81 +354,65 @@
                     <span class="ex-index">Esercizio #${currentIndex + 1}</span>
                     <button type="button" class="btn-remove-ex" onclick="this.closest('.ex-card').remove(); rinumeraEsercizi();">✕ Rimuovi</button>
                 </div>
-
                 <div class="form-group">
-                    <label>Nome Esercizio (Scrivi liberamente a mano)</label>
-                    <input type="text" class="input-nome" placeholder="es. Lat Machine Avanti" value="${dati.nome || ''}" oninput="cercaGifAutentica(this)">
+                    <label>Nome Esercizio (Scrivi a mano)</label>
+                    <input type="text" class="input-nome" placeholder="es. Lat Machine" value="${dati.nome || ''}" oninput="cercaGifAutentica(this)">
                 </div>
-
                 <div class="grid-2">
                     <div>
-                        <label>Target (es. 2 set per 3, 4x10)</label>
+                        <label>Target</label>
                         <input type="text" class="input-target" value="${dati.target || '3x10'}">
                     </div>
                     <div>
-                        <label>Recupero (secondi)</label>
+                        <label>Recupero (s)</label>
                         <input type="number" class="input-recupero" value="${dati.recupero || 90}">
                     </div>
                 </div>
-
                 <div class="preview-box">
                     <img class="img-preview" src="${dati.gif || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" alt="Preview">
                     <div>
-                        <div style="font-size: 0.68rem; color: #aaa; text-transform: uppercase;">GIF collegata automaticamente:</div>
-                        <span class="preview-path">${dati.gif || 'Nessuna GIF trovata per questo nome'}</span>
+                        <div style="font-size: 0.68rem; color: #aaa;">GIF Automatica:</div>
+                        <span class="preview-path">${dati.gif || 'Nessuna GIF trovata'}</span>
                     </div>
                 </div>
                 <input type="hidden" class="input-gif-hidden" value="${dati.gif || ''}">
-
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label>Link Video (Opzionale)</label>
-                    <input type="text" class="input-video" placeholder="https://youtube.com/..." value="${dati.video || ''}">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Link Video</label>
+                    <input type="text" class="input-video" placeholder="https://..." value="${dati.video || ''}">
                 </div>
             `;
-
             container.appendChild(card);
         }
 
-        // Funzione intelligente: mentre scrivi a mano, cerca se esiste un file compatibile su GitHub
         function cercaGifAutentica(inputEl) {
-            const testoDigitato = inputEl.value.trim().toLowerCase();
+            const testo = inputEl.value.trim().toLowerCase();
             const card = inputEl.closest('.ex-card');
             const previewImg = card.querySelector('.img-preview');
             const previewPathText = card.querySelector('.preview-path');
             const hiddenGifInput = card.querySelector('.input-gif-hidden');
 
-            if (!testoDigitato) {
+            if (!testo) {
                 hiddenGifInput.value = "";
-                previewPathText.innerText = "Nessuna GIF collegata";
+                previewPathText.innerText = "Nessuna GIF";
                 previewImg.src = "";
                 return;
             }
 
-            // Pulisce il testo digitato per confrontarlo con i nomi dei file (sostituisce spazi con trattini bassi)
-            const slugInput = testoDigitato.replace(/\s+/g, '_');
-
-            // Cerca nell'archivio degli 85+ esercizi
-            const trovato = archivioGifEsercizi.find(ex => {
-                const nomePulitoFile = ex.nome.toLowerCase();
-                return nomePulitoFile.includes(slugInput) || slugInput.includes(nomePulitoFile);
-            });
+            const slug = testo.replace(/\s+/g, '_');
+            const trovato = archivioGifEsercizi.find(ex => ex.nome.toLowerCase().includes(slug) || slug.includes(ex.nome.toLowerCase()));
 
             if (trovato) {
                 hiddenGifInput.value = trovato.percorso;
                 previewPathText.innerText = trovato.percorso;
                 previewImg.src = trovato.percorso;
             } else {
-                // Se scrivi un esercizio personalizzato che non ha la GIF, ti lascia comunque scrivere
                 hiddenGifInput.value = "";
-                previewPathText.innerText = "Esercizio personalizzato (nessuna GIF in archivio)";
+                previewPathText.innerText = "Personalizzato (senza GIF)";
                 previewImg.src = "";
             }
         }
 
-        function aggiungiNuovoEsercizioCard() {
-            creaCardEsercizio();
-        }
-
+        function aggiungiNuovoEsercizioCard() { creaCardEsercizio(); }
         function rinumeraEsercizi() {
             document.querySelectorAll('.ex-card').forEach((card, idx) => {
                 card.querySelector('.ex-index').innerText = `Esercizio #${idx + 1}`;
@@ -522,69 +423,44 @@
             try {
                 let owner = "luigirosati";
                 let repo = "studio-pt";
-
                 if (window.location.hostname.includes("github.io")) {
                     owner = window.location.hostname.split('.')[0];
                     repo = window.location.pathname.split('/')[1] || repo;
                 }
-
                 const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/esercizi`);
-                if (!res.ok) throw new Error("GitHub non raggiungibile");
-                
+                if (!res.ok) return;
                 const items = await res.json();
                 archivioGifEsercizi = [];
-
                 for (const item of items) {
                     if (item.type === "file" && item.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
-                        archivioGifEsercizi.push({
-                            nome: item.name.replace(/\.[^/.]+$/, ""),
-                            percorso: item.path
-                        });
+                        archivioGifEsercizi.push({ nome: item.name.replace(/\.[^/.]+$/, ""), percorso: item.path });
                     } else if (item.type === "dir") {
                         const subRes = await fetch(item.url);
                         if (subRes.ok) {
                             const subItems = await subRes.json();
                             subItems.forEach(sub => {
                                 if (sub.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
-                                    archivioGifEsercizi.push({
-                                        nome: sub.name.replace(/\.[^/.]+$/, ""),
-                                        percorso: sub.path
-                                    });
+                                    archivioGifEsercizi.push({ nome: sub.name.replace(/\.[^/.]+$/, ""), percorso: sub.path });
                                 }
                             });
                         }
                     }
                 }
-            } catch (e) {
-                console.warn("Archivio GIF non caricato da GitHub");
-            }
+            } catch (e) {}
         }
 
         async function caricaSchedaEsistente() {
             generaIdCliente();
             const clientId = document.getElementById('clientId').value.trim();
-            if (!clientId) {
-                alert("Inserisci Nome e Cognome dell'atleta per caricare.");
-                return;
-            }
-
-            mostraAvviso("Ricerca scheda in corso...");
+            if (!clientId) { alert("Inserisci il nome."); return; }
+            mostraAvviso("Caricamento...");
 
             try {
-                const { data, error } = await db
-                    .from('schede_clienti')
-                    .select('*')
-                    .or(`client_id.eq.${clientId},email_cliente.eq.${clientId}`);
-
+                const { data, error } = await db.from('schede_clienti').select('*').or(`client_id.eq.${clientId},email_cliente.eq.${clientId}`);
                 if (error) throw error;
-                if (!data || data.length === 0) {
-                    mostraAvviso("Nessuna scheda trovata. Creane una nuova.");
-                    return;
-                }
+                if (!data || data.length === 0) { mostraAvviso("Nessuna scheda trovata."); return; }
 
-                if (data[0].pin) {
-                    document.getElementById('clientePin').value = data[0].pin;
-                }
+                if (data[0].pin) document.getElementById('clientePin').value = data[0].pin;
 
                 if (data.length === 1 && data[0].titolo_sessione === "PROGRAMMA_COMPLETO") {
                     programmaSettimanale = JSON.parse(data[0].dati_scheda);
@@ -597,8 +473,7 @@
 
                 indiceGiornoAttivo = 0;
                 renderTabsGiorni();
-                mostraAvviso(`✅ Scheda di "${clientId}" caricata con successo!`, 'badge-success');
-
+                mostraAvviso("✅ Caricata con successo!", "badge-success");
             } catch (err) {
                 alert("Errore: " + err.message);
             }
@@ -607,27 +482,18 @@
         async function salvaTuttoIlProgramma() {
             salvaDatiFormNelGiornoAttivo();
             generaIdCliente();
-
             const clientId = document.getElementById('clientId').value.trim();
             const pin = document.getElementById('clientePin').value.trim();
             const btn = document.getElementById('btnSalvaScheda');
 
-            if (!clientId) {
-                alert("Inserisci Nome e Cognome dell'atleta!");
-                return;
-            }
-
-            if (!pin || pin.length !== 4) {
-                alert("Assegna un PIN numerico di 4 cifre.");
-                return;
-            }
+            if (!clientId) { alert("Inserisci il nome."); return; }
+            if (!pin || pin.length !== 4) { alert("Inserisci un PIN di 4 cifre."); return; }
 
             btn.disabled = true;
-            btn.innerText = "Salvataggio in corso...";
+            btn.innerText = "Salvataggio...";
 
             try {
                 await db.from('schede_clienti').delete().or(`client_id.eq.${clientId},email_cliente.eq.${clientId}`);
-
                 const { error } = await db.from('schede_clienti').insert([{
                     client_id: clientId,
                     email_cliente: clientId,
@@ -635,23 +501,17 @@
                     titolo_sessione: "PROGRAMMA_COMPLETO",
                     dati_scheda: JSON.stringify(programmaSettimanale)
                 }]);
-
                 if (error) throw error;
-
-                alert(`✅ Scheda salvata con successo per ${clientId}!`);
+                alert("✅ Salvato con successo!");
             } catch (err) {
-                alert("Errore salvataggio: " + err.message);
-            } catch (err2) {
-                alert("Errore generico: " + err2.message);
+                alert("Errore: " + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "💾 Salva Scheda Completa";
             }
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            popolaArchivioGifDaGitHub();
-        });
+        document.addEventListener("DOMContentLoaded", () => { popolaArchivioGifDaGitHub(); });
     </script>
 </body>
 </html>

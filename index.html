@@ -9,9 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Studio PT">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link rel="manifest" href="manifest.json">
     <style>
         body {
             background-color: #000000;
@@ -73,10 +70,7 @@
             font-size: 0.9rem;
             box-sizing: border-box;
         }
-        input:focus {
-            border-color: #d4af37;
-            outline: none;
-        }
+        input:focus { border-color: #d4af37; outline: none; }
         .pin-input {
             font-size: 1.3rem;
             letter-spacing: 8px;
@@ -98,9 +92,7 @@
             font-family: 'Montserrat', sans-serif;
             letter-spacing: 1px;
             margin-top: 8px;
-            transition: opacity 0.2s;
         }
-        .btn-gold:active { opacity: 0.8; }
         .divider {
             margin: 22px 0 12px 0;
             border-top: 1px solid #222;
@@ -130,24 +122,18 @@
     <div class="login-card">
         <h1>Studio PT</h1>
         <p>Area Riservata Atleti</p>
-
         <div id="erroreBox" class="error-msg"></div>
-
         <div class="form-group">
             <label for="nomeInput">Nome e Cognome</label>
-            <input type="text" id="nomeInput" placeholder="es. Enrico Lombardi" autocomplete="name">
+            <input type="text" id="nomeInput" placeholder="es. Enrico Lombardi">
         </div>
-
         <div class="form-group">
             <label for="pinInput">PIN di Sicurezza (4 cifre)</label>
-            <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*">
+            <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" inputmode="numeric">
         </div>
-
         <button class="btn-gold" id="btnAccedi" onclick="validaAccessoCliente()">Entra nella Scheda</button>
-
         <div class="divider"></div>
         <a class="admin-link" onclick="mostraLoginAdmin()">Area Riservata Coach</a>
-
         <div id="boxAccessoAdmin" style="display: none; margin-top: 14px;">
             <div class="form-group">
                 <label>PIN Master Coach</label>
@@ -183,19 +169,13 @@
             const btn = document.getElementById('btnAccedi');
 
             if (!nomeRaw || !pinRaw) {
-                mostraErrore("Compila sia il Nome e Cognome che il PIN.");
-                return;
-            }
-
-            if (pinRaw.length !== 4) {
-                mostraErrore("Il PIN deve essere esattamente di 4 cifre.");
+                mostraErrore("Compila sia il Nome che il PIN.");
                 return;
             }
 
             const slug = nomeRaw.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-
             btn.disabled = true;
-            btn.innerText = "Verifica in corso...";
+            btn.innerText = "Verifica...";
 
             try {
                 const { data, error } = await db
@@ -204,25 +184,21 @@
                     .or(`client_id.eq.${slug},email_cliente.eq.${slug}`);
 
                 if (error || !data || data.length === 0) {
-                    mostraErrore("Nessuna scheda trovata per questo atleta. Contatta il Coach.");
+                    mostraErrore("Atleta non trovato. Contatta il Coach.");
                     return;
                 }
 
-                const clienteRecord = data[0];
-                const pinRegistrato = (clienteRecord.pin || "").toString().trim();
-
-                if (pinRegistrato !== "" && pinRegistrato !== pinRaw) {
-                    mostraErrore("PIN errato. Riprova.");
+                const pinReg = (data[0].pin || "").toString().trim();
+                if (pinReg !== "" && pinReg !== pinRaw) {
+                    mostraErrore("PIN errato.");
                     return;
                 }
 
                 localStorage.setItem('studio_pt_client_id', slug);
                 localStorage.setItem('studio_pt_client_pin', pinRaw);
-
                 window.location.href = `dashboard.html?id=${slug}`;
-
             } catch (err) {
-                mostraErrore("Errore di connessione: " + err.message);
+                mostraErrore("Errore: " + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Entra nella Scheda";
@@ -240,7 +216,7 @@
                 localStorage.setItem('studio_pt_admin_logged', 'true');
                 window.location.href = "admin.html";
             } else {
-                alert("PIN Coach non corretto.");
+                alert("PIN non corretto.");
             }
         }
     </script>

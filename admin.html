@@ -52,7 +52,7 @@
             cursor: pointer;
             text-transform: uppercase;
         }
-        .form-group { margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; position: relative; }
         label {
             display: block;
             font-size: 0.72rem;
@@ -73,6 +73,34 @@
             box-sizing: border-box;
         }
         input:focus { border-color: #d4af37; outline: none; }
+        
+        .autocomplete-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border: 1px solid #d4af37;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 999;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.9);
+        }
+        .autocomplete-item {
+            padding: 10px 12px;
+            font-size: 0.82rem;
+            color: #ddd;
+            cursor: pointer;
+            border-bottom: 1px solid #222;
+        }
+        .autocomplete-item:hover {
+            background: #d4af37;
+            color: #000;
+            font-weight: 600;
+        }
+
         .grid-pin { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
         .btn-load {
             width: 100%;
@@ -354,9 +382,10 @@
                     <span class="ex-index">Esercizio #${currentIndex + 1}</span>
                     <button type="button" class="btn-remove-ex" onclick="this.closest('.ex-card').remove(); rinumeraEsercizi();">✕ Rimuovi</button>
                 </div>
-                <div class="form-group">
-                    <label>Nome Esercizio (Scrivi a mano)</label>
-                    <input type="text" class="input-nome" placeholder="es. Lat Machine" value="${dati.nome || ''}" oninput="cercaGifAutentica(this)">
+                <div class="form-group" style="position: relative;">
+                    <label>Nome Esercizio (Inizia a scrivere per cercare la GIF)</label>
+                    <input type="text" class="input-nome" placeholder="es. Chest Press, Lat Machine..." value="${dati.nome || ''}" oninput="gestisciAutocompletamento(this)" autocomplete="off">
+                    <div class="autocomplete-dropdown"></div>
                 </div>
                 <div class="grid-2">
                     <div>
@@ -371,8 +400,8 @@
                 <div class="preview-box">
                     <img class="img-preview" src="${dati.gif || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" alt="Preview">
                     <div>
-                        <div style="font-size: 0.68rem; color: #aaa;">GIF Automatica:</div>
-                        <span class="preview-path">${dati.gif || 'Nessuna GIF trovata'}</span>
+                        <div style="font-size: 0.68rem; color: #aaa;">GIF Associata:</div>
+                        <span class="preview-path">${dati.gif || 'Nessuna GIF selezionata'}</span>
                     </div>
                 </div>
                 <input type="hidden" class="input-gif-hidden" value="${dati.gif || ''}">
@@ -384,33 +413,52 @@
             container.appendChild(card);
         }
 
-        function cercaGifAutentica(inputEl) {
+        function gestisciAutocompletamento(inputEl) {
             const testo = inputEl.value.trim().toLowerCase();
             const card = inputEl.closest('.ex-card');
+            const dropdown = card.querySelector('.autocomplete-dropdown');
             const previewImg = card.querySelector('.img-preview');
             const previewPathText = card.querySelector('.preview-path');
             const hiddenGifInput = card.querySelector('.input-gif-hidden');
 
             if (!testo) {
-                hiddenGifInput.value = "";
-                previewPathText.innerText = "Nessuna GIF";
-                previewImg.src = "";
+                dropdown.style.display = 'none';
+                dropdown.innerHTML = '';
                 return;
             }
 
-            const slug = testo.replace(/\s+/g, '_');
-            const trovato = archivioGifEsercizi.find(ex => ex.nome.toLowerCase().includes(slug) || slug.includes(ex.nome.toLowerCase()));
+            const filtrati = archivioGifEsercizi.filter(ex => ex.nome.toLowerCase().includes(testo));
 
-            if (trovato) {
-                hiddenGifInput.value = trovato.percorso;
-                previewPathText.innerText = trovato.percorso;
-                previewImg.src = trovato.percorso;
+            if (filtrati.length > 0) {
+                dropdown.innerHTML = '';
+                filtrati.forEach(ex => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerText = ex.nome;
+                    item.onclick = () => {
+                        inputEl.value = ex.nome;
+                        hiddenGifInput.value = ex.percorso;
+                        previewPathText.innerText = ex.percorso;
+                        previewImg.src = ex.percorso;
+                        dropdown.style.display = 'none';
+                    };
+                    dropdown.appendChild(item);
+                });
+                dropdown.style.display = 'block';
             } else {
+                dropdown.style.display = 'none';
+                dropdown.innerHTML = '';
                 hiddenGifInput.value = "";
-                previewPathText.innerText = "Personalizzato (senza GIF)";
+                previewPathText.innerText = "Esercizio personalizzato (senza GIF)";
                 previewImg.src = "";
             }
         }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.form-group')) {
+                document.querySelectorAll('.autocomplete-dropdown').forEach(d => d.style.display = 'none');
+            }
+        });
 
         function aggiungiNuovoEsercizioCard() { creaCardEsercizio(); }
         function rinumeraEsercizi() {
@@ -433,14 +481,14 @@
                 archivioGifEsercizi = [];
                 for (const item of items) {
                     if (item.type === "file" && item.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
-                        archivioGifEsercizi.push({ nome: item.name.replace(/\.[^/.]+$/, ""), percorso: item.path });
+                        archivioGifEsercizi.push({ nome: item.name.replace(/\.[^/.]+$/, "").replace(/_/g, " "), percorso: item.path });
                     } else if (item.type === "dir") {
                         const subRes = await fetch(item.url);
                         if (subRes.ok) {
                             const subItems = await subRes.json();
                             subItems.forEach(sub => {
                                 if (sub.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
-                                    archivioGifEsercizi.push({ nome: sub.name.replace(/\.[^/.]+$/, ""), percorso: sub.path });
+                                    archivioGifEsercizi.push({ nome: sub.name.replace(/\.[^/.]+$/, "").replace(/_/g, " "), percorso: sub.path });
                                 }
                             });
                         }

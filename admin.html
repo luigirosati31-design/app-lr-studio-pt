@@ -283,18 +283,8 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Archivio completo delle GIF
-        let archivioGifEsercizi = [
-            { nome: "panca inclinata", percorso: "esercizi/petto/pancainclinata.gif" },
-            { nome: "distensioni", percorso: "esercizi/petto/disntensioni.gif" },
-            { nome: "croci panca piana", percorso: "esercizi/petto/crocipancapiana.gif" },
-            { nome: "croci panca inclinata", percorso: "esercizi/petto/crociinclinate.gif" },
-            { nome: "bicipiti z", percorso: "esercizi/braccia/bicipitiz.gif" },
-            { nome: "bicipiti 45", percorso: "esercizi/braccia/bicipiti45.gif" },
-            { nome: "lat machine", percorso: "esercizi/dorso/lat_machine.gif" },
-            { nome: "rematore 1 arm", percorso: "esercizi/dorso/rematore_1_arm.gif" },
-            { nome: "squat", percorso: "esercizi/gambe/squat.gif" }
-        ];
+        // Archivio dinamico che si riempie automaticamente da GitHub (e include fallback di sicurezza)
+        let archivioGifEsercizi = [];
 
         let programmaSettimanale = [{ titolo: "Giorno A", esercizi: [] }, { titolo: "Giorno B", esercizi: [] }];
         let indiceGiornoAttivo = 0;
@@ -393,7 +383,7 @@
         }
 
         function popolaSelectGifManuale(selectEl, selectedPath = "") {
-            selectEl.innerHTML = '<option value="">-- Seleziona GIF --</option>';
+            selectEl.innerHTML = '<option value="">-- Seleziona GIF dall archivio --</option>';
             archivioGifEsercizi.forEach(ex => {
                 const opt = document.createElement('option');
                 opt.value = ex.percorso;
@@ -486,7 +476,7 @@
             const card = inputEl.closest('.ex-card');
             const dropdown = card.querySelector('.autocomplete-dropdown');
 
-            if (!testo) {
+            if (!testo || archivioGifEsercizi.length === 0) {
                 dropdown.style.display = 'none';
                 dropdown.innerHTML = '';
                 return;
@@ -529,6 +519,44 @@
             document.querySelectorAll('.ex-card').forEach((card, idx) => {
                 card.querySelector('.ex-index').innerText = `Esercizio #${idx + 1}`;
             });
+        }
+
+        // Scarica automaticamente TUTTO l'archivio reale dalla cartella "esercizi" su GitHub
+        async function popolaArchivioGifDaGitHub() {
+            try {
+                let owner = "luigirosati";
+                let repo = "studio-pt";
+                if (window.location.hostname.includes("github.io")) {
+                    owner = window.location.hostname.split('.')[0];
+                    repo = window.location.pathname.split('/')[1] || repo;
+                }
+                const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/esercizi`);
+                if (!res.ok) return;
+                const items = await res.json();
+                archivioGifEsercizi = [];
+                for (const item of items) {
+                    if (item.type === "file" && item.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
+                        archivioGifEsercizi.push({ nome: item.name.replace(/\.[^/.]+$/, "").replace(/_/g, " "), percorso: item.path });
+                    } else if (item.type === "dir") {
+                        const subRes = await fetch(item.url);
+                        if (subRes.ok) {
+                            const subItems = await subRes.json();
+                            subItems.forEach(sub => {
+                                if (sub.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
+                                    archivioGifEsercizi.push({ nome: sub.name.replace(/\.[^/.]+$/, "").replace(/_/g, " "), percorso: sub.path });
+                                }
+                            });
+                        }
+                    }
+                }
+                // Aggiorna tutte le tendine manuali aperte con l'archivio reale appena scaricato
+                document.querySelectorAll('.select-gif-manuale').forEach(sel => {
+                    const currentVal = sel.value;
+                    popolaSelectGifManuale(sel, currentVal);
+                });
+            } catch (e) {
+                console.warn("Impossibile caricare l'archivio da GitHub, verificare la connessione.");
+            }
         }
 
         async function caricaSchedaEsistente() {
@@ -594,6 +622,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
+            popolaArchivioGifDaGitHub();
             renderTabsGiorni();
         });
     </script>

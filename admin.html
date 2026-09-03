@@ -440,7 +440,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Seleziona Esercizio dalla Cartella</label>
+                    <label>Seleziona o Scrivi Esercizio</label>
                     <select class="select-esercizio" data-selected="${dati.nome || ''}" onchange="gestisciCambioEsercizio(this)">
                     </select>
                 </div>
@@ -506,23 +506,40 @@
             });
         }
 
+        // ================= GESTIONE GRUPPI E TENDINA ORDINATA =================
         function costruisciOpzioniSelect(selectElement, selezionato = "") {
-            selectElement.innerHTML = `<option value="">-- Seleziona Esercizio dalla cartella --</option>`;
-            const listaOrdinata = [...archivioGifEsercizi].sort((a, b) => a.nome.localeCompare(b.nome));
-
-            let trovato = false;
-            listaOrdinata.forEach(ex => {
-                const opt = document.createElement('option');
-                opt.value = ex.nome;
-                opt.dataset.path = ex.percorso;
-                opt.innerText = ex.nome;
-                if (ex.nome === selezionato || ex.percorso === selezionato) {
-                    opt.selected = true;
-                    trovato = true;
-                }
-                selectElement.appendChild(opt);
+            selectElement.innerHTML = `<option value="">-- Seleziona o digita esercizio --</option>`;
+            
+            // Raggruppa gli esercizi per categoria/cartella se presenti, altrimenti in "Esercizi Generali"
+            const categorie = {};
+            archivioGifEsercizi.forEach(ex => {
+                let cat = ex.categoria || "Esercizi";
+                if (!categorie[cat]) categorie[cat] = [];
+                categorie[cat].push(ex);
             });
 
+            let trovato = false;
+
+            for (const cat in categorie) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = cat.toUpperCase();
+
+                // Ordina alfabeticamente gli esercizi dentro la categoria
+                categorie[cat].sort((a, b) => a.nome.localeCompare(b.nome)).forEach(ex => {
+                    const opt = document.createElement('option');
+                    opt.value = ex.nome;
+                    opt.dataset.path = ex.percorso;
+                    opt.innerText = ex.nome;
+                    if (ex.nome === selezionato || ex.percorso === selezionato) {
+                        opt.selected = true;
+                        trovato = true;
+                    }
+                    optgroup.appendChild(opt);
+                });
+                selectElement.appendChild(optgroup);
+            }
+
+            // Se l'esercizio salvato non è nella lista standard, aggiungilo come opzione libera
             if (selezionato && !trovato) {
                 const optCustom = document.createElement('option');
                 optCustom.value = selezionato;
@@ -552,7 +569,8 @@
                     if (item.type === "file" && item.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
                         archivioGifEsercizi.push({
                             nome: item.name.replace(/\.[^/.]+$/, ""),
-                            percorso: item.path
+                            percorso: item.path,
+                            categoria: "Esercizi"
                         });
                     } else if (item.type === "dir") {
                         const subRes = await fetch(item.url);
@@ -562,7 +580,8 @@
                                 if (sub.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
                                     archivioGifEsercizi.push({
                                         nome: sub.name.replace(/\.[^/.]+$/, ""),
-                                        percorso: sub.path
+                                        percorso: sub.path,
+                                        categoria: item.name // Nome della cartella (es. PETTO, DORSO)
                                     });
                                 }
                             });
@@ -575,11 +594,12 @@
             }
         }
 
+        // ================= CARICAMENTO COMPATIBILE CON VECCHIO E NUOVO FORMATO =================
         async function caricaSchedaEsistente() {
             generaIdCliente();
             const clientId = document.getElementById('clientId').value.trim();
             if (!clientId) {
-                alert("Inserisci Nome e Cognome dell'atleta per caricare la scheda.");
+                alert("Inserisci Nome e Cognome dell'atleta per caricare.");
                 return;
             }
 
@@ -593,7 +613,7 @@
 
                 if (error) throw error;
                 if (!data || data.length === 0) {
-                    mostraAvviso("Nessuna scheda trovata. Puoi crearne una nuova.");
+                    mostraAvviso("Nessuna scheda trovata. Creane una nuova.");
                     return;
                 }
 
@@ -601,6 +621,7 @@
                     document.getElementById('clientePin').value = data[0].pin;
                 }
 
+                // Legge sia il formato unificato recente sia il vecchio formato con righe separate per giorno
                 if (data.length === 1 && data[0].titolo_sessione === "PROGRAMMA_COMPLETO") {
                     programmaSettimanale = JSON.parse(data[0].dati_scheda);
                 } else {
@@ -615,7 +636,7 @@
                 mostraAvviso(`✅ Scheda di "${clientId}" caricata con successo!`, 'badge-success');
 
             } catch (err) {
-                alert("Errore: " + err.message);
+                alert("Errore caricamento: " + err.message);
             }
         }
 
@@ -633,7 +654,7 @@
             }
 
             if (!pin || pin.length !== 4) {
-                alert("Assegna un PIN numerico di 4 cifre per l'atleta (es. 1234).");
+                alert("Assegna un PIN numerico di 4 cifre.");
                 return;
             }
 
@@ -653,7 +674,7 @@
 
                 if (error) throw error;
 
-                alert(`✅ Scheda salvata con successo!\nPIN assegnato ad ${clientId}: ${pin}`);
+                alert(`✅ Scheda salvata con successo per ${clientId}!`);
             } catch (err) {
                 alert("Errore salvataggio: " + err.message);
             } finally {

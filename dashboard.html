@@ -609,7 +609,15 @@
         }
 
         function generaHtmlEsercizio(ex, exIdx) {
-            let gifHtml = ex.gif ? `<img src="${ex.gif}" alt="GIF">` : `🏋️`;
+            
+            let listaGifs = ex.gifs || (ex.gif ? [ex.gif] : []);
+            let gifHtml = "";
+            if (listaGifs.length > 0) {
+                gifHtml = listaGifs.map(g => `<div class="exercise-gif" style="width:48px;height:48px;display:inline-block;margin-right:4px;"><img src="${g}" alt="GIF" style="width:100%;height:100%;object-fit:cover;border-radius:6px;border:1px solid #d4af37;"></div>`).join('');
+            } else {
+                gifHtml = `<div class="exercise-gif">🏋️</div>`;
+            }
+
             const targetOrg = ex.target || '3x10';
             const parsed = interpretaTarget(targetOrg);
             const storico = Array.isArray(ex.storico) ? ex.storico : [];

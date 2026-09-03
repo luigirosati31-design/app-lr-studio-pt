@@ -193,6 +193,8 @@
         .ex-index { color: #d4af37; font-size: 0.82rem; font-weight: 700; }
         .btn-remove-ex { background: transparent; border: none; color: #e74c3c; font-size: 0.8rem; cursor: pointer; font-weight: 700; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        
+        .gif-row-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
         .preview-box {
             display: flex;
             align-items: center;
@@ -201,9 +203,14 @@
             border: 1px solid #222;
             border-radius: 6px;
             padding: 10px;
-            margin-bottom: 10px;
         }
         .preview-box img { width: 42px; height: 42px; object-fit: cover; border-radius: 4px; border: 1px solid #d4af37; background: #000; flex-shrink: 0; }
+        .btn-add-gif-row {
+            background: transparent; color: #d4af37; border: 1px dashed #d4af37; padding: 8px; border-radius: 6px;
+            font-size: 0.75rem; font-weight: 700; cursor: pointer; text-transform: uppercase; width: 100%; margin-bottom: 10px;
+        }
+        .btn-remove-gif { background: transparent; border: none; color: #e74c3c; font-size: 0.85rem; cursor: pointer; font-weight: 700; padding: 4px 8px; }
+
         .btn-add-ex {
             width: 100%;
             background: #161616;
@@ -345,13 +352,19 @@
                 const nome = card.querySelector('.input-nome').value.trim();
                 const target = card.querySelector('.input-target').value.trim() || "3x10";
                 const recupero = parseInt(card.querySelector('.input-recupero').value) || 90;
-                const gif = card.querySelector('.input-gif-hidden').value.trim();
+                
+                // Raccoglie tutte le GIF dal contenitore multiplo
+                let gifsArray = [];
+                card.querySelectorAll('.input-gif-hidden').forEach(inp => {
+                    if (inp.value.trim()) gifsArray.push(inp.value.trim());
+                });
+
                 const video = card.querySelector('.input-video').value.trim();
                 const ultimo_peso = card.dataset.ultimoPeso || "";
                 const storico = card.dataset.storico ? JSON.parse(card.dataset.storico) : [];
 
                 if (nome !== "") {
-                    eserciziArray.push({ nome, target, recupero, gif, video, ultimo_peso, storico });
+                    eserciziArray.push({ nome, target, recupero, gifs: gifsArray, video, ultimo_peso, storico });
                 }
             });
             programmaSettimanale[indiceGiornoAttivo].esercizi = eserciziArray;
@@ -380,13 +393,33 @@
         }
 
         function aggiornaGifManuale(selectEl) {
-            const card = selectEl.closest('.ex-card');
+            const box = selectEl.closest('.preview-box');
             const percorso = selectEl.value;
-            const hiddenInput = card.querySelector('.input-gif-hidden');
-            const previewImg = card.querySelector('.img-preview');
+            const hiddenInput = box.querySelector('.input-gif-hidden');
+            const previewImg = box.querySelector('.img-preview');
 
             hiddenInput.value = percorso;
             previewImg.src = percorso ? percorso : 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>';
+        }
+
+        function aggiungiRiquadroGif(card, percorsoGif = "") {
+            const container = card.querySelector('.gif-row-container');
+            const box = document.createElement('div');
+            box.className = "preview-box";
+            box.innerHTML = `
+                <img class="img-preview" src="${percorsoGif || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" alt="Preview">
+                <div style="flex-grow: 1;">
+                    <label style="margin-bottom: 3px;">GIF Associata</label>
+                    <select class="select-gif-manuale" onchange="aggiornaGifManuale(this)">
+                        <option value="">-- Seleziona GIF --</option>
+                    </select>
+                </div>
+                <button type="button" class="btn-remove-gif" onclick="this.closest('.preview-box').remove()">✕</button>
+                <input type="hidden" class="input-gif-hidden" value="${percorsoGif || ''}">
+            `;
+            container.appendChild(box);
+            const selectEl = box.querySelector('.select-gif-manuale');
+            popolaSelectGifManuale(selectEl, percorsoGif);
         }
 
         function creaCardEsercizio(dati = {}, index = null) {
@@ -403,8 +436,8 @@
                     <button type="button" class="btn-remove-ex" onclick="this.closest('.ex-card').remove(); rinumeraEsercizi();">✕ Rimuovi</button>
                 </div>
                 <div class="form-group" style="position: relative;">
-                    <label>Nome Esercizio (Scrivi liberamente, es. Rematore 1 arm / TRX)</label>
-                    <input type="text" class="input-nome" placeholder="es. Rematore 1 arm / TRX" value="${dati.nome || ''}" oninput="gestisciAutocompletamento(this)" autocomplete="off">
+                    <label>Nome Esercizio (es. Squat sumo / Polpacci / Squat iso)</label>
+                    <input type="text" class="input-nome" placeholder="es. Squat sumo / Polpacci / Squat iso" value="${dati.nome || ''}" oninput="gestisciAutocompletamento(this)" autocomplete="off">
                     <div class="autocomplete-dropdown"></div>
                 </div>
                 <div class="grid-2">
@@ -417,34 +450,31 @@
                         <input type="number" class="input-recupero" value="${dati.recupero || 90}">
                     </div>
                 </div>
-                <div class="preview-box">
-                    <img class="img-preview" src="${dati.gif || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" alt="Preview">
-                    <div style="flex-grow: 1;">
-                        <label style="margin-bottom: 3px;">Associa GIF Manualmente</label>
-                        <select class="select-gif-manuale" onchange="aggiornaGifManuale(this)">
-                            <option value="">-- Seleziona GIF --</option>
-                        </select>
-                    </div>
-                </div>
-                <input type="hidden" class="input-gif-hidden" value="${dati.gif || ''}">
-                <div class="form-group" style="margin-bottom:0;">
+
+                <label style="margin-top: 10px; color: #d4af37;">Riquadri GIF (Puoi aggiungerne più di uno per superserie)</label>
+                <div class="gif-row-container"></div>
+                <button type="button" class="btn-add-gif-row" onclick="aggiungiRiquadroGif(this.closest('.ex-card'))">+ Aggiungi riquadro GIF</button>
+
+                <div class="form-group" style="margin-bottom:0; margin-top: 10px;">
                     <label>Link Video</label>
                     <input type="text" class="input-video" placeholder="https://..." value="${dati.video || ''}">
                 </div>
             `;
             container.appendChild(card);
 
-            const selectEl = card.querySelector('.select-gif-manuale');
-            popolaSelectGifManuale(selectEl, dati.gif || "");
+            // Gestisce le GIF multiple (supporta anche il vecchio formato 'gif' singolo)
+            let listaGifs = dati.gifs || (dati.gif ? [dati.gif] : []);
+            if (listaGifs.length === 0) {
+                aggiungiRiquadroGif(card);
+            } else {
+                listaGifs.forEach(g => aggiungiRiquadroGif(card, g));
+            }
         }
 
         function gestisciAutocompletamento(inputEl) {
             const testo = inputEl.value.trim().toLowerCase();
             const card = inputEl.closest('.ex-card');
             const dropdown = card.querySelector('.autocomplete-dropdown');
-            const previewImg = card.querySelector('.img-preview');
-            const hiddenGifInput = card.querySelector('.input-gif-hidden');
-            const selectEl = card.querySelector('.select-gif-manuale');
 
             if (!testo) {
                 dropdown.style.display = 'none';
@@ -462,9 +492,8 @@
                     item.innerText = ex.nome;
                     item.onclick = () => {
                         inputEl.value = ex.nome;
-                        hiddenGifInput.value = ex.percorso;
-                        previewImg.src = ex.percorso;
-                        selectEl.value = ex.percorso;
+                        // Aggiunge la GIF automatica come primo riquadro
+                        aggiungiRiquadroGif(card, ex.percorso);
                         dropdown.style.display = 'none';
                     };
                     dropdown.appendChild(item);

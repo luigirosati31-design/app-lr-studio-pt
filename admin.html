@@ -263,4 +263,208 @@
         <div id="statusBadge" class="badge-status badge-info"></div>
 
         <div class="days-tab-bar">
-            <div id
+            <div id="tabsContainer" style="display:flex; gap:8px;"></div>
+            <button type="button" class="btn-add-day" onclick="aggiungiNuovoGiorno()">+ Giorno</button>
+        </div>
+
+        <div class="day-title-editor">
+            <input type="text" id="activeDayTitle" placeholder="Nome Giorno (es. Giorno A)" oninput="aggiornaTitoloGiornoCorrente(this.value)">
+            <button type="button" class="btn-delete-day" onclick="eliminaGiornoCorrente()">Elimina</button>
+        </div>
+
+        <div id="listaEserciziEditor"></div>
+        <button type="button" class="btn-add-ex" onclick="aggiungiNuovoEsercizioCard()">+ Aggiungi Esercizio</button>
+        <button type="button" id="btnSalvaScheda" class="btn-submit" onclick="salvaTuttoIlProgramma()">💾 Salva Scheda Completa</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseUrl = 'https://xhgxosffgsuokrsycvyd.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
+        const db = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let archivioGifEsercizi = [];
+        let programmaSettimanale = [{ titolo: "Giorno A", esercizi: [] }, { titolo: "Giorno B", esercizi: [] }];
+        let indiceGiornoAttivo = 0;
+
+        function mostraAvviso(testo, tipo = 'badge-info') {
+            const badge = document.getElementById('statusBadge');
+            badge.className = `badge-status ${tipo}`;
+            badge.innerText = testo;
+            badge.style.display = 'block';
+        }
+
+        function generaIdCliente() {
+            const nomeCompleto = document.getElementById('clienteNomeCognome').value.trim();
+            document.getElementById('clientId').value = nomeCompleto.toLowerCase().replace(/\s+/g, '').replace(/[^\w-]/g, '');
+        }
+
+        function renderTabsGiorni() {
+            const container = document.getElementById('tabsContainer');
+            container.innerHTML = "";
+            programmaSettimanale.forEach((giorno, idx) => {
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.className = `day-tab-btn ${idx === indiceGiornoAttivo ? 'active' : ''}`;
+                btn.innerText = giorno.titolo || `Giorno ${idx + 1}`;
+                btn.onclick = () => cambiaGiorno(idx);
+                container.appendChild(btn);
+            });
+            document.getElementById('activeDayTitle').value = programmaSettimanale[indiceGiornoAttivo].titolo;
+            renderEserciziGiornoAttivo();
+        }
+
+        function cambiaGiorno(nuovoIndice) {
+            salvaDatiFormNelGiornoAttivo();
+            indiceGiornoAttivo = nuovoIndice;
+            renderTabsGiorni();
+        }
+
+        function aggiungiNuovoGiorno() {
+            salvaDatiFormNelGiornoAttivo();
+            const lettere = ["A", "B", "C", "D", "E", "F"];
+            const nextLettera = lettere[programmaSettimanale.length] || (programmaSettimanale.length + 1);
+            programmaSettimanale.push({ titolo: `Giorno ${nextLettera}`, esercizi: [] });
+            indiceGiornoAttivo = programmaSettimanale.length - 1;
+            renderTabsGiorni();
+        }
+
+        function eliminaGiornoCorrente() {
+            if (programmaSettimanale.length <= 1) {
+                alert("Devi mantenere almeno un giorno.");
+                return;
+            }
+            programmaSettimanale.splice(indiceGiornoAttivo, 1);
+            indiceGiornoAttivo = Math.max(0, indiceGiornoAttivo - 1);
+            renderTabsGiorni();
+        }
+
+        function aggiornaTitoloGiornoCorrente(nuovoTitolo) {
+            programmaSettimanale[indiceGiornoAttivo].titolo = nuovoTitolo;
+            const activeBtn = document.querySelectorAll('.day-tab-btn')[indiceGiornoAttivo];
+            if (activeBtn) activeBtn.innerText = nuovoTitolo;
+        }
+
+        function salvaDatiFormNelGiornoAttivo() {
+            const cards = document.querySelectorAll('.ex-card');
+            let eserciziArray = [];
+            cards.forEach(card => {
+                const nome = card.querySelector('.input-nome').value.trim();
+                const target = card.querySelector('.input-target').value.trim() || "3x10";
+                const recupero = parseInt(card.querySelector('.input-recupero').value) || 90;
+                
+                let gifsArray = [];
+                card.querySelectorAll('.input-gif-hidden').forEach(inp => {
+                    if (inp.value.trim()) gifsArray.push(inp.value.trim());
+                });
+
+                const video = card.querySelector('.input-video').value.trim();
+                const ultimo_peso = card.dataset.ultimoPeso || "";
+                const storico = card.dataset.storico ? JSON.parse(card.dataset.storico) : [];
+
+                if (nome !== "") {
+                    eserciziArray.push({ nome, target, recupero, gifs: gifsArray, video, ultimo_peso, storico });
+                }
+            });
+            programmaSettimanale[indiceGiornoAttivo].esercizi = eserciziArray;
+        }
+
+        function renderEserciziGiornoAttivo() {
+            const container = document.getElementById('listaEserciziEditor');
+            container.innerHTML = "";
+            const giorno = programmaSettimanale[indiceGiornoAttivo];
+            if (!giorno.esercizi || giorno.esercizi.length === 0) {
+                creaCardEsercizio();
+            } else {
+                giorno.esercizi.forEach((ex, idx) => creaCardEsercizio(ex, idx));
+            }
+        }
+
+        // Funzione sicura per popolare qualsiasi tendina con l'archivio GitHub
+        function popolaSelectGifManuale(selectEl, selectedPath = "") {
+            selectEl.innerHTML = '<option value="">-- Seleziona GIF --</option>';
+            if (!archivioGifEsercizi || archivioGifEsercizi.length === 0) {
+                selectEl.innerHTML += '<option value="" disabled>(Archivio GIF in caricamento...)</option>';
+                return;
+            }
+            archivioGifEsercizi.forEach(ex => {
+                const opt = document.createElement('option');
+                opt.value = ex.percorso;
+                opt.innerText = ex.nome;
+                if (ex.percorso === selectedPath) opt.selected = true;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function aggiornaGifManuale(selectEl) {
+            const box = selectEl.closest('.preview-box');
+            const percorso = selectEl.value;
+            const hiddenInput = box.querySelector('.input-gif-hidden');
+            const previewImg = box.querySelector('.img-preview');
+
+            hiddenInput.value = percorso;
+            previewImg.src = percorso ? percorso : 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>';
+        }
+
+        function aggiungiRiquadroGif(card, percorsoGif = "") {
+            const container = card.querySelector('.gif-row-container');
+            const box = document.createElement('div');
+            box.className = "preview-box";
+            box.innerHTML = `
+                <img class="img-preview" src="${percorsoGif || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" alt="Preview">
+                <div style="flex-grow: 1;">
+                    <label style="margin-bottom: 3px;">GIF Associata</label>
+                    <select class="select-gif-manuale" onchange="aggiornaGifManuale(this)">
+                        <option value="">-- Seleziona GIF --</option>
+                    </select>
+                </div>
+                <button type="button" class="btn-remove-gif" onclick="this.closest('.preview-box').remove()">✕</button>
+                <input type="hidden" class="input-gif-hidden" value="${percorsoGif || ''}">
+            `;
+            container.appendChild(box);
+            const selectEl = box.querySelector('.select-gif-manuale');
+            popolaSelectGifManuale(selectEl, percorsoGif);
+        }
+
+        function creaCardEsercizio(dati = {}, index = null) {
+            const container = document.getElementById('listaEserciziEditor');
+            const currentIndex = (index !== null) ? index : container.children.length;
+            const card = document.createElement('div');
+            card.className = "ex-card";
+            card.dataset.ultimoPeso = dati.ultimo_peso || "";
+            card.dataset.storico = JSON.stringify(dati.storico || []);
+
+            card.innerHTML = `
+                <div class="ex-card-header">
+                    <span class="ex-index">Esercizio #${currentIndex + 1}</span>
+                    <button type="button" class="btn-remove-ex" onclick="this.closest('.ex-card').remove(); rinumeraEsercizi();">✕ Rimuovi</button>
+                </div>
+                <div class="form-group" style="position: relative;">
+                    <label>Nome Esercizio (Inizia a scrivere per cercare la GIF)</label>
+                    <input type="text" class="input-nome" placeholder="es. Trazioni, Squat..." value="${dati.nome || ''}" oninput="gestisciAutocompletamento(this)" autocomplete="off">
+                    <div class="autocomplete-dropdown"></div>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label>Target</label>
+                        <input type="text" class="input-target" value="${dati.target || '3x10'}">
+                    </div>
+                    <div>
+                        <label>Recupero (s)</label>
+                        <input type="number" class="input-recupero" value="${dati.recupero || 90}">
+                    </div>
+                </div>
+
+                <label style="margin-top: 10px; color: #d4af37;">Riquadri GIF (Puoi aggiungerne più di uno)</label>
+                <div class="gif-row-container"></div>
+                <button type="button" class="btn-add-gif-row" onclick="aggiungiRiquadroGif(this.closest('.ex-card'))">+ Aggiungi riquadro GIF</button>
+
+                <div class="form-group" style="margin-bottom:0; margin-top: 10px;">
+                    <label>Link Video</label>
+                    <input type="text" class="input-video" placeholder="https://..." value="${dati.video || ''}">
+                </div>
+            `;
+            container.appendChild(card);
+
+            let listaGifs = dati.gifs || (dati.gif ? [dati.gif] : []);
+            if

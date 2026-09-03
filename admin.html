@@ -20,7 +20,7 @@
         }
         .admin-panel {
             width: 100%;
-            max-width: 620px;
+            max-width: 650px;
             background: #111111;
             border: 1px solid #2a2a2a;
             border-radius: 12px;
@@ -44,7 +44,7 @@
             letter-spacing: 1px;
             font-weight: 700;
         }
-        .logout-btn {
+        .header-btn {
             background: transparent;
             color: #888;
             border: 1px solid #333;
@@ -78,12 +78,36 @@
             font-size: 0.85rem;
             box-sizing: border-box;
         }
-        select {
-            cursor: pointer;
-        }
+        select { cursor: pointer; }
         input:focus, select:focus {
             border-color: #d4af37;
             outline: none;
+        }
+        .magic-link-box {
+            background: #161616;
+            border: 1px dashed #d4af37;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .magic-link-box p {
+            margin: 0 0 8px 0;
+            font-size: 0.75rem;
+            color: #ccc;
+        }
+        .btn-copy-link {
+            background: #d4af37;
+            color: #000;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-family: 'Montserrat', sans-serif;
+            width: 100%;
         }
         .btn-load {
             width: 100%;
@@ -99,11 +123,6 @@
             margin-top: 5px;
             margin-bottom: 15px;
             font-family: 'Montserrat', sans-serif;
-            transition: all 0.2s;
-        }
-        .btn-load:active {
-            background: #d4af37;
-            color: #000;
         }
         .badge-status {
             display: none;
@@ -115,20 +134,76 @@
         }
         .badge-info { background: rgba(212, 175, 55, 0.15); color: #d4af37; border: 1px solid #d4af37; }
         .badge-success { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid #2ecc71; }
-        
-        .section-title {
-            color: #d4af37;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            margin: 20px 0 10px 0;
-            border-bottom: 1px solid #222;
-            padding-bottom: 6px;
+
+        .days-tab-bar {
             display: flex;
-            justify-content: space-between;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #222;
             align-items: center;
+            scrollbar-width: none;
+        }
+        .days-tab-bar::-webkit-scrollbar { display: none; }
+        .day-tab-btn {
+            background: #161616;
+            color: #888;
+            border: 1px solid #333;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .day-tab-btn.active {
+            background: #d4af37;
+            color: #000;
+            border-color: #d4af37;
+            font-weight: 700;
+        }
+        .btn-add-day {
+            background: transparent;
+            color: #d4af37;
+            border: 1px dashed #d4af37;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .day-title-editor {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            background: #161616;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #262626;
+        }
+        .day-title-editor input {
+            font-weight: 700;
+            color: #d4af37;
+        }
+        .btn-delete-day {
+            background: rgba(231, 76, 60, 0.15);
+            border: 1px solid #e74c3c;
+            color: #ff6b6b;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: 'Montserrat', sans-serif;
         }
 
-        /* CARD ESERCIZIO CON MENÙ A TENDINA */
         .ex-card {
             background: #0d0d0d;
             border: 1px solid #222;
@@ -142,11 +217,7 @@
             align-items: center;
             margin-bottom: 10px;
         }
-        .ex-index {
-            color: #d4af37;
-            font-size: 0.82rem;
-            font-weight: 700;
-        }
+        .ex-index { color: #d4af37; font-size: 0.82rem; font-weight: 700; }
         .btn-remove-ex {
             background: transparent;
             border: none;
@@ -199,10 +270,7 @@
             font-family: 'Montserrat', sans-serif;
             transition: all 0.2s;
         }
-        .btn-add-ex:hover {
-            color: #d4af37;
-            border-color: #d4af37;
-        }
+        .btn-add-ex:hover { color: #d4af37; border-color: #d4af37; }
         .btn-submit {
             width: 100%;
             background: #d4af37;
@@ -217,47 +285,50 @@
             font-family: 'Montserrat', sans-serif;
             letter-spacing: 1px;
         }
-        .btn-submit:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
     <div class="admin-panel">
         <div class="header">
-            <h1>Studio PT - Admin</h1>
-            <button class="logout-btn" onclick="faiLogout()">Esci</button>
-        </div>
-
-        <!-- SELEZIONE CLIENTE E GIORNO -->
-        <div class="form-group">
-            <label for="clienteEmail">Email Cliente</label>
-            <input type="email" id="clienteEmail" placeholder="es. cliente@email.com" required>
+            <h1>Studio PT - Pannello Schede</h1>
+            <button class="header-btn" onclick="window.location.href='index.html'">Esci</button>
         </div>
 
         <div class="form-group">
-            <label for="titoloSessione">Nome Sessione / Giorno</label>
-            <input type="text" id="titoloSessione" placeholder="es. Giorno A" value="Giorno A">
+            <label for="clienteNomeCognome">Nome e Cognome Cliente</label>
+            <input type="text" id="clienteNomeCognome" placeholder="es. Enrico Lombardi" oninput="generaIdCliente()">
         </div>
 
-        <!-- CARICA SCHEDA ESISTENTE -->
-        <button type="button" class="btn-load" onclick="caricaSchedaEsistente()">🔍 Carica Scheda Già Salvata</button>
-        
+        <div class="form-group">
+            <label for="clientId">ID Link Personale</label>
+            <input type="text" id="clientId" placeholder="es. enrico-lombardi" style="color: #d4af37; font-weight: 700;">
+        </div>
+
+        <div id="magicLinkBox" class="magic-link-box">
+            <p>🔗 <b>Link Unico da Inviare al Cliente:</b><br><span id="txtMagicLink" style="color:#d4af37; font-size:0.75rem;"></span></p>
+            <button type="button" class="btn-copy-link" onclick="copiaLinkCliente()">📲 Copia Link WhatsApp</button>
+        </div>
+
+        <button type="button" class="btn-load" onclick="caricaSchedaEsistente()">🔍 Carica Scheda Già Esistente</button>
         <div id="statusBadge" class="badge-status badge-info"></div>
 
-        <!-- LISTA DEGLI ESERCIZI -->
-        <div class="section-title">
-            <span>Esercizi Assegnati</span>
-            <span id="counterGif" style="font-size: 0.7rem; color: #888;">Caricamento GIF...</span>
+        <div class="days-tab-bar">
+            <div id="tabsContainer" style="display:flex; gap:8px;"></div>
+            <button type="button" class="btn-add-day" onclick="aggiungiNuovoGiorno()">+ Aggiungi Giorno</button>
+        </div>
+
+        <div class="day-title-editor">
+            <input type="text" id="activeDayTitle" placeholder="Nome Giorno (es. Giorno A)" oninput="aggiornaTitoloGiornoCorrente(this.value)">
+            <button type="button" class="btn-delete-day" onclick="eliminaGiornoCorrente()">Elimina Giorno</button>
         </div>
 
         <div id="listaEserciziEditor"></div>
 
-        <button type="button" class="btn-add-ex" onclick="aggiungiNuovoEsercizioCard()">+ Aggiungi Esercizio</button>
+        <button type="button" class="btn-add-ex" onclick="aggiungiNuovoEsercizioCard()">+ Aggiungi Esercizio a Questo Giorno</button>
 
-        <button type="button" id="btnSalvaScheda" class="btn-submit" onclick="salvaSchedaSuSupabase()">💾 Invia / Aggiorna Scheda</button>
+        <button type="button" id="btnSalvaScheda" class="btn-submit" onclick="salvaTuttoIlProgramma()">💾 Salva Tutto il Programma (1 Solo Clic)</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -266,14 +337,13 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        let schedaAttivaCaricataId = null;
-        let storicoEserciziEsistente = [];
-        let archivioGifEsercizi = []; // Conterrà tutti gli esercizi trovati su GitHub
+        let archivioGifEsercizi = [];
 
-        async function faiLogout() {
-            await db.auth.signOut();
-            window.location.href = "index.html";
-        }
+        let programmaSettimanale = [
+            { titolo: "Giorno A", esercizi: [] },
+            { titolo: "Giorno B", esercizi: [] }
+        ];
+        let indiceGiornoAttivo = 0;
 
         function mostraAvviso(testo, tipo = 'badge-info') {
             const badge = document.getElementById('statusBadge');
@@ -282,158 +352,173 @@
             badge.style.display = 'block';
         }
 
-        // ================= RECUPERO DINAMICO DEGLI 85+ FILE DA GITHUB =================
-        // Legge sia dalla repo locale (se hostata su GitHub Pages) che da fallback
-        async function popolaArchivioGifDaGitHub() {
-            const counter = document.getElementById('counterGif');
-            try {
-                // Ricava owner e repo dall'URL corrente se su github.io, altrimenti usa i dati del progetto
-                let owner = "luigirosati";
-                let repo = "studio-pt";
-
-                if (window.location.hostname.includes("github.io")) {
-                    owner = window.location.hostname.split('.')[0];
-                    repo = window.location.pathname.split('/')[1] || repo;
-                }
-
-                // Cerca dentro la cartella esercizi
-                const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/esercizi`);
-                if (!res.ok) throw new Error("Impossibile caricare direttamente da API GitHub");
-                
-                const items = await res.json();
-                archivioGifEsercizi = [];
-
-                for (const item of items) {
-                    // Se è un file GIF/video diretto
-                    if (item.type === "file" && item.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
-                        archivioGifEsercizi.push({
-                            nome: item.name.replace(/\.[^/.]+$/, ""), // mantiene i trattini bassi esatti
-                            percorso: item.path
-                        });
-                    } 
-                    // Se hai organizzato in sottocartelle (PETTO, DORSO, ecc.)
-                    else if (item.type === "dir") {
-                        try {
-                            const subRes = await fetch(item.url);
-                            if (subRes.ok) {
-                                const subItems = await subRes.json();
-                                subItems.forEach(sub => {
-                                    if (sub.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
-                                        archivioGifEsercizi.push({
-                                            nome: sub.name.replace(/\.[^/.]+$/, ""),
-                                            percorso: sub.path
-                                        });
-                                    }
-                                });
-                            }
-                        } catch (errSub) {
-                            console.warn("Errore sottocartella:", errSub);
-                        }
-                    }
-                }
-
-                counter.innerText = `${archivioGifEsercizi.length} GIF caricate nel menù`;
-                aggiornaTuttiIMenuTendina();
-
-            } catch (e) {
-                console.warn("Recupero GitHub:", e);
-                counter.innerText = `Menù pronto (modalità standard)`;
-            }
-        }
-
-        function aggiornaTuttiIMenuTendina() {
-            document.querySelectorAll('.ex-card').forEach(card => {
-                const select = card.querySelector('.select-esercizio');
-                const valoreCorrente = select.dataset.selected || select.value;
-                costruisciOpzioniSelect(select, valoreCorrente);
-            });
-        }
-
-        function costruisciOpzioniSelect(selectElement, selezionato = "") {
-            selectElement.innerHTML = `<option value="">-- Seleziona Esercizio dalla cartella --</option>`;
+        function generaIdCliente() {
+            const nomeCompleto = document.getElementById('clienteNomeCognome').value.trim();
+            const cleanSlug = nomeCompleto
+                .toLowerCase()
+                .replace(/[^\w\s-]/g, '')
+                .replace(/\s+/g, '-');
             
-            // Ordina gli esercizi alfabeticamente
-            const listaOrdinata = [...archivioGifEsercizi].sort((a, b) => a.nome.localeCompare(b.nome));
+            document.getElementById('clientId').value = cleanSlug;
+            aggiornaBoxMagicLink(cleanSlug);
+        }
 
-            let trovato = false;
-            listaOrdinata.forEach(ex => {
-                const opt = document.createElement('option');
-                opt.value = ex.nome;
-                opt.dataset.path = ex.percorso;
-                opt.innerText = ex.nome; // Nome con trattini esatti
-                if (ex.nome === selezionato || ex.percorso === selezionato) {
-                    opt.selected = true;
-                    trovato = true;
-                }
-                selectElement.appendChild(opt);
+        function aggiornaBoxMagicLink(slug) {
+            const box = document.getElementById('magicLinkBox');
+            const txt = document.getElementById('txtMagicLink');
+            if (!slug) {
+                box.style.display = 'none';
+                return;
+            }
+            const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+            const fullUrl = `${baseUrl}/dashboard.html?id=${slug}`;
+            txt.innerText = fullUrl;
+            box.style.display = 'block';
+        }
+
+        function copiaLinkCliente() {
+            const txt = document.getElementById('txtMagicLink').innerText;
+            navigator.clipboard.writeText(txt).then(() => {
+                alert("✅ Link copiato negli appunti! Incollalo su WhatsApp al cliente.");
+            });
+        }
+
+        function renderTabsGiorni() {
+            const container = document.getElementById('tabsContainer');
+            container.innerHTML = "";
+
+            programmaSettimanale.forEach((giorno, idx) => {
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.className = `day-tab-btn ${idx === indiceGiornoAttivo ? 'active' : ''}`;
+                btn.innerText = giorno.titolo || `Giorno ${idx + 1}`;
+                btn.onclick = () => cambiaGiorno(idx);
+                container.appendChild(btn);
             });
 
-            // Se l'esercizio della scheda non è ancora nella lista o è personalizzato, mantienilo
-            if (selezionato && !trovato) {
-                const optCustom = document.createElement('option');
-                optCustom.value = selezionato;
-                optCustom.innerText = selezionato;
-                optCustom.selected = true;
-                selectElement.appendChild(optCustom);
+            document.getElementById('activeDayTitle').value = programmaSettimanale[indiceGiornoAttivo].titolo;
+            renderEserciziGiornoAttivo();
+        }
+
+        function cambiaGiorno(nuovoIndice) {
+            salvaDatiFormNelGiornoAttivo();
+            indiceGiornoAttivo = nuovoIndice;
+            renderTabsGiorni();
+        }
+
+        function aggiungiNuovoGiorno() {
+            salvaDatiFormNelGiornoAttivo();
+            const lettere = ["A", "B", "C", "D", "E", "F"];
+            const nextLettera = lettere[programmaSettimanale.length] || (programmaSettimanale.length + 1);
+            programmaSettimanale.push({ titolo: `Giorno ${nextLettera}`, esercizi: [] });
+            indiceGiornoAttivo = programmaSettimanale.length - 1;
+            renderTabsGiorni();
+        }
+
+        function eliminaGiornoCorrente() {
+            if (programmaSettimanale.length <= 1) {
+                alert("Devi mantenere almeno un giorno nella scheda.");
+                return;
+            }
+            if (confirm(`Vuoi davvero eliminare "${programmaSettimanale[indiceGiornoAttivo].titolo}"?`)) {
+                programmaSettimanale.splice(indiceGiornoAttivo, 1);
+                indiceGiornoAttivo = Math.max(0, indiceGiornoAttivo - 1);
+                renderTabsGiorni();
             }
         }
 
-        // ================= GESTIONE CARD ESERCIZIO CON SELECT =================
+        function aggiornaTitoloGiornoCorrente(nuovoTitolo) {
+            programmaSettimanale[indiceGiornoAttivo].titolo = nuovoTitolo;
+            const activeBtn = document.querySelectorAll('.day-tab-btn')[indiceGiornoAttivo];
+            if (activeBtn) activeBtn.innerText = nuovoTitolo;
+        }
+
+        function salvaDatiFormNelGiornoAttivo() {
+            const cards = document.querySelectorAll('.ex-card');
+            let eserciziArray = [];
+
+            cards.forEach(card => {
+                const selectEl = card.querySelector('.select-esercizio');
+                const nome = selectEl.value.trim();
+                const target = card.querySelector('.input-target').value.trim() || "3x10";
+                const recupero = parseInt(card.querySelector('.input-recupero').value) || 90;
+                const gif = card.querySelector('.input-gif-hidden').value.trim();
+                const video = card.querySelector('.input-video').value.trim();
+                const ultimo_peso = card.dataset.ultimoPeso || "";
+                const storico = card.dataset.storico ? JSON.parse(card.dataset.storico) : [];
+
+                if (nome !== "") {
+                    eserciziArray.push({ nome, target, recupero, gif, video, ultimo_peso, storico });
+                }
+            });
+
+            programmaSettimanale[indiceGiornoAttivo].esercizi = eserciziArray;
+        }
+
+        function renderEserciziGiornoAttivo() {
+            const container = document.getElementById('listaEserciziEditor');
+            container.innerHTML = "";
+            const giorno = programmaSettimanale[indiceGiornoAttivo];
+
+            if (!giorno.esercizi || giorno.esercizi.length === 0) {
+                creaCardEsercizio();
+            } else {
+                giorno.esercizi.forEach((ex, idx) => {
+                    creaCardEsercizio(ex, idx);
+                });
+            }
+        }
+
         function creaCardEsercizio(dati = {}, index = null) {
             const container = document.getElementById('listaEserciziEditor');
             const currentIndex = (index !== null) ? index : container.children.length;
 
-            const nomeEsistente = dati.nome || "";
-            const gifEsistente = dati.gif || "";
-            const targetEsistente = dati.target || "3x10";
-            const recEsistente = dati.recupero || 90;
-            const videoEsistente = dati.video || "";
-
             const card = document.createElement('div');
             card.className = "ex-card";
+            card.dataset.ultimoPeso = dati.ultimo_peso || "";
+            card.dataset.storico = JSON.stringify(dati.storico || []);
+
             card.innerHTML = `
                 <div class="ex-card-header">
                     <span class="ex-index">Esercizio #${currentIndex + 1}</span>
                     <button type="button" class="btn-remove-ex" onclick="this.closest('.ex-card').remove(); rinumeraEsercizi();">✕ Rimuovi</button>
                 </div>
 
-                <!-- TENDINA DI SELEZIONE -->
                 <div class="form-group">
-                    <label>Seleziona Esercizio</label>
-                    <select class="select-esercizio" data-selected="${nomeEsistente}" onchange="gestisciCambioEsercizio(this)">
+                    <label>Seleziona Esercizio dalla Cartella</label>
+                    <select class="select-esercizio" data-selected="${dati.nome || ''}" onchange="gestisciCambioEsercizio(this)">
                     </select>
                 </div>
 
                 <div class="grid-2">
                     <div>
                         <label>Target (es. 2 set per 3, 4x10)</label>
-                        <input type="text" class="input-target" value="${targetEsistente}">
+                        <input type="text" class="input-target" value="${dati.target || '3x10'}">
                     </div>
                     <div>
                         <label>Recupero (secondi)</label>
-                        <input type="number" class="input-recupero" value="${recEsistente}">
+                        <input type="number" class="input-recupero" value="${dati.recupero || 90}">
                     </div>
                 </div>
 
-                <!-- ANTEPRIMA E PERCORSO GIF AUTOMATICO -->
                 <div class="preview-box">
-                    <img class="img-preview" src="${gifEsistente || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" alt="Preview">
+                    <img class="img-preview" src="${dati.gif || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" alt="Preview">
                     <div>
-                        <div style="font-size: 0.68rem; color: #aaa; text-transform: uppercase;">File GIF collegato:</div>
-                        <span class="preview-path">${gifEsistente || 'Nessuna GIF selezionata'}</span>
+                        <div style="font-size: 0.68rem; color: #aaa; text-transform: uppercase;">File collegato:</div>
+                        <span class="preview-path">${dati.gif || 'Nessuna GIF selezionata'}</span>
                     </div>
                 </div>
-                <input type="hidden" class="input-gif-hidden" value="${gifEsistente}">
+                <input type="hidden" class="input-gif-hidden" value="${dati.gif || ''}">
 
                 <div class="form-group" style="margin-bottom: 0;">
-                    <label>Link Video Esecuzione (Opzionale)</label>
-                    <input type="text" class="input-video" placeholder="https://youtube.com/..." value="${videoEsistente}">
+                    <label>Link Video (Opzionale)</label>
+                    <input type="text" class="input-video" placeholder="https://youtube.com/..." value="${dati.video || ''}">
                 </div>
             `;
 
             container.appendChild(card);
             const selectCreato = card.querySelector('.select-esercizio');
-            costruisciOpzioniSelect(selectCreato, nomeEsistente);
+            costruisciOpzioniSelect(selectCreato, dati.nome || "");
         }
 
         function gestisciCambioEsercizio(selectEl) {
@@ -466,100 +551,123 @@
             });
         }
 
-        // ================= CARICA SCHEDA ESISTENTE DA SUPABASE =================
-        async function caricaSchedaEsistente() {
-            const email = document.getElementById('clienteEmail').value.trim();
-            const titolo = document.getElementById('titoloSessione').value.trim();
+        function costruisciOpzioniSelect(selectElement, selezionato = "") {
+            selectElement.innerHTML = `<option value="">-- Seleziona Esercizio dalla cartella --</option>`;
+            const listaOrdinata = [...archivioGifEsercizi].sort((a, b) => a.nome.localeCompare(b.nome));
 
-            if (!email) {
-                alert("Inserisci l'email del cliente per cercare la scheda.");
-                return;
-            }
-
-            mostraAvviso("Ricerca scheda salvata in corso...");
-
-            try {
-                let query = db.from('schede_clienti').select('*').eq('email_cliente', email);
-                if (titolo) query = query.eq('titolo_sessione', titolo);
-
-                const { data, error } = await query;
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    mostraAvviso("Nessuna scheda trovata per questa sessione. Puoi compilarne una nuova.");
-                    schedaAttivaCaricataId = null;
-                    storicoEserciziEsistente = [];
-                    return;
+            let trovato = false;
+            listaOrdinata.forEach(ex => {
+                const opt = document.createElement('option');
+                opt.value = ex.nome;
+                opt.dataset.path = ex.percorso;
+                opt.innerText = ex.nome;
+                if (ex.nome === selezionato || ex.percorso === selezionato) {
+                    opt.selected = true;
+                    trovato = true;
                 }
+                selectElement.appendChild(opt);
+            });
 
-                const scheda = data[0];
-                schedaAttivaCaricataId = scheda.id;
-                document.getElementById('titoloSessione').value = scheda.titolo_sessione || "Giorno A";
-
-                const esercizi = JSON.parse(scheda.dati_scheda);
-                const container = document.getElementById('listaEserciziEditor');
-                container.innerHTML = "";
-
-                // Mantiene intatto lo storico registrato dal cliente
-                storicoEserciziEsistente = esercizi.map(ex => ({
-                    ultimo_peso: ex.ultimo_peso || "",
-                    storico: ex.storico || []
-                }));
-
-                esercizi.forEach((ex, idx) => {
-                    creaCardEsercizio(ex, idx);
-                });
-
-                mostraAvviso(`✅ Scheda di "${email}" caricata! Modifica dai menù a tendina e premi Salva.`, 'badge-success');
-
-            } catch (err) {
-                alert("Errore nel recupero della scheda: " + err.message);
+            if (selezionato && !trovato) {
+                const optCustom = document.createElement('option');
+                optCustom.value = selezionato;
+                optCustom.innerText = selezionato;
+                optCustom.selected = true;
+                selectElement.appendChild(optCustom);
             }
         }
 
-        // ================= SALVATAGGIO / AGGIORNAMENTO =================
-        async function salvaSchedaSuSupabase() {
-            const email = document.getElementById('clienteEmail').value.trim();
-            const titolo = document.getElementById('titoloSessione').value.trim() || "Giorno A";
+        async function popolaArchivioGifDaGitHub() {
+            try {
+                let owner = "luigirosati";
+                let repo = "studio-pt";
+
+                if (window.location.hostname.includes("github.io")) {
+                    owner = window.location.hostname.split('.')[0];
+                    repo = window.location.pathname.split('/')[1] || repo;
+                }
+
+                const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/esercizi`);
+                if (!res.ok) throw new Error("GitHub non raggiungibile");
+                
+                const items = await res.json();
+                archivioGifEsercizi = [];
+
+                for (const item of items) {
+                    if (item.type === "file" && item.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
+                        archivioGifEsercizi.push({
+                            nome: item.name.replace(/\.[^/.]+$/, ""),
+                            percorso: item.path
+                        });
+                    } else if (item.type === "dir") {
+                        const subRes = await fetch(item.url);
+                        if (subRes.ok) {
+                            const subItems = await subRes.json();
+                            subItems.forEach(sub => {
+                                if (sub.name.match(/\.(gif|mp4|webp|png|jpg)$/i)) {
+                                    archivioGifEsercizi.push({
+                                        nome: sub.name.replace(/\.[^/.]+$/, ""),
+                                        percorso: sub.path
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }
+                renderTabsGiorni();
+            } catch (e) {
+                renderTabsGiorni();
+            }
+        }
+
+        async function caricaSchedaEsistente() {
+            const clientId = document.getElementById('clientId').value.trim();
+            if (!clientId) {
+                alert("Inserisci Nome e Cognome del cliente per caricare.");
+                return;
+            }
+
+            mostraAvviso("Ricerca programma in corso...");
+
+            try {
+                const { data, error } = await db
+                    .from('schede_clienti')
+                    .select('*')
+                    .eq('client_id', clientId);
+
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    mostraAvviso("Nessuna scheda trovata per questo cliente. Creane una nuova.");
+                    return;
+                }
+
+                if (data.length === 1 && data[0].titolo_sessione === "PROGRAMMA_COMPLETO") {
+                    programmaSettimanale = JSON.parse(data[0].dati_scheda);
+                } else {
+                    programmaSettimanale = data.map(riga => ({
+                        titolo: riga.titolo_sessione || "Giorno A",
+                        esercizi: JSON.parse(riga.dati_scheda || "[]")
+                    }));
+                }
+
+                indiceGiornoAttivo = 0;
+                renderTabsGiorni();
+                aggiornaBoxMagicLink(clientId);
+                mostraAvviso(`✅ Scheda di "${clientId}" caricata con successo!`, 'badge-success');
+
+            } catch (err) {
+                alert("Errore: " + err.message);
+            }
+        }
+
+        async function salvaTuttoIlProgramma() {
+            salvaDatiFormNelGiornoAttivo();
+
+            const clientId = document.getElementById('clientId').value.trim();
             const btn = document.getElementById('btnSalvaScheda');
 
-            if (!email) {
-                alert("Inserisci l'email del cliente prima di salvare!");
-                return;
-            }
-
-            const cards = document.querySelectorAll('.ex-card');
-            if (cards.length === 0) {
-                alert("Aggiungi almeno un esercizio.");
-                return;
-            }
-
-            let eserciziArray = [];
-            cards.forEach((card, idx) => {
-                const selectEl = card.querySelector('.select-esercizio');
-                const nome = selectEl.value.trim(); // Nome con i trattini bassi originali
-                const target = card.querySelector('.input-target').value.trim() || "3x10";
-                const recupero = parseInt(card.querySelector('.input-recupero').value) || 90;
-                const gif = card.querySelector('.input-gif-hidden').value.trim();
-                const video = card.querySelector('.input-video').value.trim();
-
-                const fallbackStorico = storicoEserciziEsistente[idx] || {};
-
-                if (nome !== "") {
-                    eserciziArray.push({
-                        nome: nome,
-                        target: target,
-                        recupero: recupero,
-                        gif: gif,
-                        video: video,
-                        ultimo_peso: fallbackStorico.ultimo_peso || "",
-                        storico: fallbackStorico.storico || []
-                    });
-                }
-            });
-
-            if (eserciziArray.length === 0) {
-                alert("Seleziona almeno un esercizio valido dai menù a tendina.");
+            if (!clientId) {
+                alert("Inserisci il Nome e Cognome del cliente prima di salvare!");
                 return;
             }
 
@@ -567,39 +675,28 @@
             btn.innerText = "Salvataggio in corso...";
 
             try {
-                if (schedaAttivaCaricataId) {
-                    const { error } = await db
-                        .from('schede_clienti')
-                        .update({
-                            titolo_sessione: titolo,
-                            dati_scheda: JSON.stringify(eserciziArray)
-                        })
-                        .eq('id', schedaAttivaCaricataId);
+                await db.from('schede_clienti').delete().eq('client_id', clientId);
 
-                    if (error) throw error;
-                    alert("✅ Scheda aggiornata con successo!");
-                } else {
-                    const { error } = await db
-                        .from('schede_clienti')
-                        .insert([{
-                            email_cliente: email,
-                            titolo_sessione: titolo,
-                            dati_scheda: JSON.stringify(eserciziArray)
-                        }]);
+                const { error } = await db.from('schede_clienti').insert([{
+                    client_id: clientId,
+                    email_cliente: clientId,
+                    titolo_sessione: "PROGRAMMA_COMPLETO",
+                    dati_scheda: JSON.stringify(programmaSettimanale)
+                }]);
 
-                    if (error) throw error;
-                    alert("✅ Nuova scheda inviata con successo!");
-                }
+                if (error) throw error;
+
+                alert("✅ Tutto il programma della settimana è stato salvato con successo!");
+                aggiornaBoxMagicLink(clientId);
             } catch (err) {
                 alert("Errore salvataggio: " + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "💾 Invia / Aggiorna Scheda";
+                btn.innerText = "💾 Salva Tutto il Programma (1 Solo Clic)";
             }
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            creaCardEsercizio();
             popolaArchivioGifDaGitHub();
         });
     </script>

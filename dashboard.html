@@ -67,9 +67,8 @@
             box-sizing: border-box;
         }
         .welcome-banner h2 { margin: 0 0 5px 0; font-size: 1.3rem; }
-        .welcome-banner p { margin: 0; font-size: 0.9rem; color: #aaaaaa; }
+        .welcome-banner p { margin: 0; font-size: 0.9rem; color: #aaaaaa; text-transform: capitalize; }
 
-        /* BARRA WORKOUT TIMER */
         .session-timer-bar {
             background: #161616;
             border: 1px solid #333;
@@ -180,7 +179,6 @@
         .btn-gold { background-color: #d4af37; color: #000; border: none; }
         .btn-whatsapp { background-color: #25D366; color: #fff; border: none; }
         
-        /* FORM MISURE */
         .update-misure-box {
             margin-top: 20px;
             background: #0a0a0a;
@@ -221,7 +219,6 @@
             gap: 8px;
         }
 
-        /* TABS SESSIONI */
         .sessions-tab-bar {
             display: flex;
             gap: 8px;
@@ -324,11 +321,7 @@
             border-radius: 5px;
             border: 1px solid #333;
         }
-        .target-edit-wrapper span {
-            font-size: 0.68rem;
-            color: #888;
-            text-transform: uppercase;
-        }
+        .target-edit-wrapper span { font-size: 0.68rem; color: #888; text-transform: uppercase; }
         .target-input {
             background: transparent;
             border: none;
@@ -380,10 +373,7 @@
             font-size: 0.75rem;
         }
         .history-drawer.open { display: block; }
-        .history-entry {
-            border-bottom: 1px solid #222;
-            padding: 6px 0;
-        }
+        .history-entry { border-bottom: 1px solid #222; padding: 6px 0; }
         .history-entry:last-child { border-bottom: none; }
         .history-date-row {
             display: flex;
@@ -437,9 +427,7 @@
             font-family: 'Montserrat', sans-serif;
         }
         .log-input:focus { border-color: #d4af37; outline: none; }
-        
         .set-num { font-weight: 600; color: #d4af37; font-size: 0.85rem; }
-        
         .check-btn {
             background: #161616;
             border: 1px solid #333;
@@ -482,7 +470,6 @@
             resize: none;
         }
 
-        /* NOTIFICA TOAST */
         #toastSave {
             display: none;
             position: fixed;
@@ -499,7 +486,6 @@
             z-index: 2000;
         }
 
-        /* MODAL CALCOLATORE DISCHI */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -552,7 +538,6 @@
         <h1>Studio PT</h1>
         <div class="header-actions">
             <button class="header-btn header-btn-calc" onclick="apriModalDischi()">🧮 Dischi</button>
-            <button class="header-btn" onclick="faiLogout()">Esci</button>
         </div>
     </div>
 
@@ -589,7 +574,6 @@
                     <canvas id="progressChart" height="150"></canvas>
                 </div>
 
-                <!-- FORM AGGIORNAMENTO MISURE -->
                 <div class="update-misure-box">
                     <h4>Aggiorna le tue Misure</h4>
                     <div class="grid-2">
@@ -622,7 +606,6 @@
             </div>
             <div id="allenamento-content" class="card-content" style="display: block;">
                 
-                <!-- TIMER ALLENAMENTO SESSIONE -->
                 <div class="session-timer-bar">
                     <div>
                         <span class="timer-status-label" id="sessionTimerLabel">Durata Allenamento</span>
@@ -657,21 +640,15 @@
 
     </div>
 
-    <!-- TOAST NOTIFICA -->
     <div id="toastSave">💾 Salvato!</div>
 
-    <!-- MODAL CALCOLATORE DISCHI -->
     <div id="modalDischi" class="modal-overlay" onclick="if(event.target === this) chiudiModalDischi()">
         <div class="modal-box">
             <h4>Calcola Dischi</h4>
             <p style="font-size: 0.72rem; color: #888; margin: 0 0 15px 0;">Bilanciere standard 20 kg</p>
-            
             <input type="number" id="targetBilanciereKg" class="log-input" placeholder="Peso totale kg (es. 75)" style="font-size: 1.1rem; font-weight: 700; padding: 10px;">
-            
             <button class="action-btn btn-gold" style="margin-top: 10px; padding: 10px;" onclick="calcolaPiastre()">Calcola per lato</button>
-            
             <div id="risultatoDischi" class="plate-results" style="display: none;"></div>
-            
             <button class="history-toggle-btn" style="width: 100%; margin-top: 12px; justify-content: center; padding: 8px;" onclick="chiudiModalDischi()">Chiudi</button>
         </div>
     </div>
@@ -682,12 +659,13 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        let emailUtenteCorrente = "";
+        let clientIdCorrente = "";
         let pesoChartInstance = null;
         let listaSchedeRicevute = [];
         let indiceSessioneAttiva = 0;
+        let isProgrammaCompletoSingolo = false;
+        let interoProgrammaRaw = [];
 
-        // ================= PARSER TARGET COMPLETO (2 set per 3, x3, 4x10, ecc.) =================
         function interpretaTarget(targetString) {
             let numSerie = 3;
             let placeholderRip = "rip";
@@ -695,7 +673,6 @@
             if (!targetString) return { numSerie, placeholderRip };
             const raw = targetString.trim().toLowerCase();
 
-            // Es: "2 set per 3" oppure "2 set x 3" (2 giri per 3 volte = 3 serie di lavoro)
             const matchSetPer = raw.match(/(\d+)\s*(?:set|serie|round|giri?)\s*(?:per|x)\s*(\d+)/i);
             if (matchSetPer) {
                 numSerie = parseInt(matchSetPer[2]);
@@ -703,7 +680,6 @@
                 return { numSerie, placeholderRip };
             }
 
-            // Es: "4x10", "3x8", "3xMAX"
             if (raw.includes('x')) {
                 const parti = raw.split('x');
                 const p0 = parseInt(parti[0]);
@@ -714,7 +690,6 @@
                 return { numSerie, placeholderRip };
             }
 
-            // Es: "x3", "per 3", "3 set", "3 serie"
             const matchGenerico = raw.match(/(?:x|per|set|serie)\s*(\d+)/i) || raw.match(/(\d+)\s*(?:set|serie|round)/i);
             if (matchGenerico && matchGenerico[1]) {
                 numSerie = parseInt(matchGenerico[1]);
@@ -722,7 +697,6 @@
                 return { numSerie, placeholderRip };
             }
 
-            // Numero isolato
             const parsedNum = parseInt(raw);
             if (!isNaN(parsedNum) && parsedNum > 0) {
                 numSerie = parsedNum;
@@ -731,7 +705,6 @@
             return { numSerie, placeholderRip };
         }
 
-        // GESTIONE TIMER SESSIONE
         let sessionTimerInterval = null;
 
         function formattaSecondi(totaleSec) {
@@ -745,7 +718,7 @@
         }
 
         function aggiornaUIOrologioSessione() {
-            const startTimestamp = localStorage.getItem(`session_start_${emailUtenteCorrente}`);
+            const startTimestamp = localStorage.getItem(`session_start_${clientIdCorrente}`);
             const clockEl = document.getElementById('sessionTimerClock');
             const btnEl = document.getElementById('btnToggleSessionTimer');
             const labelEl = document.getElementById('sessionTimerLabel');
@@ -771,7 +744,7 @@
         }
 
         function gestisciTimerSessione() {
-            const startKey = `session_start_${emailUtenteCorrente}`;
+            const startKey = `session_start_${clientIdCorrente}`;
             const startTimestamp = localStorage.getItem(startKey);
 
             if (!startTimestamp) {
@@ -788,7 +761,7 @@
         }
 
         function getDurataFormattataSessione() {
-            const startTimestamp = localStorage.getItem(`session_start_${emailUtenteCorrente}`);
+            const startTimestamp = localStorage.getItem(`session_start_${clientIdCorrente}`);
             if (!startTimestamp) return null;
             const diffSec = Math.floor((Date.now() - parseInt(startTimestamp, 10)) / 1000);
             const minuti = Math.max(1, Math.round(diffSec / 60));
@@ -802,7 +775,6 @@
             setTimeout(() => { toast.style.display = 'none'; }, 2000);
         }
 
-        // BEEP AUDIO NATIVO
         let audioCtx = null;
         function playBeep(freq = 600, duration = 0.15) {
             try {
@@ -824,7 +796,6 @@
             }
         }
 
-        // CALCOLATORE DISCHI
         function apriModalDischi() {
             document.getElementById('modalDischi').style.display = 'flex';
             document.getElementById('targetBilanciereKg').focus();
@@ -841,14 +812,14 @@
             const box = document.getElementById('risultatoDischi');
             
             if (isNaN(totale) || totale < 20) {
-                box.innerHTML = `<span style="color: #ff6b6b;">Inserisci almeno 20 kg (peso del bilanciere).</span>`;
+                box.innerHTML = `<span style="color: #ff6b6b;">Inserisci almeno 20 kg.</span>`;
                 box.style.display = 'block';
                 return;
             }
 
             let pesoDaCaricare = (totale - 20) / 2;
             if (pesoDaCaricare === 0) {
-                box.innerHTML = `<span style="color: #d4af37;">Bilanciere scarico (nessun disco per lato).</span>`;
+                box.innerHTML = `<span style="color: #d4af37;">Bilanciere scarico.</span>`;
                 box.style.display = 'block';
                 return;
             }
@@ -875,16 +846,11 @@
             });
 
             if (pesoDaCaricare > 0) {
-                outputHtml += `<div style="color: #aaa; font-size: 0.68rem; margin-top: 4px;">(+ ${pesoDaCaricare} kg non coperti da dischi standard)</div>`;
+                outputHtml += `<div style="color: #aaa; font-size: 0.68rem; margin-top: 4px;">(+ ${pesoDaCaricare} kg residui)</div>`;
             }
 
             box.innerHTML = outputHtml;
             box.style.display = 'block';
-        }
-
-        async function faiLogout() {
-            await db.auth.signOut();
-            window.location.href = "index.html"; 
         }
 
         function toggleSection(id, headerElement) {
@@ -964,10 +930,9 @@
             salvaBozzaLocale();
         }
 
-        // AUTO-SAVE LOCALE
         function getChiaveBozza() {
             const sessione = listaSchedeRicevute[indiceSessioneAttiva];
-            return sessione ? `bozza_allenamento_${emailUtenteCorrente}_${sessione.id}` : null;
+            return sessione ? `bozza_${clientIdCorrente}_sessione_${indiceSessioneAttiva}` : null;
         }
 
         function salvaBozzaLocale() {
@@ -1026,12 +991,8 @@
             }
         }
 
-        // SALVATAGGIO MISURE
         async function inviaMisureCliente() {
-            if (!emailUtenteCorrente) {
-                alert("Utente non autenticato.");
-                return;
-            }
+            if (!clientIdCorrente) return;
 
             const peso = document.getElementById('upPeso').value.trim();
             const petto = document.getElementById('upPetto').value.trim();
@@ -1048,12 +1009,13 @@
             }
 
             const { error } = await db.from('misure_clienti').insert([{ 
-                email_cliente: emailUtenteCorrente, 
+                client_id: clientIdCorrente,
+                email_cliente: clientIdCorrente, 
                 peso, petto, spalle, braccio, vita, fianchi, quadricipiti, polpacci 
             }]);
 
             if (error) {
-                alert("Errore salvataggio: " + error.message);
+                alert("Errore salvataggio misure: " + error.message);
             } else {
                 alert("Misure aggiornate con successo!");
                 document.getElementById('upPeso').value = '';
@@ -1068,7 +1030,6 @@
             }
         }
 
-        // SALVATAGGIO ALLENAMENTO
         async function salvaSessioneCliente(silenzioso = false) {
             const sessione = listaSchedeRicevute[indiceSessioneAttiva];
             if (!sessione) return;
@@ -1123,15 +1084,27 @@
                 }
             });
 
-            const { error } = await db
-                .from('schede_clienti')
-                .update({ dati_scheda: JSON.stringify(esercizi) })
-                .eq('id', sessione.id);
+            sessione.dati_scheda = JSON.stringify(esercizi);
+
+            let error = null;
+            if (isProgrammaCompletoSingolo) {
+                interoProgrammaRaw[indiceSessioneAttiva].esercizi = esercizi;
+                const res = await db
+                    .from('schede_clienti')
+                    .update({ dati_scheda: JSON.stringify(interoProgrammaRaw) })
+                    .eq('id', sessione.id);
+                error = res.error;
+            } else {
+                const res = await db
+                    .from('schede_clienti')
+                    .update({ dati_scheda: JSON.stringify(esercizi) })
+                    .eq('id', sessione.id);
+                error = res.error;
+            }
 
             if (error) {
                 alert("Errore nel salvataggio: " + error.message);
             } else {
-                sessione.dati_scheda = JSON.stringify(esercizi);
                 if (silenzioso) {
                     mostraToast("💾 Esercizio salvato!");
                 } else {
@@ -1141,7 +1114,7 @@
                     let messaggioConclusione = "Sessione completata e salvata con successo!";
                     if (durataCalcolata) {
                         messaggioConclusione += `\n⏱️ Tempo totale: ${durataCalcolata}`;
-                        localStorage.removeItem(`session_start_${emailUtenteCorrente}`);
+                        localStorage.removeItem(`session_start_${clientIdCorrente}`);
                         if (sessionTimerInterval) clearInterval(sessionTimerInterval);
                         aggiornaUIOrologioSessione();
                     }
@@ -1153,12 +1126,12 @@
         }
 
         async function caricaUltimeMisure() {
-            if (!emailUtenteCorrente) return;
+            if (!clientIdCorrente) return;
 
             const { data, error } = await db
                 .from('misure_clienti')
                 .select('*')
-                .eq('email_cliente', emailUtenteCorrente)
+                .or(`client_id.eq.${clientIdCorrente},email_cliente.eq.${clientIdCorrente}`)
                 .order('id', { ascending: false });
 
             if (!error && data && data.length > 0) {
@@ -1216,12 +1189,12 @@
         }
 
         async function caricaPacchettoMassaggi() {
-            if (!emailUtenteCorrente) return;
+            if (!clientIdCorrente) return;
 
             const { data, error } = await db
                 .from('pacchetti_massaggi')
                 .select('*')
-                .eq('email_cliente', emailUtenteCorrente)
+                .or(`client_id.eq.${clientIdCorrente},email_cliente.eq.${clientIdCorrente}`)
                 .order('id', { ascending: false })
                 .limit(1);
 
@@ -1288,7 +1261,6 @@
                     ? `<img src="${ex.gif}" alt="GIF">` 
                     : `🏋️`;
 
-                // Testo originario intatto e calcolo intelligente delle righe
                 const targetOriginale = ex.target || '3x10';
                 const parsedTarget = interpretaTarget(targetOriginale);
                 const numSerieDefault = parsedTarget.numSerie;
@@ -1395,16 +1367,28 @@
 
         async function caricaSchedaCliente() {
             try {
-                const { data: { session }, error: sessionError } = await db.auth.getSession();
-                
-                if (sessionError || !session || !session.user) {
-                    window.location.href = "index.html";
+                const urlParams = new URLSearchParams(window.location.search);
+                let idTrovato = urlParams.get('id');
+
+                if (idTrovato) {
+                    clientIdCorrente = idTrovato.trim().toLowerCase();
+                    localStorage.setItem('studio_pt_client_id', clientIdCorrente);
+                } else {
+                    clientIdCorrente = localStorage.getItem('studio_pt_client_id');
+                }
+
+                if (!clientIdCorrente) {
+                    document.getElementById('listaEserciziDinamica').innerHTML = `
+                        <div style="text-align: center; padding: 30px 10px;">
+                            <p style="color: #d4af37; font-weight: 700; margin-bottom: 8px;">Nessun profilo trovato</p>
+                            <p style="color: #888; font-size: 0.8rem;">Apri il link completo inviato dal tuo Personal Trainer su WhatsApp.</p>
+                        </div>
+                    `;
                     return;
                 }
 
-                const user = session.user;
-                emailUtenteCorrente = user.email.trim();
-                document.getElementById('userEmailDisplay').innerText = emailUtenteCorrente;
+                const nomeVisualizzato = clientIdCorrente.replace(/-/g, ' ');
+                document.getElementById('userEmailDisplay').innerText = nomeVisualizzato;
 
                 avviaLoopTimerSessione();
                 caricaUltimeMisure();
@@ -1413,20 +1397,31 @@
                 const { data, error } = await db
                     .from('schede_clienti')
                     .select('*')
-                    .eq('email_cliente', emailUtenteCorrente);
+                    .or(`client_id.eq.${clientIdCorrente},email_cliente.eq.${clientIdCorrente}`);
 
                 const container = document.getElementById('listaEserciziDinamica');
                 const tabsBar = document.getElementById('tabsBarSessioni');
                 
                 if (error || !data || data.length === 0) {
-                    container.innerHTML = `<p style="text-align: center; color: #888; font-size: 0.85rem;">Nessuna scheda assegnata al momento.</p>`;
+                    container.innerHTML = `<p style="text-align: center; color: #888; font-size: 0.85rem;">Nessuna scheda attiva trovata per "${nomeVisualizzato}".</p>`;
                     tabsBar.style.display = 'none';
                     return;
                 }
 
-                listaSchedeRicevute = data;
-                indiceSessioneAttiva = 0;
+                if (data.length === 1 && data[0].titolo_sessione === "PROGRAMMA_COMPLETO") {
+                    isProgrammaCompletoSingolo = true;
+                    interoProgrammaRaw = JSON.parse(data[0].dati_scheda);
+                    listaSchedeRicevute = interoProgrammaRaw.map(g => ({
+                        id: data[0].id,
+                        titolo_sessione: g.titolo,
+                        dati_scheda: JSON.stringify(g.esercizi)
+                    }));
+                } else {
+                    isProgrammaCompletoSingolo = false;
+                    listaSchedeRicevute = data;
+                }
 
+                indiceSessioneAttiva = 0;
                 renderTabs();
                 mostraSessioneCorrente();
 

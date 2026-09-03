@@ -283,7 +283,19 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZ3hvc2ZmZ3N1b2tyc3ljdnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTgyNzgsImV4cCI6MjEwMzY5NDI3OH0.OGkhaS3O-aWXV65tV3uwMpo9VmCmr3Hgubfn2ShuVMg';
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        let archivioGifEsercizi = [];
+        // Archivio completo delle GIF
+        let archivioGifEsercizi = [
+            { nome: "panca inclinata", percorso: "esercizi/petto/pancainclinata.gif" },
+            { nome: "distensioni", percorso: "esercizi/petto/disntensioni.gif" },
+            { nome: "croci panca piana", percorso: "esercizi/petto/crocipancapiana.gif" },
+            { nome: "croci panca inclinata", percorso: "esercizi/petto/crociinclinate.gif" },
+            { nome: "bicipiti z", percorso: "esercizi/braccia/bicipitiz.gif" },
+            { nome: "bicipiti 45", percorso: "esercizi/braccia/bicipiti45.gif" },
+            { nome: "lat machine", percorso: "esercizi/dorso/lat_machine.gif" },
+            { nome: "rematore 1 arm", percorso: "esercizi/dorso/rematore_1_arm.gif" },
+            { nome: "squat", percorso: "esercizi/gambe/squat.gif" }
+        ];
+
         let programmaSettimanale = [{ titolo: "Giorno A", esercizi: [] }, { titolo: "Giorno B", esercizi: [] }];
         let indiceGiornoAttivo = 0;
 
@@ -380,13 +392,8 @@
             }
         }
 
-        // Funzione sicura per popolare qualsiasi tendina con l'archivio GitHub
         function popolaSelectGifManuale(selectEl, selectedPath = "") {
             selectEl.innerHTML = '<option value="">-- Seleziona GIF --</option>';
-            if (!archivioGifEsercizi || archivioGifEsercizi.length === 0) {
-                selectEl.innerHTML += '<option value="" disabled>(Archivio GIF in caricamento...)</option>';
-                return;
-            }
             archivioGifEsercizi.forEach(ex => {
                 const opt = document.createElement('option');
                 opt.value = ex.percorso;
@@ -413,7 +420,7 @@
             box.innerHTML = `
                 <img class="img-preview" src="${percorsoGif || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" alt="Preview">
                 <div style="flex-grow: 1;">
-                    <label style="margin-bottom: 3px;">GIF Associata</label>
+                    <label style="margin-bottom: 3px;">Seleziona GIF</label>
                     <select class="select-gif-manuale" onchange="aggiornaGifManuale(this)">
                         <option value="">-- Seleziona GIF --</option>
                     </select>
@@ -440,8 +447,8 @@
                     <button type="button" class="btn-remove-ex" onclick="this.closest('.ex-card').remove(); rinumeraEsercizi();">✕ Rimuovi</button>
                 </div>
                 <div class="form-group" style="position: relative;">
-                    <label>Nome Esercizio (Inizia a scrivere per cercare la GIF)</label>
-                    <input type="text" class="input-nome" placeholder="es. Trazioni, Squat..." value="${dati.nome || ''}" oninput="gestisciAutocompletamento(this)" autocomplete="off">
+                    <label>Nome Esercizio (Inizia a scrivere per cercare)</label>
+                    <input type="text" class="input-nome" placeholder="es. Panca inclinata, Trazioni..." value="${dati.nome || ''}" oninput="gestisciAutocompletamento(this)" autocomplete="off">
                     <div class="autocomplete-dropdown"></div>
                 </div>
                 <div class="grid-2">
@@ -455,7 +462,7 @@
                     </div>
                 </div>
 
-                <label style="margin-top: 10px; color: #d4af37;">Riquadri GIF (Puoi aggiungerne più di uno)</label>
+                <label style="margin-top: 10px; color: #d4af37;">Riquadri GIF (Aggiungine altri per superserie)</label>
                 <div class="gif-row-container"></div>
                 <button type="button" class="btn-add-gif-row" onclick="aggiungiRiquadroGif(this.closest('.ex-card'))">+ Aggiungi riquadro GIF</button>
 
@@ -467,4 +474,128 @@
             container.appendChild(card);
 
             let listaGifs = dati.gifs || (dati.gif ? [dati.gif] : []);
-            if
+            if (listaGifs.length === 0) {
+                aggiungiRiquadroGif(card);
+            } else {
+                listaGifs.forEach(g => aggiungiRiquadroGif(card, g));
+            }
+        }
+
+        function gestisciAutocompletamento(inputEl) {
+            const testo = inputEl.value.trim().toLowerCase();
+            const card = inputEl.closest('.ex-card');
+            const dropdown = card.querySelector('.autocomplete-dropdown');
+
+            if (!testo) {
+                dropdown.style.display = 'none';
+                dropdown.innerHTML = '';
+                return;
+            }
+
+            const filtrati = archivioGifEsercizi.filter(ex => ex.nome.toLowerCase().includes(testo));
+
+            if (filtrati.length > 0) {
+                dropdown.innerHTML = '';
+                filtrati.forEach(ex => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerText = ex.nome;
+                    item.onclick = () => {
+                        inputEl.value = ex.nome;
+                        const primaSelect = card.querySelector('.select-gif-manuale');
+                        if (primaSelect) {
+                            primaSelect.value = ex.percorso;
+                            aggiornaGifManuale(primaSelect);
+                        }
+                        dropdown.style.display = 'none';
+                    };
+                    dropdown.appendChild(item);
+                });
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.style.display = 'none';
+                dropdown.innerHTML = '';
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.form-group')) {
+                document.querySelectorAll('.autocomplete-dropdown').forEach(d => d.style.display = 'none');
+            }
+        });
+
+        function aggiungiNuovoEsercizioCard() { creaCardEsercizio(); }
+        function rinumeraEsercizi() {
+            document.querySelectorAll('.ex-card').forEach((card, idx) => {
+                card.querySelector('.ex-index').innerText = `Esercizio #${idx + 1}`;
+            });
+        }
+
+        async function caricaSchedaEsistente() {
+            generaIdCliente();
+            const clientId = document.getElementById('clientId').value.trim();
+            if (!clientId) { alert("Inserisci il nome."); return; }
+            mostraAvviso("Caricamento...");
+
+            try {
+                const { data, error } = await db.from('schede_clienti').select('*').or(`client_id.eq.${clientId},email_cliente.eq.${clientId}`);
+                if (error) throw error;
+                if (!data || data.length === 0) { mostraAvviso("Nessuna scheda trovata."); return; }
+
+                if (data[0].pin) document.getElementById('clientePin').value = data[0].pin;
+
+                if (data.length === 1 && data[0].titolo_sessione === "PROGRAMMA_COMPLETO") {
+                    programmaSettimanale = JSON.parse(data[0].dati_scheda);
+                } else {
+                    programmaSettimanale = data.map(riga => ({
+                        titolo: riga.titolo_sessione || "Giorno A",
+                        esercizi: JSON.parse(riga.dati_scheda || "[]")
+                    }));
+                }
+
+                indiceGiornoAttivo = 0;
+                renderTabsGiorni();
+                mostraAvviso("✅ Caricata con successo!", "badge-success");
+            } catch (err) {
+                alert("Errore: " + err.message);
+            }
+        }
+
+        async function salvaTuttoIlProgramma() {
+            salvaDatiFormNelGiornoAttivo();
+            generaIdCliente();
+            const clientId = document.getElementById('clientId').value.trim();
+            const pin = document.getElementById('clientePin').value.trim();
+            const btn = document.getElementById('btnSalvaScheda');
+
+            if (!clientId) { alert("Inserisci il nome."); return; }
+            if (!pin || pin.length !== 4) { alert("Inserisci un PIN di 4 cifre."); return; }
+
+            btn.disabled = true;
+            btn.innerText = "Salvataggio...";
+
+            try {
+                await db.from('schede_clienti').delete().or(`client_id.eq.${clientId},email_cliente.eq.${clientId}`);
+                const { error } = await db.from('schede_clienti').insert([{
+                    client_id: clientId,
+                    email_cliente: clientId,
+                    pin: pin,
+                    titolo_sessione: "PROGRAMMA_COMPLETO",
+                    dati_scheda: JSON.stringify(programmaSettimanale)
+                }]);
+                if (error) throw error;
+                alert("✅ Salvato con successo!");
+            } catch (err) {
+                alert("Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "💾 Salva Scheda Completa";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderTabsGiorni();
+        });
+    </script>
+</body>
+</html>

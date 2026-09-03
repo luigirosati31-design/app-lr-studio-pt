@@ -138,6 +138,47 @@
         .btn-gold { background-color: #d4af37; color: #000; border: none; }
         .btn-whatsapp { background-color: #25D366; color: #fff; border: none; }
         
+        /* FORM MISURE */
+        .update-misure-box {
+            margin-top: 20px;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .update-misure-box h4 {
+            color: #d4af37;
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        .update-misure-box label {
+            display: block;
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            margin-top: 8px;
+        }
+        .update-misure-box input {
+            width: 100%;
+            background: #161616;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 8px;
+            border-radius: 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            box-sizing: border-box;
+        }
+        .update-misure-box input:focus { border-color: #d4af37; outline: none; }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
         /* TABS SESSIONI */
         .sessions-tab-bar {
             display: flex;
@@ -498,6 +539,29 @@
                 <div class="chart-container">
                     <canvas id="progressChart" height="150"></canvas>
                 </div>
+
+                <!-- FORM INSERIMENTO/MODIFICA MISURE -->
+                <div class="update-misure-box">
+                    <h4>Aggiorna le tue Misure</h4>
+                    <div class="grid-2">
+                        <div><label>Peso (kg)</label><input type="text" id="upPeso" placeholder="es. 80"></div>
+                        <div><label>Petto (cm)</label><input type="text" id="upPetto" placeholder="es. 105"></div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label>Spalle (cm)</label><input type="text" id="upSpalle" placeholder="es. 122"></div>
+                        <div><label>Braccio (cm)</label><input type="text" id="upBraccio" placeholder="es. 38.5"></div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label>Vita (cm)</label><input type="text" id="upVita" placeholder="es. 80"></div>
+                        <div><label>Fianchi (cm)</label><input type="text" id="upFianchi" placeholder="es. 95"></div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label>Quadricipiti (cm)</label><input type="text" id="upQuadricipiti" placeholder="es. 60"></div>
+                        <div><label>Polpacci (cm)</label><input type="text" id="upPolpacci" placeholder="es. 38"></div>
+                    </div>
+                    <button class="action-btn btn-gold" style="margin-top: 12px;" onclick="inviaMisureCliente()">Salva Nuove Misure</button>
+                </div>
+
             </div>
         </div>
 
@@ -535,8 +599,8 @@
 
     </div>
 
-    <!-- TOAST DI CONFERMA -->
-    <div id="toastSave">💾 Esercizio salvato!</div>
+    <!-- TOAST NOTIFICA -->
+    <div id="toastSave">💾 Salvato!</div>
 
     <!-- MODAL CALCOLATORE DISCHI -->
     <div id="modalDischi" class="modal-overlay" onclick="if(event.target === this) chiudiModalDischi()">
@@ -734,7 +798,7 @@
             salvaBozzaLocale();
         }
 
-        // ================= AUTO-SAVE LOCALE ANTI-RICARICA =================
+        // AUTO-SAVE LOCALE ANTI-RICARICA
         function getChiaveBozza() {
             const sessione = listaSchedeRicevute[indiceSessioneAttiva];
             return sessione ? `bozza_allenamento_${emailUtenteCorrente}_${sessione.id}` : null;
@@ -796,7 +860,49 @@
             }
         }
 
-        // ================= SALVATAGGIO CLOUD E GESTIONE STORICO GIORNATA =================
+        // SALVATAGGIO MISURE CLIENTE (SUPABASE)
+        async function inviaMisureCliente() {
+            if (!emailUtenteCorrente) {
+                alert("Utente non autenticato.");
+                return;
+            }
+
+            const peso = document.getElementById('upPeso').value.trim();
+            const petto = document.getElementById('upPetto').value.trim();
+            const spalle = document.getElementById('upSpalle').value.trim();
+            const braccio = document.getElementById('upBraccio').value.trim();
+            const vita = document.getElementById('upVita').value.trim();
+            const fianchi = document.getElementById('upFianchi').value.trim();
+            const quadricipiti = document.getElementById('upQuadricipiti').value.trim();
+            const polpacci = document.getElementById('upPolpacci').value.trim();
+
+            if (!peso && !petto && !spalle && !braccio && !vita && !fianchi && !quadricipiti && !polpacci) {
+                alert("Compila almeno una misura prima di salvare.");
+                return;
+            }
+
+            const { error } = await db.from('misure_clienti').insert([{ 
+                email_cliente: emailUtenteCorrente, 
+                peso, petto, spalle, braccio, vita, fianchi, quadricipiti, polpacci 
+            }]);
+
+            if (error) {
+                alert("Errore salvataggio misure: " + error.message);
+            } else {
+                alert("Misure aggiornate con successo!");
+                document.getElementById('upPeso').value = '';
+                document.getElementById('upPetto').value = '';
+                document.getElementById('upSpalle').value = '';
+                document.getElementById('upBraccio').value = '';
+                document.getElementById('upVita').value = '';
+                document.getElementById('upFianchi').value = '';
+                document.getElementById('upQuadricipiti').value = '';
+                document.getElementById('upPolpacci').value = '';
+                caricaUltimeMisure();
+            }
+        }
+
+        // SALVATAGGIO ALLENAMENTO CLOUD
         async function salvaSessioneCliente(silenzioso = false) {
             const sessione = listaSchedeRicevute[indiceSessioneAttiva];
             if (!sessione) return;
@@ -833,7 +939,6 @@
                 if (almenoUnaCompilata && esercizi[idx]) {
                     if (!Array.isArray(esercizi[idx].storico)) esercizi[idx].storico = [];
                     
-                    // CONTROLLO DUPLICATI: se esiste già una voce con la data odierna, aggiornala!
                     const indiceGiornoEsistente = esercizi[idx].storico.findIndex(s => s.data === dataOggi);
                     if (indiceGiornoEsistente !== -1) {
                         esercizi[idx].storico[indiceGiornoEsistente].serie = serieDati;
@@ -857,7 +962,6 @@
                 if (silenzioso) {
                     mostraToast("💾 Esercizio salvato!");
                 } else {
-                    // Se clicca il tasto finale di fine seduta, ripulisce la bozza locale
                     const chiave = getChiaveBozza();
                     if (chiave) localStorage.removeItem(chiave);
                     alert("Sessione completata e salvata con successo!");

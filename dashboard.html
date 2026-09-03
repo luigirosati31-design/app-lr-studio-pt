@@ -69,6 +69,48 @@
         .welcome-banner h2 { margin: 0 0 5px 0; font-size: 1.3rem; }
         .welcome-banner p { margin: 0; font-size: 0.9rem; color: #aaaaaa; }
 
+        /* BARRA WORKOUT TIMER GENERALE */
+        .session-timer-bar {
+            background: #161616;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .timer-display {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #d4af37;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 1px;
+        }
+        .timer-status-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            display: block;
+        }
+        .btn-session-timer {
+            background: #222;
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .btn-session-timer.running {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #ff6b6b;
+        }
+
         .card-container {
             width: 100%;
             max-width: 420px;
@@ -343,7 +385,14 @@
             padding: 6px 0;
         }
         .history-entry:last-child { border-bottom: none; }
-        .history-date { color: #d4af37; font-weight: 600; margin-bottom: 4px; display: block; }
+        .history-date-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .history-date { color: #d4af37; font-weight: 600; }
+        .history-duration { color: #888; font-size: 0.7rem; }
         .history-pills { display: flex; flex-wrap: wrap; gap: 6px; }
         .history-pill {
             background: #0d0d0d;
@@ -573,6 +622,15 @@
             </div>
             <div id="allenamento-content" class="card-content" style="display: block;">
                 
+                <!-- TIMER DURATA SESSIONE ALLENAMENTO -->
+                <div class="session-timer-bar">
+                    <div>
+                        <span class="timer-status-label" id="sessionTimerLabel">Durata Allenamento</span>
+                        <span class="timer-display" id="sessionTimerClock">00:00</span>
+                    </div>
+                    <button id="btnToggleSessionTimer" class="btn-session-timer" onclick="gestisciTimerSessione()">▶ Avvia</button>
+                </div>
+
                 <div id="tabsBarSessioni" class="sessions-tab-bar" style="display: none;"></div>
 
                 <div id="listaEserciziDinamica">
@@ -628,6 +686,72 @@
         let pesoChartInstance = null;
         let listaSchedeRicevute = [];
         let indiceSessioneAttiva = 0;
+
+        // GESTIONE TIMER GENERALE ALLENAMENTO (PERSISTENTE IN LOCALSTORAGE)
+        let sessionTimerInterval = null;
+
+        function formattaSecondi(totaleSec) {
+            const ore = Math.floor(totaleSec / 3600);
+            const min = Math.floor((totaleSec % 3600) / 60);
+            const sec = totaleSec % 60;
+            if (ore > 0) {
+                return `${ore}:${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+            }
+            return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        function aggiornaUIOrologioSessione() {
+            const startTimestamp = localStorage.getItem(`session_start_${emailUtenteCorrente}`);
+            const clockEl = document.getElementById('sessionTimerClock');
+            const btnEl = document.getElementById('btnToggleSessionTimer');
+            const labelEl = document.getElementById('sessionTimerLabel');
+
+            if (startTimestamp) {
+                const diffSec = Math.floor((Date.now() - parseInt(startTimestamp, 10)) / 1000);
+                clockEl.innerText = formattaSecondi(diffSec);
+                btnEl.innerText = "⏸ Pausa";
+                btnEl.classList.add('running');
+                labelEl.innerText = "Allenamento in corso...";
+            } else {
+                clockEl.innerText = "00:00";
+                btnEl.innerText = "▶ Avvia";
+                btnEl.classList.remove('running');
+                labelEl.innerText = "Durata Allenamento";
+            }
+        }
+
+        function avviaLoopTimerSessione() {
+            if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+            aggiornaUIOrologioSessione();
+            sessionTimerInterval = setInterval(aggiornaUIOrologioSessione, 1000);
+        }
+
+        function gestisciTimerSessione() {
+            const startKey = `session_start_${emailUtenteCorrente}`;
+            const startTimestamp = localStorage.getItem(startKey);
+
+            if (!startTimestamp) {
+                // Avvia nuovo allenamento
+                localStorage.setItem(startKey, Date.now().toString());
+                avviaLoopTimerSessione();
+                mostraToast("⏱️ Allenamento avviato!");
+            } else {
+                // Metti in pausa o azzera
+                if (confirm("Vuoi fermare o azzerare il timer della sessione?")) {
+                    localStorage.removeItem(startKey);
+                    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+                    aggiornaUIOrologioSessione();
+                }
+            }
+        }
+
+        function getDurataFormattataSessione() {
+            const startTimestamp = localStorage.getItem(`session_start_${emailUtenteCorrente}`);
+            if (!startTimestamp) return null;
+            const diffSec = Math.floor((Date.now() - parseInt(startTimestamp, 10)) / 1000);
+            const minuti = Math.max(1, Math.round(diffSec / 60));
+            return `${minuti} min`;
+        }
 
         function mostraToast(testo) {
             const toast = document.getElementById('toastSave');
@@ -860,7 +984,7 @@
             }
         }
 
-        // SALVATAGGIO MISURE CLIENTE (SUPABASE)
+        // SALVATAGGIO MISURE CLIENTE
         async function inviaMisureCliente() {
             if (!emailUtenteCorrente) {
                 alert("Utente non autenticato.");
@@ -902,7 +1026,7 @@
             }
         }
 
-        // SALVATAGGIO ALLENAMENTO CLOUD
+        // SALVATAGGIO ALLENAMENTO CON CALCOLO TEMPO SESSIONE
         async function salvaSessioneCliente(silenzioso = false) {
             const sessione = listaSchedeRicevute[indiceSessioneAttiva];
             if (!sessione) return;
@@ -912,6 +1036,7 @@
 
             const oggi = new Date();
             const dataOggi = `${oggi.getDate().toString().padStart(2, '0')}/${(oggi.getMonth() + 1).toString().padStart(2, '0')}/${oggi.getFullYear()}`;
+            const durataCalcolata = getDurataFormattataSessione();
 
             blocchi.forEach((blocco, idx) => {
                 const targetModificato = blocco.querySelector('.ex-target-val').value.trim();
@@ -940,10 +1065,16 @@
                     if (!Array.isArray(esercizi[idx].storico)) esercizi[idx].storico = [];
                     
                     const indiceGiornoEsistente = esercizi[idx].storico.findIndex(s => s.data === dataOggi);
+                    const recordGiorno = {
+                        data: dataOggi,
+                        serie: serieDati,
+                        durata: durataCalcolata || undefined
+                    };
+
                     if (indiceGiornoEsistente !== -1) {
-                        esercizi[idx].storico[indiceGiornoEsistente].serie = serieDati;
+                        esercizi[idx].storico[indiceGiornoEsistente] = recordGiorno;
                     } else {
-                        esercizi[idx].storico.push({ data: dataOggi, serie: serieDati });
+                        esercizi[idx].storico.push(recordGiorno);
                     }
 
                     if (esercizi[idx].storico.length > 10) esercizi[idx].storico.shift();
@@ -964,7 +1095,17 @@
                 } else {
                     const chiave = getChiaveBozza();
                     if (chiave) localStorage.removeItem(chiave);
-                    alert("Sessione completata e salvata con successo!");
+
+                    let messaggioConclusione = "Sessione completata e salvata con successo!";
+                    if (durataCalcolata) {
+                        messaggioConclusione += `\n⏱️ Tempo totale: ${durataCalcolata}`;
+                        // Resetta il timer di sessione concluso
+                        localStorage.removeItem(`session_start_${emailUtenteCorrente}`);
+                        if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+                        aggiornaUIOrologioSessione();
+                    }
+
+                    alert(messaggioConclusione);
                     mostraSessioneCorrente();
                 }
             }
@@ -1127,9 +1268,13 @@
                         const seriePills = s.serie.map((ser, i) => 
                             `<span class="history-pill">S${i+1}: <b>${ser.kg || '-'} kg</b> × ${ser.rip || '-'}</span>`
                         ).join("");
+                        const labelDurata = s.durata ? `<span class="history-duration">⏱️ ${s.durata}</span>` : '';
                         return `
                             <div class="history-entry">
-                                <span class="history-date">📅 ${s.data}</span>
+                                <div class="history-date-row">
+                                    <span class="history-date">📅 ${s.data}</span>
+                                    ${labelDurata}
+                                </div>
                                 <div class="history-pills">${seriePills}</div>
                             </div>
                         `;
@@ -1218,6 +1363,9 @@
                 const user = session.user;
                 emailUtenteCorrente = user.email.trim();
                 document.getElementById('userEmailDisplay').innerText = emailUtenteCorrente;
+
+                // Controlla se c'è un timer allenamento attivo e ripristinalo
+                avviaLoopTimerSessione();
 
                 caricaUltimeMisure();
                 caricaPacchettoMassaggi();

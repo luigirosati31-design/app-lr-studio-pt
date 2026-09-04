@@ -39,7 +39,7 @@
             border-radius: 8px; margin-bottom: 15px; overflow: hidden;
         }
         .mode-btn {
-            flex: 1; background: transparent; border: none; color: #888; padding: 10px; font-size: 0.75rem;
+            flex: 1; background: transparent; border: none; color: #888; padding: 10px; font-size: 0.72rem;
             font-weight: 700; text-transform: uppercase; cursor: pointer; font-family: 'Montserrat', sans-serif;
         }
         .mode-btn.active { background: #d4af37; color: #000; }
@@ -95,10 +95,10 @@
         .exercise-block { margin-bottom: 20px; background-color: #0a0a0a; padding: 15px; border-radius: 10px; border: 1px solid #222; }
         .exercise-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
         
-        /* Carosello orizzontale per GIF multiple */
+        /* Carosello orizzontale GIF multiple ottimizzato mobile */
         .gif-carousel {
             display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory;
-            max-width: 130px; padding-bottom: 4px; flex-shrink: 0;
+            max-width: 120px; padding-bottom: 4px; flex-shrink: 0;
         }
         .gif-carousel::-webkit-scrollbar { height: 3px; }
         .gif-carousel::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 3px; }
@@ -108,17 +108,17 @@
         }
         .exercise-gif img { width: 100%; height: 100%; object-fit: cover; }
         
-        .exercise-info { flex-grow: 1; }
-        .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .exercise-title { font-size: 0.95rem; color: #fff; font-weight: 600; }
+        .exercise-info { flex-grow: 1; min-width: 0; }
+        .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
+        .exercise-title { font-size: 0.95rem; color: #fff; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .save-exercise-btn {
             background: #181818; border: 1px solid #333; color: #d4af37; border-radius: 6px; padding: 4px 8px;
-            font-size: 0.72rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+            font-size: 0.72rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
         }
-        .exercise-meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-        .target-edit-wrapper { display: inline-flex; align-items: center; gap: 4px; background: #161616; padding: 3px 8px; border-radius: 5px; border: 1px solid #333; }
-        .target-edit-wrapper span { font-size: 0.68rem; color: #888; text-transform: uppercase; }
-        .target-input { background: transparent; border: none; color: #d4af37; font-size: 0.78rem; font-weight: 700; min-width: 90px; }
+        .exercise-meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; width: 100%; box-sizing: border-box; }
+        .target-edit-wrapper { display: inline-flex; align-items: center; gap: 4px; background: #161616; padding: 4px 8px; border-radius: 5px; border: 1px solid #333; max-width: 100%; box-sizing: border-box; }
+        .target-edit-wrapper span { font-size: 0.68rem; color: #888; text-transform: uppercase; flex-shrink: 0; }
+        .target-input { background: transparent; border: none; color: #d4af37; font-size: 0.78rem; font-weight: 700; width: 80px; }
         .target-input:focus { outline: none; }
         .last-weight-badge {
             display: inline-flex; align-items: center; gap: 4px; background: rgba(212, 175, 55, 0.12);
@@ -134,11 +134,10 @@
         .history-entry:last-child { border-bottom: none; }
         .history-date-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .history-date { color: #d4af37; font-weight: 600; }
-        .history-duration { color: #888; font-size: 0.7rem; }
         .history-pills { display: flex; flex-wrap: wrap; gap: 6px; }
         .history-pill { background: #0d0d0d; border: 1px solid #2a2a2a; padding: 2px 6px; border-radius: 4px; color: #ccc; }
 
-        .timer-btn { background: transparent; color: #888; border: 1px solid #444; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; width: 100%; text-align: left; margin-bottom: 10px; }
+        .timer-btn { background: transparent; color: #888; border: 1px solid #444; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; width: 100%; text-align: left; margin-bottom: 10px; box-sizing: border-box; }
         @keyframes pulse {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.5); }
             70% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(212, 175, 55, 0); }
@@ -160,7 +159,7 @@
             border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;
         }
         .check-btn.completed { background: #d4af37; color: #000; border-color: #d4af37; }
-        .add-set-btn { background: #161616; color: #d4af37; border: 1px dashed #d4af37; width: 100%; padding: 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
+        .add-set-btn { background: #161616; color: #d4af37; border: 1px dashed #d4af37; width: 100%; padding: 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-top: 10px; text-transform: uppercase; box-sizing: border-box; }
         .coach-notes { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 0.8rem; box-sizing: border-box; resize: none; }
 
         .step-nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
@@ -597,8 +596,14 @@
             const res = await db.from('schede_clienti').update({ dati_scheda: sessione.dati_scheda }).eq('id', sessione.id);
             if (res.error) alert("Errore: " + res.error.message);
             else {
-                if (silenzioso) mostraToast("💾 Salvato!");
-                else { localStorage.removeItem(`bozza_${clientIdCorrente}_${indiceSessioneAttiva}`); alert("Sessione conclusa!"); mostraSessioneCorrente(); }
+                if (silenzioso) {
+                    mostraToast("💾 Salvato!");
+                    localStorage.removeItem(`bozza_${clientIdCorrente}_${indiceSessioneAttiva}`);
+                } else { 
+                    localStorage.removeItem(`bozza_${clientIdCorrente}_${indiceSessioneAttiva}`); 
+                    alert("Sessione conclusa!"); 
+                    mostraSessioneCorrente(); 
+                }
             }
         }
 
@@ -651,7 +656,7 @@
                     if (ultima.serie[i-1].kg) pk = `${ultima.serie[i-1].kg}kg`;
                     if (ultima.serie[i-1].rip) pr = `${ultima.serie[i-1].rip}rip`;
                 }
-                righe += `<tr><td class="set-num">${i}</td><td><input type="text" class="log-input log-kg" placeholder="${pk}" oninput="salvaBozzaLocale()"></td><td><input type="text" class="log-input log-rip" placeholder="${pr}" oninput="salvaBozzaLocale()"></td><td><button class="check-btn" onclick="toggleCheck(this)"></button></td></tr>`;
+                righe += `<tr><td class="set-num">${i}</td><td><input type="text" class="log-input log-kg" placeholder="${pk}" autocomplete="off"></td><td><input type="text" class="log-input log-rip" placeholder="${pr}" autocomplete="off"></td><td><button class="check-btn" onclick="toggleCheck(this)"></button></td></tr>`;
             }
 
             return `
@@ -664,7 +669,7 @@
                                 <button class="save-exercise-btn" onclick="salvaSessioneCliente(true)">💾 Salva</button>
                             </div>
                             <div class="exercise-meta-row">
-                                <div class="target-edit-wrapper"><span>Target:</span><input type="text" class="target-input ex-target-val" value="${targetOrg}" oninput="salvaBozzaLocale()"></div>
+                                <div class="target-edit-wrapper"><span>Target:</span><input type="text" class="target-input ex-target-val" value="${targetOrg}"></div>
                                 ${badgePeso}
                                 ${ex.video ? `<a href="${ex.video}" target="_blank" class="video-link-btn">▶ Video</a>` : ''}
                                 <button type="button" class="history-toggle-btn" onclick="toggleHistoricoDrawer(this)">📜 Storico</button>
@@ -675,7 +680,7 @@
                     <button class="timer-btn" onclick="toggleTimer(this, ${ex.recupero||90})">⏱️ Avvia Recupero (${ex.recupero||90}s)</button>
                     <table><thead><tr><th>Serie</th><th>Kg</th><th>Rip</th><th>✓</th></tr></thead><tbody>${righe}</tbody></table>
                     <button class="add-set-btn" onclick="aggiungiSerieTabella(this, '', '${parsed.placeholderRip}')">+ Aggiungi serie</button>
-                    <textarea class="coach-notes" rows="2" placeholder="Note carichi..." oninput="salvaBozzaLocale()"></textarea>
+                    <textarea class="coach-notes" rows="2" placeholder="Note carichi..."></textarea>
                 </div>
             `;
         }
@@ -695,6 +700,7 @@
                 let html = "";
                 esercizi.forEach((ex, idx) => { html += generaHtmlEsercizio(ex, idx); });
                 container.innerHTML = html;
+                ripristinaBozza();
             } else {
                 if (indiceStepCorrente >= esercizi.length) indiceStepCorrente = esercizi.length - 1;
                 if (indiceStepCorrente < 0) indiceStepCorrente = 0;
@@ -708,8 +714,32 @@
                     </div>
                 `;
                 container.innerHTML = navHtml + generaHtmlEsercizio(ex, indiceStepCorrente);
+                ripristinaBozzaStep(indiceStepCorrente);
             }
-            ripristinaBozza();
+        }
+
+        function ripristinaBozzaStep(stepIdx) {
+            const salvato = localStorage.getItem(`bozza_${clientIdCorrente}_${indiceSessioneAttiva}`);
+            if (!salvato) return;
+            try {
+                const bozza = JSON.parse(salvato);
+                if (bozza[stepIdx]) {
+                    const b = document.querySelector('.exercise-block');
+                    if (!b) return;
+                    if (bozza[stepIdx].target) b.querySelector('.ex-target-val').value = bozza[stepIdx].target;
+                    if (bozza[stepIdx].note) b.querySelector('.coach-notes').value = bozza[stepIdx].note;
+                    b.querySelectorAll('tbody tr').forEach((r, rIdx) => {
+                        if (bozza[stepIdx].serie[rIdx]) {
+                            r.querySelector('.log-kg').value = bozza[stepIdx].serie[rIdx].kg || '';
+                            r.querySelector('.log-rip').value = bozza[stepIdx].serie[stepIdx] && bozza[stepIdx].serie[rIdx].rip || '';
+                            if (bozza[stepIdx].serie[rIdx].check) {
+                                r.querySelector('.check-btn').classList.add('completed');
+                                r.querySelector('.check-btn').innerHTML = '✓';
+                            }
+                        }
+                    });
+                }
+            } catch(e) {}
         }
 
         async function caricaSchedaCliente() {

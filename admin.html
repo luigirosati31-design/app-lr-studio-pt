@@ -125,7 +125,6 @@
         }
         .badge-info { background: rgba(212, 175, 55, 0.15); color: #d4af37; border: 1px solid #d4af37; }
         .badge-success { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid #2ecc71; }
-        
         .days-tab-bar {
             display: flex;
             gap: 8px;
@@ -141,7 +140,7 @@
             border: 1px solid #333;
             padding: 8px 14px;
             border-radius: 6px;
-            font-size: 0.8rem;
+            font-size: 0.80rem;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
@@ -252,11 +251,11 @@
         <div class="grid-pin">
             <div class="form-group">
                 <label for="clienteNomeCognome">Nome Atleta</label>
-                <input type="text" id="clienteNomeCognome" placeholder="es. Luca Torre" oninput="generaIdCliente()">
+                <input type="text" id="clienteNomeCognome" placeholder="es. Luca Torre" oninput="generaIdCliente()" spellcheck="false">
             </div>
             <div class="form-group">
                 <label for="clientePin">PIN (4 cifre)</label>
-                <input type="text" id="clientePin" placeholder="1234" maxlength="4" style="text-align: center; font-weight: 700; color: #d4af37; font-size: 1.1rem;">
+                <input type="text" id="clientePin" placeholder="1234" maxlength="4" style="text-align: center; font-weight: 700; color: #d4af37; font-size: 1.1rem;" spellcheck="false">
             </div>
         </div>
         <input type="hidden" id="clientId">
@@ -270,7 +269,7 @@
         </div>
 
         <div class="day-title-editor">
-            <input type="text" id="activeDayTitle" placeholder="Nome Giorno (es. Giorno A)" oninput="aggiornaTitoloGiornoCorrente(this.value)">
+            <input type="text" id="activeDayTitle" placeholder="Nome Giorno (es. Giorno A)" oninput="aggiornaTitoloGiornoCorrente(this.value)" spellcheck="false">
             <button type="button" class="btn-delete-day" onclick="eliminaGiornoCorrente()">Elimina Giorno</button>
         </div>
 
@@ -466,13 +465,13 @@
                 </div>
                 <div class="form-group" style="position: relative;">
                     <label>Nome Esercizio</label>
-                    <input type="text" class="input-nome" placeholder="es. Panca inclinata, Trazioni..." value="${dati.nome || ''}" autocomplete="off">
+                    <input type="text" class="input-nome" placeholder="es. Panca inclinata, Trazioni..." value="${dati.nome || ''}" autocomplete="off" spellcheck="false">
                     <div class="autocomplete-dropdown"></div>
                 </div>
                 <div class="grid-2">
                     <div>
                         <label>Target</label>
-                        <input type="text" class="input-target" value="${dati.target || '3x10'}">
+                        <input type="text" class="input-target" value="${dati.target || '3x10'}" spellcheck="false">
                     </div>
                     <div>
                         <label>Recupero (s)</label>
@@ -486,7 +485,7 @@
 
                 <div class="form-group" style="margin-bottom:0; margin-top: 10px;">
                     <label>Link Video</label>
-                    <input type="text" class="input-video" placeholder="https://..." value="${dati.video || ''}">
+                    <input type="text" class="input-video" placeholder="https://..." value="${dati.video || ''}" spellcheck="false">
                 </div>
             `;
             container.appendChild(card);

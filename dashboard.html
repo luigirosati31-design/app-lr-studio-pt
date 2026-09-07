@@ -95,6 +95,7 @@
         .exercise-block { margin-bottom: 20px; background-color: #0a0a0a; padding: 15px; border-radius: 10px; border: 1px solid #222; }
         .exercise-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
         
+        /* Carosello orizzontale GIF multiple ottimizzato mobile */
         .gif-carousel {
             display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory;
             max-width: 120px; padding-bottom: 4px; flex-shrink: 0;
@@ -569,7 +570,7 @@
             const oggi = new Date();
             const dataOggi = `${oggi.getDate().toString().padStart(2,'0')}/${(oggi.getMonth()+1).toString().padStart(2,'0')}/${oggi.getFullYear()}`;
 
-            // Se siamo in modalità step, salviamo prima lo stato corrente della vista
+            // Se siamo in modalità step, salviamo prima lo stato dell'esercizio corrente a schermo
             if (visualizzazioneModo === 'step') {
                 const b = document.querySelector('.exercise-block');
                 if (b && esercizi[indiceStepCorrente]) {
@@ -619,10 +620,10 @@
                 });
             }
 
-            // Aggiorna lo stato locale del giorno attivo
+            // Aggiorna lo stato locale degli esercizi per il giorno attivo
             sessione.dati_scheda = JSON.stringify(esercizi);
 
-            // Preparazione del payload corretto: protegge l'intera struttura a giorni
+            // Prepara il payload corretto per salvare l'intero programma senza cancellare gli altri giorni
             let payloadDati = "";
             if (isProgrammaCompleto && Array.isArray(programmaCompletoDati) && programmaCompletoDati[indiceSessioneAttiva]) {
                 programmaCompletoDati[indiceSessioneAttiva].esercizi = esercizi;
@@ -660,6 +661,7 @@
         }
 
         function generaHtmlEsercizio(ex, exIdx) {
+            // Carosello orizzontale GIF multiple o singole (con classi originali intatte)
             let listaGifs = ex.gifs || (ex.gif ? [ex.gif] : []);
             let gifHtml = "";
             if (listaGifs.length > 0) {

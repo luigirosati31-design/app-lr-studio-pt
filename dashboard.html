@@ -95,7 +95,6 @@
         .exercise-block { margin-bottom: 20px; background-color: #0a0a0a; padding: 15px; border-radius: 10px; border: 1px solid #222; }
         .exercise-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
         
-        /* Carosello orizzontale GIF multiple ottimizzato mobile */
         .gif-carousel {
             display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory;
             max-width: 120px; padding-bottom: 4px; flex-shrink: 0;
@@ -311,6 +310,8 @@
         let indiceSessioneAttiva = 0;
         let visualizzazioneModo = 'list';
         let indiceStepCorrente = 0;
+        let isProgrammaCompleto = false;
+        let programmaCompletoDati = [];
 
         function faiLogoutAtleta() {
             localStorage.removeItem('studio_pt_client_id');
@@ -568,32 +569,69 @@
             const oggi = new Date();
             const dataOggi = `${oggi.getDate().toString().padStart(2,'0')}/${(oggi.getMonth()+1).toString().padStart(2,'0')}/${oggi.getFullYear()}`;
 
-            document.querySelectorAll('.exercise-block').forEach((b, idx) => {
-                const targetMod = b.querySelector('.ex-target-val').value.trim();
-                if (esercizi[idx] && targetMod) esercizi[idx].target = targetMod;
-
-                let serieDati = [], pesoTrovato = "", almenoUna = false;
-                b.querySelectorAll('tbody tr').forEach(r => {
-                    const kg = r.querySelector('.log-kg').value.trim();
-                    const rip = r.querySelector('.log-rip').value.trim();
-                    if (kg || rip) almenoUna = true;
-                    if (kg) pesoTrovato = kg;
-                    serieDati.push({ kg, rip });
-                });
-
-                if (pesoTrovato && esercizi[idx]) esercizi[idx].ultimo_peso = pesoTrovato;
-                if (almenoUna && esercizi[idx]) {
-                    if (!Array.isArray(esercizi[idx].storico)) esercizi[idx].storico = [];
-                    const found = esercizi[idx].storico.findIndex(s => s.data === dataOggi);
-                    const rec = { data: dataOggi, serie: serieDati };
-                    if (found !== -1) esercizi[idx].storico[found] = rec;
-                    else esercizi[idx].storico.push(rec);
-                    if (esercizi[idx].storico.length > 10) esercizi[idx].storico.shift();
+            // Se siamo in modalità step, salviamo prima lo stato corrente della vista
+            if (visualizzazioneModo === 'step') {
+                const b = document.querySelector('.exercise-block');
+                if (b && esercizi[indiceStepCorrente]) {
+                    const targetMod = b.querySelector('.ex-target-val').value.trim();
+                    if (targetMod) esercizi[indiceStepCorrente].target = targetMod;
+                    let serieDati = [], pesoTrovato = "", almenoUna = false;
+                    b.querySelectorAll('tbody tr').forEach(r => {
+                        const kg = r.querySelector('.log-kg').value.trim();
+                        const rip = r.querySelector('.log-rip').value.trim();
+                        if (kg || rip) almenoUna = true;
+                        if (kg) pesoTrovato = kg;
+                        serieDati.push({ kg, rip });
+                    });
+                    if (pesoTrovato) esercizi[indiceStepCorrente].ultimo_peso = pesoTrovato;
+                    if (almenoUna) {
+                        if (!Array.isArray(esercizi[indiceStepCorrente].storico)) esercizi[indiceStepCorrente].storico = [];
+                        const found = esercizi[indiceStepCorrente].storico.findIndex(s => s.data === dataOggi);
+                        const rec = { data: dataOggi, serie: serieDati };
+                        if (found !== -1) esercizi[indiceStepCorrente].storico[found] = rec;
+                        else esercizi[indiceStepCorrente].storico.push(rec);
+                        if (esercizi[indiceStepCorrente].storico.length > 10) esercizi[indiceStepCorrente].storico.shift();
+                    }
                 }
-            });
+            } else {
+                document.querySelectorAll('.exercise-block').forEach((b, idx) => {
+                    const targetMod = b.querySelector('.ex-target-val').value.trim();
+                    if (esercizi[idx] && targetMod) esercizi[idx].target = targetMod;
 
+                    let serieDati = [], pesoTrovato = "", almenoUna = false;
+                    b.querySelectorAll('tbody tr').forEach(r => {
+                        const kg = r.querySelector('.log-kg').value.trim();
+                        const rip = r.querySelector('.log-rip').value.trim();
+                        if (kg || rip) almenoUna = true;
+                        if (kg) pesoTrovato = kg;
+                        serieDati.push({ kg, rip });
+                    });
+
+                    if (pesoTrovato && esercizi[idx]) esercizi[idx].ultimo_peso = pesoTrovato;
+                    if (almenoUna && esercizi[idx]) {
+                        if (!Array.isArray(esercizi[idx].storico)) esercizi[idx].storico = [];
+                        const found = esercizi[idx].storico.findIndex(s => s.data === dataOggi);
+                        const rec = { data: dataOggi, serie: serieDati };
+                        if (found !== -1) esercizi[idx].storico[found] = rec;
+                        else esercizi[idx].storico.push(rec);
+                        if (esercizi[idx].storico.length > 10) esercizi[idx].storico.shift();
+                    }
+                });
+            }
+
+            // Aggiorna lo stato locale del giorno attivo
             sessione.dati_scheda = JSON.stringify(esercizi);
-            const res = await db.from('schede_clienti').update({ dati_scheda: sessione.dati_scheda }).eq('id', sessione.id);
+
+            // Preparazione del payload corretto: protegge l'intera struttura a giorni
+            let payloadDati = "";
+            if (isProgrammaCompleto && Array.isArray(programmaCompletoDati) && programmaCompletoDati[indiceSessioneAttiva]) {
+                programmaCompletoDati[indiceSessioneAttiva].esercizi = esercizi;
+                payloadDati = JSON.stringify(programmaCompletoDati);
+            } else {
+                payloadDati = sessione.dati_scheda;
+            }
+
+            const res = await db.from('schede_clienti').update({ dati_scheda: payloadDati }).eq('id', sessione.id);
             if (res.error) alert("Errore: " + res.error.message);
             else {
                 if (silenzioso) {
@@ -622,7 +660,6 @@
         }
 
         function generaHtmlEsercizio(ex, exIdx) {
-            // Carosello orizzontale GIF multiple o singole (con classi originali intatte)
             let listaGifs = ex.gifs || (ex.gif ? [ex.gif] : []);
             let gifHtml = "";
             if (listaGifs.length > 0) {
@@ -729,9 +766,9 @@
                     if (bozza[stepIdx].target) b.querySelector('.ex-target-val').value = bozza[stepIdx].target;
                     if (bozza[stepIdx].note) b.querySelector('.coach-notes').value = bozza[stepIdx].note;
                     b.querySelectorAll('tbody tr').forEach((r, rIdx) => {
-                        if (bozza[stepIdx].serie[rIdx]) {
+                        if (bozza[stepIdx].serie && bozza[stepIdx].serie[rIdx]) {
                             r.querySelector('.log-kg').value = bozza[stepIdx].serie[rIdx].kg || '';
-                            r.querySelector('.log-rip').value = bozza[stepIdx].serie[stepIdx] && bozza[stepIdx].serie[rIdx].rip || '';
+                            r.querySelector('.log-rip').value = bozza[stepIdx].serie[rIdx].rip || '';
                             if (bozza[stepIdx].serie[rIdx].check) {
                                 r.querySelector('.check-btn').classList.add('completed');
                                 r.querySelector('.check-btn').innerHTML = '✓';
@@ -767,16 +804,26 @@
                 caricaUltimeMisure();
                 caricaPacchettoMassaggi();
 
-                if (data.length === 1 && data[0].titolo_sessione === "PROGRAMMA_COMPLETO") {
-                    listaSchedeRicevute = JSON.parse(data[0].dati_scheda).map(g => ({ id: data[0].id, titolo_sessione: g.titolo, dati_scheda: JSON.stringify(g.esercizi) }));
+                // Verifica se la scheda è un programma multi-giorno compresso in una riga
+                if (data.length === 1 && (data[0].titolo_sessione === "PROGRAMMA_COMPLETO" || (typeof data[0].dati_scheda === 'string' && data[0].dati_scheda.trim().startsWith('[{"titolo"')))) {
+                    isProgrammaCompleto = true;
+                    programmaCompletoDati = JSON.parse(data[0].dati_scheda);
+                    listaSchedeRicevute = programmaCompletoDati.map(g => ({ 
+                        id: data[0].id, 
+                        titolo_sessione: g.titolo, 
+                        dati_scheda: JSON.stringify(g.esercizi) 
+                    }));
                 } else {
+                    isProgrammaCompleto = false;
                     listaSchedeRicevute = data;
                 }
 
                 indiceSessioneAttiva = 0;
                 renderTabs();
                 mostraSessioneCorrente();
-            } catch (e) {}
+            } catch (e) {
+                console.error("Errore caricamento scheda:", e);
+            }
         }
 
         document.addEventListener("DOMContentLoaded", () => { caricaSchedaCliente(); });

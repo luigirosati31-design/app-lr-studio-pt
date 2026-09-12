@@ -3,13 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Admin - Studio PT</title>
+    <title>Admin - LR Studio PT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #08090b;
+            --card-bg: rgba(18, 20, 25, 0.88);
+            --card-border: rgba(212, 175, 55, 0.22);
+            --gold-main: #d4af37;
+            --gold-gradient: linear-gradient(135deg, #f5e29f 0%, #d4af37 50%, #9e7b17 100%);
+            --input-bg: #121418;
+            --input-border: #262930;
+        }
+
         body {
-            background-color: #0a0a0a;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 50% 10%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+                radial-gradient(circle at 50% 100%, rgba(20, 22, 28, 0.8) 0%, transparent 100%);
             color: #ffffff;
             font-family: 'Montserrat', sans-serif;
             margin: 0;
@@ -19,244 +32,174 @@
         }
         .admin-panel {
             width: 100%;
-            max-width: 650px;
-            background: #111111;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 25px 20px;
+            max-width: 660px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 26px 22px;
             box-sizing: border-box;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.7);
         }
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #222;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
+        .header-brand { display: flex; align-items: center; gap: 10px; }
+        .header-badge {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.82rem; color: var(--gold-main);
+        }
         .header h1 {
-            color: #d4af37;
-            font-size: 1.2rem;
-            margin: 0;
-            text-transform: uppercase;
-            font-weight: 700;
+            color: #fff; font-size: 1.15rem; margin: 0;
+            text-transform: uppercase; font-weight: 800; letter-spacing: 1px;
+        }
+        .header h1 span {
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .header-btn {
-            background: transparent;
-            color: #888;
-            border: 1px solid #333;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.04);
+            color: #9aa1af; border: 1px solid #282b34;
+            padding: 7px 13px; border-radius: 8px;
+            font-size: 0.74rem; cursor: pointer;
+            text-transform: uppercase; font-weight: 700;
+            transition: all 0.2s ease;
         }
+        .header-btn:hover { border-color: var(--gold-main); color: #fff; }
+
         .form-group { margin-bottom: 15px; position: relative; }
         label {
-            display: block;
-            font-size: 0.72rem;
-            color: #aaa;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            font-weight: 600;
+            display: block; font-size: 0.7rem; color: #8c929e;
+            text-transform: uppercase; margin-bottom: 6px;
+            font-weight: 600; letter-spacing: 0.5px;
         }
         input, select {
-            width: 100%;
-            background: #181818;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.85rem;
-            box-sizing: border-box;
+            width: 100%; background: var(--input-bg);
+            border: 1px solid var(--input-border); color: #fff;
+            padding: 11px 12px; border-radius: 9px;
+            font-family: 'Montserrat', sans-serif; font-size: 0.86rem;
+            box-sizing: border-box; transition: border-color 0.2s;
         }
-        input:focus, select:focus { border-color: #d4af37; outline: none; }
+        input:focus, select:focus { border-color: var(--gold-main); outline: none; }
         
         .autocomplete-dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #1a1a1a;
-            border: 1px solid #d4af37;
-            border-radius: 0 0 8px 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 999;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.9);
+            display: none; position: absolute; top: 100%; left: 0; right: 0;
+            background: #14161d; border: 1px solid var(--gold-main);
+            border-radius: 0 0 10px 10px; max-height: 200px;
+            overflow-y: auto; z-index: 999;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.9);
         }
         .autocomplete-item {
-            padding: 10px 12px;
-            font-size: 0.82rem;
-            color: #ddd;
-            cursor: pointer;
-            border-bottom: 1px solid #222;
+            padding: 11px 13px; font-size: 0.82rem; color: #ddd;
+            cursor: pointer; border-bottom: 1px solid #20242e;
         }
-        .autocomplete-item:hover {
-            background: #d4af37;
-            color: #000;
-            font-weight: 600;
-        }
+        .autocomplete-item:hover { background: var(--gold-main); color: #08090b; font-weight: 700; }
 
         .grid-pin { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
         .action-bar-top { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .btn-load {
-            background: #1e1e1e;
-            color: #d4af37;
-            border: 1px solid #d4af37;
-            padding: 11px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            cursor: pointer;
+            background: #161820; color: var(--gold-main);
+            border: 1px solid rgba(212, 175, 55, 0.5); padding: 12px;
+            border-radius: 9px; font-size: 0.78rem; font-weight: 800;
+            text-transform: uppercase; cursor: pointer; transition: all 0.2s ease;
         }
+        .btn-load:hover { background: rgba(212, 175, 55, 0.15); }
         .btn-reset {
-            background: #1a1a1a;
-            color: #aaa;
-            border: 1px solid #444;
-            padding: 11px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            cursor: pointer;
+            background: #13151b; color: #9aa1af;
+            border: 1px solid #282c36; padding: 12px;
+            border-radius: 9px; font-size: 0.78rem; font-weight: 800;
+            text-transform: uppercase; cursor: pointer; transition: all 0.2s ease;
         }
+        .btn-reset:hover { border-color: var(--gold-main); color: #fff; }
+        
         .badge-status {
-            display: none;
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            margin-bottom: 15px;
-            text-align: center;
+            display: none; padding: 11px 14px; border-radius: 8px;
+            font-size: 0.76rem; margin-bottom: 16px; text-align: center; font-weight: 600;
         }
-        .badge-info { background: rgba(212, 175, 55, 0.15); color: #d4af37; border: 1px solid #d4af37; }
-        .badge-success { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid #2ecc71; }
-        .badge-warn { background: rgba(231, 76, 60, 0.15); color: #ff6b6b; border: 1px solid #e74c3c; }
+        .badge-info { background: rgba(212, 175, 55, 0.12); color: var(--gold-main); border: 1px solid rgba(212, 175, 55, 0.3); }
+        .badge-success { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-warn { background: rgba(231, 76, 60, 0.12); color: #ff7675; border: 1px solid rgba(231, 76, 60, 0.3); }
 
         .days-tab-bar {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-            margin-top: 20px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #222;
+            display: flex; gap: 8px; overflow-x: auto;
+            padding-bottom: 10px; margin-top: 20px; margin-bottom: 15px;
+            border-bottom: 1px solid #1f2229;
         }
         .day-tab-btn {
-            background: #161616;
-            color: #888;
-            border: 1px solid #333;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 0.80rem;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
+            background: #14161c; color: #828997; border: 1px solid #262930;
+            padding: 9px 15px; border-radius: 7px; font-size: 0.80rem;
+            font-weight: 700; cursor: pointer; white-space: nowrap;
+            transition: all 0.2s ease;
         }
-        .day-tab-btn.active { background: #d4af37; color: #000; border-color: #d4af37; }
+        .day-tab-btn.active { background: var(--gold-gradient); color: #08090b; border-color: transparent; font-weight: 800; }
         .btn-add-day {
-            background: transparent;
-            color: #d4af37;
-            border: 1px dashed #d4af37;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            white-space: nowrap;
+            background: transparent; color: var(--gold-main); border: 1px dashed var(--gold-main);
+            padding: 9px 15px; border-radius: 7px; font-size: 0.8rem; font-weight: 700; cursor: pointer; white-space: nowrap;
         }
         .day-title-editor {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 15px;
-            background: #161616;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #262626;
+            display: flex; gap: 10px; align-items: center; margin-bottom: 15px;
+            background: #14161c; padding: 10px; border-radius: 9px; border: 1px solid #232732;
         }
-        .day-title-editor input { font-weight: 700; color: #d4af37; }
+        .day-title-editor input { font-weight: 700; color: var(--gold-main); }
         .btn-delete-day {
-            background: rgba(231, 76, 60, 0.15);
-            border: 1px solid #e74c3c;
-            color: #ff6b6b;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            cursor: pointer;
+            background: rgba(231, 76, 60, 0.15); border: 1px solid #e74c3c;
+            color: #ff7675; padding: 10px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;
         }
         .ex-card {
-            background: #0d0d0d;
-            border: 1px solid #222;
-            border-radius: 8px;
-            padding: 14px;
-            margin-bottom: 14px;
+            background: #0c0e12; border: 1px solid #1f2229;
+            border-radius: 12px; padding: 16px; margin-bottom: 16px;
         }
         .ex-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
         }
-        .ex-index { color: #d4af37; font-size: 0.82rem; font-weight: 700; }
-        .btn-remove-ex { background: transparent; border: none; color: #e74c3c; font-size: 0.8rem; cursor: pointer; font-weight: 700; }
+        .ex-index { color: var(--gold-main); font-size: 0.84rem; font-weight: 800; }
+        .btn-remove-ex { background: transparent; border: none; color: #ff7675; font-size: 0.8rem; cursor: pointer; font-weight: 700; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         
         .gif-row-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
         .preview-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #141414;
-            border: 1px solid #222;
-            border-radius: 6px;
-            padding: 10px;
+            display: flex; align-items: center; gap: 10px;
+            background: #14161d; border: 1px solid #232732; border-radius: 8px; padding: 10px;
         }
-        .preview-box img { width: 42px; height: 42px; object-fit: cover; border-radius: 4px; border: 1px solid #d4af37; background: #000; flex-shrink: 0; }
+        .preview-box img { width: 42px; height: 42px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gold-main); background: #000; flex-shrink: 0; }
         .btn-add-gif-row {
-            background: transparent; color: #d4af37; border: 1px dashed #d4af37; padding: 8px; border-radius: 6px;
-            font-size: 0.75rem; font-weight: 700; cursor: pointer; text-transform: uppercase; width: 100%; margin-bottom: 10px;
+            background: transparent; color: var(--gold-main); border: 1px dashed var(--gold-main); padding: 9px; border-radius: 7px;
+            font-size: 0.74rem; font-weight: 700; cursor: pointer; text-transform: uppercase; width: 100%; margin-bottom: 10px;
         }
-        .btn-remove-gif { background: transparent; border: none; color: #e74c3c; font-size: 0.85rem; cursor: pointer; font-weight: 700; padding: 4px 8px; }
+        .btn-remove-gif { background: transparent; border: none; color: #ff7675; font-size: 0.85rem; cursor: pointer; font-weight: 700; padding: 4px 8px; }
 
         .btn-add-ex {
-            width: 100%;
-            background: #161616;
-            color: #888;
-            border: 1px dashed #444;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-transform: uppercase;
-            margin-bottom: 20px;
+            width: 100%; background: #14161d; color: #9aa1af; border: 1px dashed #3a3f4e;
+            padding: 13px; border-radius: 9px; font-size: 0.8rem; font-weight: 700;
+            cursor: pointer; text-transform: uppercase; margin-bottom: 20px;
         }
         .btn-submit {
-            width: 100%;
-            background: #d4af37;
-            color: #000;
-            border: none;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            cursor: pointer;
-            letter-spacing: 1px;
+            width: 100%; background: var(--gold-gradient); color: #08090b; border: none;
+            padding: 15px; border-radius: 10px; font-size: 0.88rem; font-weight: 800;
+            text-transform: uppercase; cursor: pointer; letter-spacing: 1.5px;
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25); transition: all 0.25s ease;
         }
+        .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4); }
     </style>
 </head>
 <body>
 
     <div class="admin-panel">
         <div class="header">
-            <h1>Studio PT - Admin</h1>
+            <div class="header-brand">
+                <div class="header-badge">LR</div>
+                <h1>LR <span>Studio PT</span> Admin</h1>
+            </div>
             <button class="header-btn" onclick="window.location.href='index.html'">Esci</button>
         </div>
 
@@ -268,7 +211,7 @@
             </div>
             <div class="form-group">
                 <label for="clientePin">PIN (4 cifre)</label>
-                <input type="text" id="clientePin" placeholder="1234" maxlength="4" style="text-align: center; font-weight: 700; color: #d4af37; font-size: 1.1rem;" spellcheck="false">
+                <input type="text" id="clientePin" placeholder="1234" maxlength="4" style="text-align: center; font-weight: 800; color: var(--gold-main); font-size: 1.1rem;" spellcheck="false">
             </div>
         </div>
         <input type="hidden" id="clientId">
@@ -332,7 +275,7 @@
             ];
             indiceGiornoAttivo = 0;
             renderTabsGiorni();
-            mostraAvviso("Inserisci il nome, il PIN a 4 cifre e imposta gli esercizi.", "badge-info");
+            mostraAvviso("Nuova scheda pronta. Inserisci nome, PIN e compila gli esercizi.", "badge-info");
         }
 
         async function caricaListaClientiSuggeriti() {
@@ -446,11 +389,13 @@
                 const targetInput = card.querySelector('.input-target');
                 const recInput = card.querySelector('.input-recupero');
                 const videoInput = card.querySelector('.input-video');
+                const noteCoachInput = card.querySelector('.input-note-coach');
 
                 if (!nomeInput) return;
                 const nome = nomeInput.value.trim();
                 const target = targetInput ? targetInput.value.trim() : "3x10";
                 const recupero = recInput ? (parseInt(recInput.value) || 90) : 90;
+                const note_coach = noteCoachInput ? noteCoachInput.value.trim() : "";
                 
                 let gifsArray = [];
                 card.querySelectorAll('.input-gif-hidden').forEach(inp => {
@@ -462,7 +407,7 @@
                 const storico = card.dataset.storico ? JSON.parse(card.dataset.storico) : [];
 
                 if (nome !== "") {
-                    eserciziArray.push({ nome, target, recupero, gifs: gifsArray, video, ultimo_peso, storico });
+                    eserciziArray.push({ nome, target, recupero, gifs: gifsArray, video, note_coach, ultimo_peso, storico });
                 }
             });
             programmaSettimanale[indiceGiornoAttivo].esercizi = eserciziArray;
@@ -555,7 +500,12 @@
                     </div>
                 </div>
 
-                <label style="margin-top: 10px; color: #d4af37;">Riquadri GIF (Aggiungine altri per superserie)</label>
+                <div class="form-group" style="margin-top: 10px;">
+                    <label style="color: var(--gold-main);">Istruzioni / Tecniche Coach (Visibili all'atleta)</label>
+                    <input type="text" class="input-note-coach" placeholder="es. Rest-pause: 8 rip, pausa 5s, chiudi a cedimento" value="${dati.note_coach || ''}" spellcheck="false">
+                </div>
+
+                <label style="margin-top: 10px; color: var(--gold-main);">Riquadri GIF (Aggiungine altri per superserie)</label>
                 <div class="gif-row-container"></div>
                 <button type="button" class="btn-add-gif-row" onclick="aggiungiRiquadroGif(this.closest('.ex-card'))">+ Aggiungi riquadro GIF</button>
 
@@ -656,7 +606,7 @@
                     popolaSelectGifManuale(sel, currentVal);
                 });
             } catch (e) {
-                console.warn("Impossibile caricare l'archivio da GitHub");
+                console.warn("Impossibile caricare archivio GIF");
             }
         }
 
@@ -723,8 +673,8 @@
                 }]);
 
                 if (error) throw error;
-                mostraAvviso("✅ Scheda creata e salvata con successo!", "badge-success");
-                alert("✅ Salvato con successo!");
+                mostraAvviso("✅ Scheda salvata con successo!", "badge-success");
+                alert("✅ Scheda salvata con successo!");
                 caricaListaClientiSuggeriti();
             } catch (err) {
                 alert("Errore: " + err.message);

@@ -102,8 +102,8 @@
         }
 
         .grid-pin { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+        .action-bar-top { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .btn-load {
-            width: 100%;
             background: #1e1e1e;
             color: #d4af37;
             border: 1px solid #d4af37;
@@ -113,7 +113,17 @@
             font-weight: 700;
             text-transform: uppercase;
             cursor: pointer;
-            margin-bottom: 15px;
+        }
+        .btn-reset {
+            background: #1a1a1a;
+            color: #aaa;
+            border: 1px solid #444;
+            padding: 11px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
         }
         .badge-status {
             display: none;
@@ -125,6 +135,8 @@
         }
         .badge-info { background: rgba(212, 175, 55, 0.15); color: #d4af37; border: 1px solid #d4af37; }
         .badge-success { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid #2ecc71; }
+        .badge-warn { background: rgba(231, 76, 60, 0.15); color: #ff6b6b; border: 1px solid #e74c3c; }
+
         .days-tab-bar {
             display: flex;
             gap: 8px;
@@ -249,9 +261,10 @@
         </div>
 
         <div class="grid-pin">
-            <div class="form-group">
+            <div class="form-group" style="position: relative;">
                 <label for="clienteNomeCognome">Nome Atleta</label>
-                <input type="text" id="clienteNomeCognome" placeholder="es. Luca Torre" oninput="generaIdCliente()" spellcheck="false">
+                <input type="text" id="clienteNomeCognome" placeholder="es. Luca Torre" oninput="generaIdCliente()" autocomplete="off" spellcheck="false">
+                <div id="clientiDropdown" class="autocomplete-dropdown"></div>
             </div>
             <div class="form-group">
                 <label for="clientePin">PIN (4 cifre)</label>
@@ -260,7 +273,10 @@
         </div>
         <input type="hidden" id="clientId">
 
-        <button type="button" class="btn-load" onclick="caricaSchedaEsistente()">🔍 Carica Scheda</button>
+        <div class="action-bar-top">
+            <button type="button" class="btn-load" onclick="caricaSchedaEsistente()">🔍 Carica Scheda</button>
+            <button type="button" class="btn-reset" onclick="inizializzaNuovoAtleta()">➕ Nuovo Atleta</button>
+        </div>
         <div id="statusBadge" class="badge-status badge-info"></div>
 
         <div class="days-tab-bar" id="tabsContainer"></div>
@@ -285,6 +301,7 @@
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         let archivioGifEsercizi = [];
+        let listaClientiEsistenti = [];
         let programmaSettimanale = [
             { titolo: "Giorno A", esercizi: [] },
             { titolo: "Giorno B", esercizi: [] }
@@ -300,8 +317,67 @@
 
         function generaIdCliente() {
             const nomeCompleto = document.getElementById('clienteNomeCognome').value.trim();
-            document.getElementById('clientId').value = nomeCompleto.toLowerCase().replace(/\s+/g, '').replace(/[^\w-]/g, '');
+            // Normalizza con trattini (es. "Luca Torre" -> "luca-torre") compatibile con dashboard.html
+            const idFormattato = nomeCompleto.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+            document.getElementById('clientId').value = idFormattato;
         }
+
+        function inizializzaNuovoAtleta() {
+            document.getElementById('clienteNomeCognome').value = "";
+            document.getElementById('clientePin').value = "";
+            document.getElementById('clientId').value = "";
+            programmaSettimanale = [
+                { titolo: "Giorno A", esercizi: [] },
+                { titolo: "Giorno B", esercizi: [] }
+            ];
+            indiceGiornoAttivo = 0;
+            renderTabsGiorni();
+            mostraAvviso("Inserisci il nome, il PIN a 4 cifre e imposta gli esercizi.", "badge-info");
+        }
+
+        async function caricaListaClientiSuggeriti() {
+            try {
+                const { data } = await db.from('schede_clienti').select('client_id, email_cliente');
+                if (data && data.length > 0) {
+                    const unique = new Set();
+                    data.forEach(c => {
+                        if (c.client_id) unique.add(c.client_id);
+                        if (c.email_cliente) unique.add(c.email_cliente);
+                    });
+                    listaClientiEsistenti = Array.from(unique);
+                }
+            } catch(e) {}
+        }
+
+        const inputCliente = document.getElementById('clienteNomeCognome');
+        const dropdownClienti = document.getElementById('clientiDropdown');
+
+        inputCliente.addEventListener('input', function() {
+            const val = this.value.trim().toLowerCase();
+            if (!val || listaClientiEsistenti.length === 0) {
+                dropdownClienti.style.display = 'none';
+                return;
+            }
+            const match = listaClientiEsistenti.filter(c => c.toLowerCase().includes(val));
+            if (match.length > 0) {
+                dropdownClienti.innerHTML = '';
+                match.forEach(c => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerText = c.replace(/-/g, ' ');
+                    item.onclick = () => {
+                        inputCliente.value = c.replace(/-/g, ' ');
+                        generaIdCliente();
+                        dropdownClienti.style.display = 'none';
+                        caricaSchedaEsistente();
+                    };
+                    dropdownClienti.appendChild(item);
+                });
+                dropdownClienti.style.display = 'block';
+            } else {
+                dropdownClienti.style.display = 'none';
+            }
+        });
 
         function renderTabsGiorni() {
             const container = document.getElementById('tabsContainer');
@@ -587,17 +663,24 @@
         async function caricaSchedaEsistente() {
             generaIdCliente();
             const clientId = document.getElementById('clientId').value.trim();
+            const rawNome = document.getElementById('clienteNomeCognome').value.trim().toLowerCase();
             if (!clientId) { alert("Inserisci il nome."); return; }
             mostraAvviso("Caricamento...");
 
             try {
-                const { data, error } = await db.from('schede_clienti').select('*').or(`client_id.eq.${clientId},email_cliente.eq.${clientId}`);
+                const { data, error } = await db.from('schede_clienti')
+                    .select('*')
+                    .or(`client_id.eq.${clientId},email_cliente.eq.${clientId},client_id.eq.${rawNome},email_cliente.eq.${rawNome}`);
+                
                 if (error) throw error;
-                if (!data || data.length === 0) { mostraAvviso("Nessuna scheda trovata."); return; }
+                if (!data || data.length === 0) { 
+                    mostraAvviso("Nessuna scheda trovata per questo atleta. Premi 'Nuovo Atleta' per crearla da zero.", "badge-warn"); 
+                    return; 
+                }
 
                 if (data[0].pin) document.getElementById('clientePin').value = data[0].pin;
 
-                if (data.length === 1 && data[0].titolo_sessione === "PROGRAMMA_COMPLETO") {
+                if (data.length === 1 && (data[0].titolo_sessione === "PROGRAMMA_COMPLETO" || (typeof data[0].dati_scheda === 'string' && data[0].dati_scheda.trim().startsWith('[{"titolo"')))) {
                     programmaSettimanale = JSON.parse(data[0].dati_scheda);
                 } else {
                     programmaSettimanale = data.map(riga => ({
@@ -608,7 +691,7 @@
 
                 indiceGiornoAttivo = 0;
                 renderTabsGiorni();
-                mostraAvviso("✅ Caricata con successo!", "badge-success");
+                mostraAvviso("✅ Scheda caricata con successo!", "badge-success");
             } catch (err) {
                 alert("Errore: " + err.message);
             }
@@ -628,7 +711,9 @@
             btn.innerText = "Salvataggio...";
 
             try {
+                // Rimuove eventuali vecchie configurazioni frammentate per salvare il blocco unico
                 await db.from('schede_clienti').delete().or(`client_id.eq.${clientId},email_cliente.eq.${clientId}`);
+                
                 const { error } = await db.from('schede_clienti').insert([{
                     client_id: clientId,
                     email_cliente: clientId,
@@ -636,10 +721,13 @@
                     titolo_sessione: "PROGRAMMA_COMPLETO",
                     dati_scheda: JSON.stringify(programmaSettimanale)
                 }]);
+
                 if (error) throw error;
+                mostraAvviso("✅ Scheda creata e salvata con successo!", "badge-success");
                 alert("✅ Salvato con successo!");
+                caricaListaClientiSuggeriti();
             } catch (err) {
-                alert("Error: " + err.message);
+                alert("Errore: " + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "💾 Salva Scheda Completa";
@@ -648,6 +736,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             popolaArchivioGifDaGitHub();
+            caricaListaClientiSuggeriti();
             renderTabsGiorni();
         });
     </script>

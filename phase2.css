@@ -52,3 +52,15 @@
  .day-action{grid-column:2;justify-self:start;border-left:0;padding:0}
  .day-preview{line-height:1.45}
 }
+
+/* Compact mobile training rows: small media, full exercise names, less vertical scrolling. */
+@media(max-width:760px){
+ .exercise-head{display:grid;grid-template-columns:68px minmax(0,1fr);align-items:start;gap:10px;padding:12px 0 9px}
+ .exercise .media-thumb{grid-column:1;grid-row:1;width:68px;height:68px;justify-self:start;margin:0}
+ .exercise .exercise-heading{grid-column:2;grid-row:1;min-width:0}
+ .exercise .exercise-heading h3{font-size:14px;line-height:1.33;font-weight:700;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;margin-bottom:4px}
+ .exercise .exercise-number{font-size:10px}
+ .exercise .prescription{font-size:11px;line-height:1.3}
+ .exercise-body{padding-bottom:12px}
+}
+@media(max-width:360px){.exercise-head{grid-template-columns:56px minmax(0,1fr);gap:8px}.exercise .media-thumb{width:56px;height:56px}}

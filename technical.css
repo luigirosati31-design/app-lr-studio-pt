@@ -1,0 +1,53 @@
+/* LR Studio / revisione tecnica: gerarchia operativa, densità e superfici continue. */
+:root{--bg:#111211;--panel:#171817;--line:#333530;--gold:#c5ac7d;--muted:#a9aca4}
+body{font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.45;background-image:none}
+h1,h2,h3,.brand,.stat,.number{font-family:Arial,Helvetica,sans-serif;letter-spacing:normal}
+h1{font-size:28px;font-weight:600;letter-spacing:-.7px}h2{font-size:21px}h3{font-size:16px}
+button,input,select,textarea,.panel,.metric,.editor-card,.sticky-save,dialog{border-radius:4px}
+button{font-weight:500;padding:9px 13px}input,select,textarea{background:#121312}
+.shell{max-width:1120px;padding:0 26px 108px}.topbar{height:74px;margin-bottom:22px}
+.brand{font-size:15px;gap:10px}.brand img{width:46px;height:46px}.brand small{font-size:9px;letter-spacing:1.4px}
+.notice{padding:5px 16px;font-size:11px;background:#1a1b18;color:#bcb7a9;border-color:var(--line)}
+.hero{margin:20px 0 18px;align-items:center;gap:12px}.hero h1{margin-bottom:7px}.hero p{margin:0;font-size:13px;text-transform:capitalize}
+.eyebrow{font-size:10px;letter-spacing:1.3px;margin-bottom:7px;color:var(--muted)}
+.tabs{gap:0;padding:0;margin-bottom:0;border-bottom:1px solid var(--line)}
+.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;padding:12px 16px;background:transparent;font-size:13px}
+.tabs button[aria-selected=true]{background:transparent;color:var(--gold);border-color:var(--gold)}
+.workout-layout{display:flex;flex-direction:column;gap:0}.workout-layout>section{width:100%}
+.side{position:static;order:-1;width:100%;margin-bottom:12px}
+.session-strip{display:grid;grid-template-columns:180px 1fr auto;align-items:center;gap:24px;padding:14px 0;border-bottom:1px solid var(--line)}
+.session-time small{font-size:11px}.session-time .row{gap:12px}.session-time button{min-height:34px;font-size:12px;padding:4px 10px}
+.stat{font-size:24px;font-variant-numeric:tabular-nums}.session-progress p{margin:0 0 7px;font-size:12px}progress{height:4px;display:block}
+.exercise{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;margin:0;overflow:visible}
+.exercise-head{padding:22px 0 8px;gap:12px}.number{font-size:14px;color:var(--muted);min-width:24px;padding-top:1px;font-variant-numeric:tabular-nums}
+.exercise-head h3{margin:0 0 5px}.exercise-body{padding:0 0 20px 36px}.prescription{font-size:12px}
+.coach-note{background:none;margin:4px 0 12px;padding:3px 10px;font-size:12px;border-color:#666959;color:#bec1b8}
+.sets{max-width:680px}.sets th{padding:6px;font-size:10px;letter-spacing:.6px}.sets td{padding:4px 6px}
+.sets input{min-height:44px;font-size:16px}.check{height:44px;min-height:44px;width:44px;font-size:17px;border-radius:4px}
+.exercise-tools{margin-top:10px;gap:8px}.exercise-tools button{border:0;min-height:40px;background:transparent;color:#c2c5bc;padding:7px 8px;text-decoration:underline;text-decoration-color:#55594e;text-underline-offset:4px}
+details{margin:8px 0 0}summary{font-size:12px;padding:8px 0}.bottom-nav{backdrop-filter:none;background:#151615;padding-top:7px;padding-bottom:max(7px,env(safe-area-inset-bottom))}
+.bottom-nav button{border-radius:3px;min-height:44px;font-size:12px}.bottom-nav button[aria-current=page]{background:transparent;color:var(--gold);border-top:2px solid var(--gold)}
+.panel{background:transparent;padding:18px 0;border:0;border-bottom:1px solid var(--line)}.grid2{gap:16px}.metric{background:transparent;padding:14px 0;border:0;border-bottom:1px solid var(--line)}.metric strong{font-size:24px}
+.coach-layout{grid-template-columns:210px minmax(0,1fr);gap:28px}.coach-layout>aside{border-right:1px solid var(--line);padding-right:20px}
+.athlete-list{margin:12px 0}.athlete-list button{border:0;border-left:2px solid transparent;border-radius:0;background:transparent;padding:10px 12px;font-size:13px}
+.athlete-list button.primary{color:var(--gold);border-left-color:var(--gold);background:#c5ac7d09}
+.coach-layout>section>.row h2{font-size:19px;margin:0}.coach-layout>section>.row{margin-bottom:14px}
+.editor-card{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:18px 0;margin:0;display:grid;grid-template-columns:1.3fr 1fr 1.3fr;gap:0 16px}
+.editor-head{grid-column:1/-1}.editor-head .eyebrow{margin:0}.editor-head button{font-size:11px;min-height:34px;padding:5px 8px;background:transparent;border-color:transparent}
+.editor-card>details{grid-column:1/-1}.editor-card label{font-size:11px;margin:10px 0 5px}.editor-card input{min-height:42px;font-size:13px}.editor-card .grid2{gap:8px}
+.sticky-save{bottom:16px;border-radius:4px;background:#20221e;padding:10px 14px;backdrop-filter:none}.coach-layout section>.actions button{font-size:12px;min-height:38px}
+.login-shell{max-width:940px;grid-template-columns:.9fr 1.1fr;min-height:100dvh;align-items:center;padding:40px 0}
+.login-story{padding:38px;background:none;min-height:470px;justify-content:center;gap:40px}.login-story .brand img{width:80px;height:80px}.login-story h1{font-size:32px;line-height:1.2;margin:0 0 14px;letter-spacing:-.6px}.login-story p{font-size:14px}.login-story footer{font-size:11px;max-width:240px}
+.login-form{padding:38px}.login-form h2{font-size:25px}.login-form p{font-size:13px}.login-form .primary{margin-top:20px}.login-form .divider{margin:22px 0}.login-form .actions{gap:16px}.login-form .actions a{font-size:12px}
+@media(min-width:761px){.workout-layout{max-width:850px}.exercise-head{padding-top:20px}.exercise-body{padding-bottom:18px}}
+@media(max-width:760px){
+ .shell{padding:0 16px 90px}.topbar{height:64px;margin-bottom:14px}.topbar button{font-size:12px;min-height:40px}.brand img{width:38px;height:38px}.brand small{font-size:8px}
+ .hero{margin:14px 0}.hero h1{font-size:25px}.hero .eyebrow{display:none}.hero p{font-size:12px;margin:0}.tabs button{padding:10px 12px;font-size:12px;min-height:42px}
+ .session-strip{grid-template-columns:1fr auto;gap:8px 12px;padding:10px 0}.session-time{display:flex;align-items:center;gap:9px}.session-time small{display:none}.session-time .stat{font-size:21px}.session-progress{grid-column:1/-1;grid-row:2}.session-progress p{font-size:11px;margin-bottom:5px}.session-strip>#saveWorkout{font-size:12px;min-height:38px;padding:8px 12px}.side{margin-bottom:0}
+ .exercise-head{padding:16px 0 7px;gap:8px}.exercise-head h3{font-size:15px}.exercise-body{padding:0 0 15px}.number{min-width:19px;font-size:12px}.coach-note{margin:2px 0 8px;font-size:12px}.sets td{padding:3px 4px}.sets th{padding:5px 4px}.exercise-tools{gap:6px}
+ .coach-layout{gap:18px}.coach-layout>aside{padding:0 0 12px;border-right:0}.coach-layout>aside>.eyebrow{display:none}.athlete-list{display:flex;max-height:110px;overflow:auto;margin:6px 0}.athlete-list button{width:auto;white-space:nowrap;flex-shrink:0;margin:0}.coach-layout>aside>button{font-size:12px;min-height:38px}.coach-layout>section>.row{margin-bottom:10px}
+ .editor-card{grid-template-columns:1fr 1fr;gap:0 12px;padding:14px 0}.editor-card>div:nth-child(2){grid-column:1/-1}.editor-card>div:nth-child(3){grid-column:1/-1}.editor-card>div:nth-child(4){grid-column:1/-1}.editor-card .grid2{gap:12px}.editor-head{flex-wrap:nowrap}.editor-head .actions{gap:0}.editor-head button{font-size:10px;padding:4px 6px}.editor-head .eyebrow{font-size:9px;letter-spacing:.5px}
+ .login-shell{padding:0;display:block}.login-story{min-height:0;padding:22px 24px 18px;gap:16px;border-bottom:1px solid var(--line)}.login-story .brand img{width:52px;height:52px}.login-story h1{font-size:23px;margin-bottom:6px}.login-story>div>.eyebrow{display:none}.login-story p{font-size:12px;margin:0}.login-form{padding:26px 24px}.login-form h2{font-size:24px}
+}
+
+.hero p{text-transform:none}.editor-card>.grid2{align-items:end}

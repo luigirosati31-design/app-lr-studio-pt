@@ -1,0 +1,274 @@
+[
+  {
+    "name": "leg raise sbarra",
+    "path": "esercizi/addome/leg_raise_sbarra.gif"
+  },
+  {
+    "name": "russian twist",
+    "path": "esercizi/addome/russian_twist.gif"
+  },
+  {
+    "name": "bicipiti alternati",
+    "path": "esercizi/braccia/bicipiti_alternati.gif"
+  },
+  {
+    "name": "bicipiti45",
+    "path": "esercizi/braccia/bicipiti45.gif"
+  },
+  {
+    "name": "bicipitipancascott",
+    "path": "esercizi/braccia/bicipitipancascott.gif"
+  },
+  {
+    "name": "bicipitiz",
+    "path": "esercizi/braccia/bicipitiz.gif"
+  },
+  {
+    "name": "abductor",
+    "path": "esercizi/gambe/abductor.gif"
+  },
+  {
+    "name": "adductor",
+    "path": "esercizi/gambe/adductor.gif"
+  },
+  {
+    "name": "affondi bulgari bil",
+    "path": "esercizi/gambe/affondi_bulgari_bil.gif"
+  },
+  {
+    "name": "affondisulposto",
+    "path": "esercizi/gambe/affondisulposto.gif"
+  },
+  {
+    "name": "glutei cavi dietro",
+    "path": "esercizi/gambe/glutei_cavi_dietro.gif"
+  },
+  {
+    "name": "glutei cavi lat",
+    "path": "esercizi/gambe/glutei_cavi_lat.gif"
+  },
+  {
+    "name": "glutei ham",
+    "path": "esercizi/gambe/glutei_ham.gif"
+  },
+  {
+    "name": "hip thrust bil",
+    "path": "esercizi/gambe/hip_thrust_bil.gif"
+  },
+  {
+    "name": "hip thrust una gamba",
+    "path": "esercizi/gambe/hip_thrust_una gamba.gif"
+  },
+  {
+    "name": "leg curl seduto",
+    "path": "esercizi/gambe/leg_curl_seduto.gif"
+  },
+  {
+    "name": "leg extension",
+    "path": "esercizi/gambe/leg_extension.gif"
+  },
+  {
+    "name": "pressa orizzontale",
+    "path": "esercizi/gambe/pressa_orizzontale.gif"
+  },
+  {
+    "name": "pressa verticale",
+    "path": "esercizi/gambe/pressa_verticale.gif"
+  },
+  {
+    "name": "reverse hack squat",
+    "path": "esercizi/gambe/reverse_hack_squat.gif"
+  },
+  {
+    "name": "squat bil",
+    "path": "esercizi/gambe/squat_bil.gif"
+  },
+  {
+    "name": "squat iso",
+    "path": "esercizi/gambe/squat_iso.gif"
+  },
+  {
+    "name": "squat machine",
+    "path": "esercizi/gambe/squat_machine.gif"
+  },
+  {
+    "name": "squat q bar",
+    "path": "esercizi/gambe/squat_q_bar.gif"
+  },
+  {
+    "name": "squat sumo",
+    "path": "esercizi/gambe/squat_sumo.gif"
+  },
+  {
+    "name": "stacco",
+    "path": "esercizi/gambe/stacco.gif"
+  },
+  {
+    "name": "chest press",
+    "path": "esercizi/petto/chest_press.gif"
+  },
+  {
+    "name": "croci cavi",
+    "path": "esercizi/petto/croci_cavi.gif"
+  },
+  {
+    "name": "crociinclinate",
+    "path": "esercizi/petto/crociinclinate.gif"
+  },
+  {
+    "name": "crocipancapiana",
+    "path": "esercizi/petto/crocipancapiana.gif"
+  },
+  {
+    "name": "dip",
+    "path": "esercizi/petto/dip.gif"
+  },
+  {
+    "name": "disntensioni",
+    "path": "esercizi/petto/disntensioni.gif"
+  },
+  {
+    "name": "panca inclinata multip",
+    "path": "esercizi/petto/panca_inclinata_multip.gif"
+  },
+  {
+    "name": "pancainclinata",
+    "path": "esercizi/petto/pancainclinata.gif"
+  },
+  {
+    "name": "pancapiana",
+    "path": "esercizi/petto/pancapiana.gif"
+  },
+  {
+    "name": "peck fly",
+    "path": "esercizi/petto/peck_fly.gif"
+  },
+  {
+    "name": "piegamentipiedipanca",
+    "path": "esercizi/petto/piegamentipiedipanca.gif"
+  },
+  {
+    "name": "spintepancainclinata",
+    "path": "esercizi/petto/spintepancainclinata.gif"
+  },
+  {
+    "name": "australian pull up",
+    "path": "esercizi/schiena/australian_pull_up.gif"
+  },
+  {
+    "name": "lat machine larga",
+    "path": "esercizi/schiena/lat_machine_larga.gif"
+  },
+  {
+    "name": "lat machine triangolo",
+    "path": "esercizi/schiena/lat_machine_triangolo.gif"
+  },
+  {
+    "name": "pulley presa larga",
+    "path": "esercizi/schiena/pulley_presa_larga.gif"
+  },
+  {
+    "name": "pulley triangolo",
+    "path": "esercizi/schiena/pulley_triangolo.gif"
+  },
+  {
+    "name": "rematore bilanciere presa inversa",
+    "path": "esercizi/schiena/rematore_bilanciere_presa_inversa.gif"
+  },
+  {
+    "name": "rematore bilanciere presa prona",
+    "path": "esercizi/schiena/rematore_bilanciere_presa_prona.gif"
+  },
+  {
+    "name": "rematore cavi",
+    "path": "esercizi/schiena/rematore_cavi.gif"
+  },
+  {
+    "name": "rematore panca",
+    "path": "esercizi/schiena/rematore_panca.gif"
+  },
+  {
+    "name": "rematore1arm",
+    "path": "esercizi/schiena/rematore1arm.gif"
+  },
+  {
+    "name": "renegade",
+    "path": "esercizi/schiena/renegade.gif"
+  },
+  {
+    "name": "scroll",
+    "path": "esercizi/schiena/scroll.gif"
+  },
+  {
+    "name": "t bar",
+    "path": "esercizi/schiena/t_bar.gif"
+  },
+  {
+    "name": "trazioni presa larga",
+    "path": "esercizi/schiena/trazioni_presa_larga.gif"
+  },
+  {
+    "name": "alzate frontali",
+    "path": "esercizi/spalle/alzate_frontali.gif"
+  },
+  {
+    "name": "alzate laterali",
+    "path": "esercizi/spalle/alzate_laterali.gif"
+  },
+  {
+    "name": "arnold press",
+    "path": "esercizi/spalle/arnold_press.gif"
+  },
+  {
+    "name": "bicipiti alternati",
+    "path": "esercizi/spalle/bicipiti_alternati.gif"
+  },
+  {
+    "name": "bicipiti martello cavi",
+    "path": "esercizi/spalle/bicipiti_martello_cavi.gif"
+  },
+  {
+    "name": "bicipiti martello manubri",
+    "path": "esercizi/spalle/bicipiti_martello_manubri.gif"
+  },
+  {
+    "name": "croci 90",
+    "path": "esercizi/spalle/croci_90.gif"
+  },
+  {
+    "name": "croci peck fly",
+    "path": "esercizi/spalle/croci_peck_fly.gif"
+  },
+  {
+    "name": "french press",
+    "path": "esercizi/spalle/french_press.gif"
+  },
+  {
+    "name": "military press multip",
+    "path": "esercizi/spalle/military_press_multip.gif"
+  },
+  {
+    "name": "push press",
+    "path": "esercizi/spalle/push_press.gif"
+  },
+  {
+    "name": "shoulder press",
+    "path": "esercizi/spalle/shoulder_press.gif"
+  },
+  {
+    "name": "spinte panca 90",
+    "path": "esercizi/spalle/spinte_panca_90.gif"
+  },
+  {
+    "name": "tricipiti corda",
+    "path": "esercizi/spalle/tricipiti_corda.gif"
+  },
+  {
+    "name": "tricipiti ov",
+    "path": "esercizi/spalle/tricipiti_ov.gif"
+  },
+  {
+    "name": "tricipiti v",
+    "path": "esercizi/spalle/tricipiti_v.gif"
+  }
+]

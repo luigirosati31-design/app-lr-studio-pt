@@ -44,7 +44,13 @@ export async function loadRows(id){
  if(demo)return clone(JSON.parse(sessionStorage.getItem('lr-demo-rows')||'null')||[{id:1,client_id:'atleta-demo',email_cliente:'atleta-demo',titolo_sessione:'PROGRAMMA_COMPLETO',dati_scheda:JSON.stringify(demoProgram)}]);
  return check(await queryOwner(client().from('schede_clienti').select(columns),id).order('id'));
 }
-export async function listAthletes(){if(demo)return [{client_id:'atleta-demo',email_cliente:'Atleta Demo'}];return check(await client().from('schede_clienti').select('client_id,email_cliente').order('client_id'));}
+export async function listAthletes(){
+ if(demo)return [{client_id:'atleta-demo',email_cliente:'Atleta Demo'}];
+ const rows=check(await client().from('schede_clienti').select('client_id,email_cliente').order('client_id'));
+ const {data,error}=await client().functions.invoke('coach-account',{body:{action:'list'}});
+ if(error||!data?.ok)throw Error('Impossibile caricare gli atleti. Riprova.');
+ return [...rows,...data.usernames.filter(name=>!rows.some(row=>row.client_id===name||row.email_cliente===name)).map(name=>({client_id:name,email_cliente:name}))];
+}
 export async function saveProgram(id,rows,program){
  if(demo){sessionStorage.setItem('lr-demo-rows',JSON.stringify([{id:1,client_id:id,email_cliente:id,titolo_sessione:'PROGRAMMA_COMPLETO',dati_scheda:JSON.stringify(program)}]));return;}
  check(await client().rpc('lr_save_program',{p_client:validateId(id),p_expected:rows.map(r=>({id:r.id,dati_scheda:r.dati_scheda})),p_program:program}));

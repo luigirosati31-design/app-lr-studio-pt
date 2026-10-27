@@ -1,7 +1,7 @@
 import {el,button} from './ui.js';
 import {safeURL} from './core.js?v=20261027.2';
 import {icon} from './icons.js';
-function player(src,name,large=false){const video=/\.mp4(?:\?|$)/i.test(src);const node=video?el('video',{src,...(large?{controls:'',autoplay:'',muted:'',playsinline:''}:{muted:'',preload:'metadata',playsinline:''}),'aria-label':name}):el('img',{src,alt:`Dimostrazione: ${name}`,loading:'lazy'});return node;}
+function player(src,name,large=false){const video=/\.mp4(?:\?|$)/i.test(src);const node=video?el('video',{src,...(large?{controls:'',autoplay:'',muted:'',playsinline:''} :{autoplay:'',loop:'',muted:'',preload:'auto',playsinline:''}),'aria-label':name}):el('img',{src,alt:`Dimostrazione: ${name}`,loading:'lazy'});return node;}
 export function mediaThumb(ex){
  const urls=(ex.gifs?.length?ex.gifs:ex.gif?[ex.gif]:[]).map(s=>safeURL(s,true)).filter(Boolean);
  if(!urls.length)return el('div',{class:'media-thumb empty'},icon('dumbbell'),el('small',{},'Nessuna GIF'));

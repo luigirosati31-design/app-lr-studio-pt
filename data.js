@@ -1,4 +1,5 @@
-import {clone,demoProgram} from './core.js';
+import {clone,demoProgram} from './core.js?v=20261027.2';
+import {accessError,loginFailure} from './login-errors.js?v=20261027.2';
 const demo=new URLSearchParams(location.search).get('demo')==='1';
 export const isDemo=demo;
 export const config=window.LR_CONFIG;
@@ -11,12 +12,15 @@ export function client(){
 export async function login(username,password){
  const name=username.trim().toLowerCase();
  if(!/^[a-z][a-z0-9._-]{2,31}$/.test(name))throw Error('Controlla il nome utente.');
- const {data,error}=await client().functions.invoke('username-login',{body:{username:name,password}});
- if(error||!data?.access_token||!data?.refresh_token)throw Error('Nome utente o password non validi.');
+ if(globalThis.navigator?.onLine===false)throw loginFailure(Object.assign(new Error(),{name:'FunctionsFetchError'}));
+ let response;try{response=await client().functions.invoke('username-login',{body:{username:name,password}});}catch(e){throw loginFailure(e);}
+ const {data,error}=response;
+ if(error||!data?.access_token||!data?.refresh_token)throw loginFailure(error);
  const {error:sessionError}=await client().auth.setSession({access_token:data.access_token,refresh_token:data.refresh_token});
- if(sessionError)throw Error('Accesso non riuscito. Riprova.');
+ if(sessionError)throw loginFailure(sessionError);
  const {data:verified,error:userError}=await client().auth.getUser();
- if(userError||!verified.user){await client().auth.signOut();throw Error('Accesso non riuscito. Riprova.');}
+ if(userError)throw loginFailure(userError);
+ if(!verified.user){await client().auth.signOut();throw Error('Accesso non completato. Riprova.');}
  if(!['coach','athlete'].includes(verified.user.app_metadata?.role)){await client().auth.signOut();throw Error('Account non ancora associato. Contatta Luigi.');}
  return verified.user;
 }
@@ -37,7 +41,7 @@ export async function identity(coach=false){
  return data.user;
 }
 export async function logout(){try{if(db)await db.auth.signOut();}finally{sessionStorage.removeItem('lr-auth');sessionStorage.removeItem('lr-studio-auth');location.href='index.html';}}
-function check(result){if(result.error){if(result.error.message?.includes('Scheda aggiornata altrove'))throw Error('La scheda è stata aggiornata altrove. La bozza locale è conservata: ricarica e verifica gli aggiornamenti prima di salvare.');throw Error('Operazione non riuscita. Riprova; i dati locali sono conservati.');}return result.data;}
+function check(result){if(result.error){if(result.error.message?.includes('Scheda aggiornata altrove'))throw accessError('program_changed','La scheda è stata aggiornata altrove. La bozza locale è conservata: aggiorna e recupera prima di salvare.');throw Error('Operazione non riuscita. Riprova; i dati locali sono conservati.');}return result.data;}
 const columns='id,created_at,client_id,email_cliente,titolo_sessione,dati_scheda';
 function queryOwner(query,id){return query.or(`client_id.eq.${id},email_cliente.eq.${id}`);}
 export function validateId(id){if(!/^[a-z0-9@._ -]{1,160}$/i.test(id))throw Error('Identificativo atleta non valido.');return id;}

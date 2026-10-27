@@ -1,16 +1,42 @@
-﻿import {mediaThumb} from './media.js';
-import {identity,isDemo,loadRows,saveWorkout,logout,measurements,saveMeasurements,massage,config} from './data.js';
-import {normalize,makeDraft,recordDay,payloads,clone,safeURL,targetInfo} from './core.js';
-import {activities,daysWithActivity,measurementTrend,weeklyTraining,strengthChanges} from './insights.js';
+import {mediaThumb} from './media.js';
+import {identity,isDemo,loadRows,saveWorkout,logout,measurements,saveMeasurements,massage,config} from './data.js?v=20261027.2';
+import {normalize,makeDraft,recordDay,payloads,clone,safeURL,targetInfo} from './core.js?v=20261027.2';
+import {activities,daysWithActivity,measurementTrend,weeklyTraining,strengthChanges} from './insights.js?v=20261027.2';
 import {$,el,button,toast,error,field,hero} from './ui.js';
+import {readDraft,writeDraft,cachedProgram,recoverDraft,recoveryTarget,prescription,hasLog,downloadDraft} from './drafts.js?v=20261027.2';
 let user,rows,program,draft,day=0,view='training',busy=false,restEnd=0,sessionStart=0,workoutOpen=false;
+let recoveryItems=[],recoveryMessage='',storageWarning=false,refreshRequired=false;
 const key=()=>`lr-v2-draft-${isDemo?'demo':user.id}`;
-function store(){try{sessionStorage.setItem(key(),JSON.stringify({source:rows.map(r=>r.dati_scheda),draft,sessionStart,selectedDay:day,workoutOpen}));}catch{toast('Memoria locale piena: conserva la pagina aperta e salva la sessione.');}}
+function snapshot(){return {version:3,source:rows.map(r=>r.dati_scheda),titles:rows.map(r=>r.titolo_sessione),program,draft,sessionStart,selectedDay:day,workoutOpen,recoveryItems,recoveryMessage};}
+function store(){if(!user||!program)return;try{storageWarning=!writeDraft(key(),snapshot());}catch{storageWarning=true;}if(storageWarning){toast('La bozza non può essere conservata alla chiusura. Scaricala prima di uscire.');const report=$('#error');report.className='error';report.replaceChildren(el('p',{},'La memoria del dispositivo non è disponibile. Scarica la bozza prima di chiudere.'),button('Scarica bozza',()=>downloadDraft(snapshot())));}}
+function applyUpdatedRows(nextRows){
+ const next=normalize(nextRows),selectedTitle=program[day]?.titolo;
+ const recovered=recoverDraft(program,draft,next);
+ if(prescription(program)!==prescription(next))recoveryMessage=`Scheda aggiornata dal coach. ${recovered.recovered} esercizi recuperati; controlla la bozza prima di continuare.`;
+ recoveryItems.push(...recovered.items);draft=recovered.draft;program=next;rows=nextRows;
+ const selected=program.findIndex(value=>value.titolo===selectedTitle);day=selected>=0?selected:0;
+ store();
+}
 $('#logout').onclick=()=>logout();
 $('#demoNotice').hidden=!isDemo;
 document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{view=b.dataset.view;if(view==='training'){workoutOpen=false;store();}render().catch(error);});
-async function init(){try{user=await identity();rows=await loadRows(user.app_metadata.client_id);program=normalize(rows);draft=makeDraft(program);const cached=sessionStorage.getItem(key());if(cached){try{const c=JSON.parse(cached);if(JSON.stringify(c.source)===JSON.stringify(rows.map(r=>r.dati_scheda))){draft=c.draft;sessionStart=c.sessionStart||0;day=Math.min(Math.max(0,c.selectedDay||0),Math.max(0,program.length-1));workoutOpen=!!c.workoutOpen;}else toast('Scheda aggiornata dal coach. Bozza precedente conservata, non applicata.');}catch{toast('Bozza non leggibile. Scheda originale disponibile.');}}$('.bottom-nav').hidden=false;await render();}catch(e){$('#content').replaceChildren();error(e);}}
-function updateProgress(){const all=draft[day]?.flatMap(e=>e.serie)||[],done=all.filter(s=>s.check).length;const p=$('#progress');if(p)p.value=all.length?done/all.length:0;const label=$('#progressLabel');if(label)label.textContent=`${done} di ${all.length} serie completate`;for(const id of ['#saveWorkout','#saveWorkoutDock']){const saveButton=$(id);if(saveButton){saveButton.disabled=busy||done===0;saveButton.textContent=busy?'Salvataggio…':'Concludi e salva';}}const dock=$('#workoutSaveDock');if(dock){dock.hidden=done===0;const count=$('#dockProgress');if(count)count.textContent=`${done}/${all.length} serie`;document.body.classList.toggle('workout-save-visible',done>0);}else document.body.classList.remove('workout-save-visible');const start=$('#startWorkout');if(start&&sessionStart){start.textContent='In corso';start.disabled=true;}}
+async function init(){try{
+ user=await identity();rows=await loadRows(user.app_metadata.client_id);program=normalize(rows);draft=makeDraft(program);
+ const c=readDraft(key());if(c){
+  recoveryItems=Array.isArray(c.recoveryItems)?c.recoveryItems:[];recoveryMessage=c.recoveryMessage||'';
+  recoveryItems.push(...(c.damagedCopies||[]).map(damagedRaw=>({reason:'Copia precedente non leggibile',damagedRaw})));
+  try{
+   if(c.damagedRaw)throw Error();
+   const previous=cachedProgram(c,program),recovered=recoverDraft(previous,c.draft,program);
+   draft=recovered.draft;recoveryItems.push(...recovered.items);
+   if(prescription(previous)!==prescription(program))recoveryMessage=`Scheda aggiornata dal coach. ${recovered.recovered} esercizi recuperati; controlla la bozza prima di continuare.`;
+   const title=previous[c.selectedDay||0]?.titolo,selected=program.findIndex(value=>value.titolo===title);
+   day=selected>=0?selected:0;sessionStart=c.sessionStart||0;workoutOpen=!!c.workoutOpen;
+  }catch{recoveryItems.push({reason:'Bozza precedente non leggibile',damagedRaw:c.damagedRaw||JSON.stringify(c)});recoveryMessage='La bozza precedente è conservata e scaricabile. La scheda attuale è disponibile.';}
+ }
+ store();$('.bottom-nav').hidden=false;await render();
+ }catch(e){$('#content').replaceChildren();error(e);}}
+function updateProgress(){document.querySelectorAll('#content input,#content textarea,#content select,#content button,.bottom-nav button').forEach(n=>n.disabled=busy);const all=draft[day]?.flatMap(e=>e.serie)||[],done=all.filter(s=>s.check).length;const p=$('#progress');if(p)p.value=all.length?done/all.length:0;const label=$('#progressLabel');if(label)label.textContent=`${done} di ${all.length} serie completate`;for(const id of ['#saveWorkout','#saveWorkoutDock']){const saveButton=$(id);if(saveButton){saveButton.disabled=busy||done===0;saveButton.textContent=busy?'Salvataggio…':'Concludi e salva';}}const dock=$('#workoutSaveDock');if(dock){dock.hidden=done===0;const count=$('#dockProgress');if(count)count.textContent=`${done}/${all.length} serie`;document.body.classList.toggle('workout-save-visible',done>0);}else document.body.classList.remove('workout-save-visible');const start=$('#startWorkout');if(start&&sessionStart){start.textContent='In corso';start.disabled=true;}}
 function rest(seconds){restEnd=Date.now()+Math.max(0,Number(seconds)||90)*1000;$('#rest').hidden=false;tick();}
 $('#stopRest').onclick=()=>{restEnd=0;$('#rest').hidden=true;};
 function tick(){if(restEnd){const left=Math.max(0,Math.ceil((restEnd-Date.now())/1000));$('#restTime').textContent=`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;if(!left){restEnd=0;$('#rest').hidden=true;toast('Recupero terminato. Pronto per la prossima serie.');}}const clock=$('#clock');if(clock){const sec=sessionStart?Math.floor((Date.now()-sessionStart)/1000):0;clock.textContent=`${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;}}
@@ -19,6 +45,7 @@ async function render(){document.body.classList.remove('workout-save-visible');d
 function renderTraining(){
  if(!workoutOpen){renderHome();return;}
  const root=$('#content');
+ renderDraftNotice(root);
  if(!program.length){root.append(el('div',{class:'panel empty'},'La tua scheda è in preparazione. Contatta il coach.'));return;}
  const title=String(program[day].titolo||'').replace(/^\s*[A-Z]\s*[·–-]\s*/i,'').trim();
  const switcher=el('select',{'aria-label':'Cambia giorno'},...program.map((session,index)=>el('option',{value:index},'Giorno '+dayLetter(index))));switcher.value=String(day);
@@ -41,17 +68,43 @@ async function save(){
  if(!completed){toast('Conferma almeno una serie prima di salvare.');return;}
  busy=true;updateProgress();
  try{
+  const latest=await loadRows(user.app_metadata.client_id);
+  if(prescription(normalize(latest))!==prescription(program)){applyUpdatedRows(latest);renderTrainingOnly();toast('Il coach ha aggiornato la scheda. Controlla la bozza recuperata e salva di nuovo.');return;}
+  rows=latest;program=normalize(rows);
+  const savedDay=day;
   const updated=recordDay(program,draft,day,new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}));
+  store(); // Conserva l'identificativo prima della richiesta: il retry è idempotente.
   const nextPayloads=payloads(rows,updated);
   await saveWorkout(rows,updated);
   try{rows=await loadRows(user.app_metadata.client_id);}catch{
    rows=rows.map(row=>({...row,dati_scheda:nextPayloads.find(p=>p.id===row.id)?.value||row.dati_scheda}));
    toast('Allenamento salvato. La scheda aggiornata sarà disponibile alla prossima apertura.');
   }
-  program=normalize(rows);
-  draft[day]=makeDraft(program)[day];sessionStart=0;store();
+  draft[savedDay]=makeDraft(updated)[savedDay];program=updated;applyUpdatedRows(rows);sessionStart=0;store();
+  refreshRequired=false;$('#error').replaceChildren();
+  renderTrainingOnly();
   showSuccess(completed);
- }catch(e){error(e);}finally{busy=false;updateProgress();}
+ }catch(e){if(e.code==='program_changed'){refreshRequired=true;renderTrainingOnly();}error(e);}finally{busy=false;updateProgress();}
+}
+function renderDraftNotice(root){
+ if(!recoveryMessage&&!recoveryItems.length&&!storageWarning&&!refreshRequired)return;
+ const box=el('section',{class:'notice draft-notice','aria-label':'Bozza allenamento'},el('p',{},storageWarning?'La memoria del dispositivo non è disponibile: scarica la bozza prima di chiudere.':refreshRequired?'La scheda è cambiata durante il salvataggio. Le tue serie sono conservate.':recoveryMessage||'Hai serie precedenti da controllare.'),el('small',{},recoveryItems.length?`${recoveryItems.length} esercizi o bozze da controllare.`:'Bozza conservata su questo dispositivo.'));
+ box.append(el('div',{class:'actions'},button('Scarica bozza',()=>downloadDraft(snapshot())),...(recoveryItems.length?[button('Controlla bozza',showDraftRecovery)]:[]),...(refreshRequired?[button('Aggiorna e recupera',async()=>{try{applyUpdatedRows(await loadRows(user.app_metadata.client_id));refreshRequired=false;$('#error').replaceChildren();renderTrainingOnly();}catch(e){error(e);}})]:[]),...(!recoveryItems.length&&!refreshRequired&&!storageWarning?[button('Ho controllato',()=>{recoveryMessage='';store();renderTrainingOnly();})]:[])));
+ root.append(box);
+}
+function showDraftRecovery(){
+ const dialog=el('dialog',{'aria-label':'Recupero bozza',class:'new-program-dialog'},el('h2',{},'Serie da controllare'),el('p',{},'Le serie compatibili sono già nella scheda. Queste richiedono un controllo: puoi scaricarle senza perderle.'));
+ recoveryItems.forEach((item,index)=>{
+  const panel=el('section',{class:'panel'},el('h3',{},item.exercise||'Bozza precedente'),el('p',{},[item.day,item.target,item.reason].filter(Boolean).join(' · ')));
+  if(item.log){panel.append(el('p',{},item.log.serie.map(s=>`${s.kg||'—'} kg × ${s.rip||'—'}${s.check?' ✓':''}`).join(' / ')));if(item.log.note)panel.append(el('p',{},item.log.note));}
+  const target=recoveryTarget(program,item);
+  if(target&&!hasLog(draft[target.day][target.exercise]))panel.append(button('Recupera serie in questo esercizio',()=>{
+   draft[target.day][target.exercise]={...clone(item.log),sessionId:item.log.sessionId||draft[target.day][target.exercise].sessionId};recoveryItems.splice(index,1);recoveryMessage='Serie recuperate. Controllale prima di salvare.';store();dialog.close();renderTrainingOnly();
+  }));
+  dialog.append(panel);
+ });
+ dialog.append(el('div',{class:'actions'},button('Scarica bozza completa',()=>downloadDraft(snapshot())),button('Chiudi',()=>dialog.close()),button('Rimuovi bozza precedente',()=>{if(confirm('Rimuovere le serie da controllare? Prima scaricale se vuoi conservarle.')){recoveryItems=[];recoveryMessage='';store();dialog.close();renderTrainingOnly();}},'danger')));
+ dialog.addEventListener('close',()=>dialog.remove());document.body.append(dialog);dialog.showModal();
 }
 function measureSparkline(rows,key,label,unit){
  const points=(rows||[]).map(row=>({date:row.created_at,value:Number(String(row[key]||'').replace(',','.'))})).filter(item=>Number.isFinite(item.value)&&item.value>0).slice(0,8).reverse();
@@ -122,6 +175,7 @@ function renderHome(){
   root.append(el('section',{class:'welcome'},
     el('div',{class:'eyebrow'},'LR STUDIO · IL TUO PROGRAMMA'),
     el('h1',{},name?'Bentornato, '+name+'.':'Bentornato.',el('span',{},'Cosa alleniamo oggi?'))));
+  renderDraftNotice(root);
   if(!program.length){root.append(el('div',{class:'panel empty'},'Il coach sta preparando il tuo programma.'));return;}
   const grid=el('div',{class:'day-grid','aria-label':'Giorni di allenamento'});
   program.forEach((session,index)=>{

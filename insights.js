@@ -15,11 +15,11 @@ export function activities(program){
     for(const ex of day.esercizi||[]){
       for(const record of Array.isArray(ex.storico)?ex.storico:[]){
         if(!Array.isArray(record.serie)||!record.serie.length)continue;
-        items.push({dayIndex,day:day.titolo,exercise:ex.nome||'Esercizio',date:record.data||'',sets:record.serie.length,note:record.note||'',series:record.serie});
+        items.push({dayIndex,day:day.titolo,exercise:ex.nome||'Esercizio',date:record.data||'',savedAt:record.saved_at||'',sets:record.serie.length,note:record.note||'',series:record.serie});
       }
     }
   }
-  return items.sort((a,b)=>dateValue(b.date)-dateValue(a.date));
+  return items.sort((a,b)=>dateValue(b.date)-dateValue(a.date)||b.savedAt.localeCompare(a.savedAt));
 }
 
 export function daysWithActivity(program){return new Set(activities(program).map(a=>a.date).filter(Boolean)).size;}

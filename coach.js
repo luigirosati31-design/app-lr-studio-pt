@@ -1,21 +1,36 @@
 import {mediaThumb} from './media.js';
-import {identity,isDemo,listAthletes,loadRows,saveProgram,coachAccount,logout,validateId} from './data.js';
-import {normalize,clone,safeURL} from './core.js';
-import {activities,daysWithActivity} from './insights.js';
+import {identity,isDemo,listAthletes,loadRows,saveProgram,coachAccount,logout,validateId} from './data.js?v=20261027.2';
+import {normalize,clone,safeURL} from './core.js?v=20261027.2';
+import {activities,daysWithActivity} from './insights.js?v=20261027.2';
 import {exerciseOptions,findExercise} from './exercise-library.js';
 import {$,el,button,toast,error,field} from './ui.js';
+import {readDraft,writeDraft,removeDraft,downloadDraft} from './drafts.js?v=20261027.2';
 let rows=[],program=[],day=0,id='',dirty=false,athletes=[],media=[],coachUser;
+let previousDrafts=[];
 const expandedCards=new WeakMap();
 const draftKey=()=>`lr-coach-${isDemo?'demo':coachUser?.id||'none'}-${id}`;
-$('#demoNotice').hidden=!isDemo;$('#logout').onclick=()=>{if(!dirty||confirm('La bozza resta in questa sessione. Vuoi uscire?'))logout();};
-function changed(){dirty=true;try{sessionStorage.setItem(draftKey(),JSON.stringify({program,source:rows.map(r=>r.dati_scheda)}));}catch{toast('Impossibile conservare la bozza locale. Esportala prima di uscire.');}const status=$('#saveStatus');if(status)status.textContent='Modifiche da salvare';}
+$('#demoNotice').hidden=!isDemo;$('#logout').onclick=()=>{if(!dirty||confirm('La bozza resta su questo dispositivo. Vuoi uscire?'))logout();};
+function persistCoachDraft(){try{if(!writeDraft(draftKey(),{program,source:rows.map(r=>r.dati_scheda),dirty,previousDrafts}))toast('Bozza disponibile solo in questa scheda. Esportala prima di chiudere.');}catch{toast('Impossibile conservare la bozza locale. Esportala prima di uscire.');}}
+function changed(){dirty=true;persistCoachDraft();const status=$('#saveStatus');if(status)status.textContent='Modifiche da salvare';}
 async function init(){try{coachUser=await identity(true);athletes=await listAthletes();try{media=await(await fetch('esercizi.json')).json();}catch{}render();}catch(e){$('#content').replaceChildren();error(e);}}
-async function open(clientId){if(dirty&&!confirm('Cambiare atleta? La bozza corrente resta disponibile in questa sessione.'))return;try{rows=await loadRows(clientId);program=normalize(rows);id=clientId;day=0;dirty=false;const cached=sessionStorage.getItem(draftKey());if(cached){const c=JSON.parse(cached);if(JSON.stringify(c.source)===JSON.stringify(rows.map(r=>r.dati_scheda))&&confirm('Riprendere le modifiche non salvate?')){program=c.program;dirty=true;}else toast('Bozza conservata; caricato il programma corrente.');}render();}catch(e){error(e);}}
+async function open(clientId){if(dirty&&!confirm('Cambiare atleta? La bozza corrente resta su questo dispositivo.'))return;try{
+ rows=await loadRows(clientId);program=normalize(rows);id=clientId;day=0;dirty=false;previousDrafts=[];
+ const c=readDraft(draftKey());if(c){
+  previousDrafts=Array.isArray(c.previousDrafts)?c.previousDrafts:[];
+  previousDrafts.push(...(c.damagedCopies||[]).map(damagedRaw=>({damagedRaw})));
+  if(c.damagedRaw)previousDrafts.push({damagedRaw:c.damagedRaw});
+  else if(c.dirty!==false){
+   if(JSON.stringify(c.source)===JSON.stringify(rows.map(r=>r.dati_scheda))&&confirm('Riprendere le modifiche non salvate?')){program=c.program;dirty=true;}
+   else{previousDrafts.push({program:c.program,source:c.source});toast('Caricata la scheda attuale. La bozza precedente è conservata e scaricabile.');}
+  }
+  persistCoachDraft();
+ }render();
+ }catch(e){error(e);}}
 function newProgramDialog(){
  if(dirty&&!confirm('Conservare la bozza e iniziare un nuovo programma?'))return;
  const dialog=el('dialog',{class:'new-program-dialog','aria-label':'Nuovo programma'});
  const form=el('form',{},el('h2',{},'Nuovo programma'),el('p',{},'Inserisci l’identificativo assegnato all’atleta. Per l’accesso reale, associa poi questo ID al suo account.'),field('ID atleta',el('input',{name:'clientId',required:'',maxlength:160,placeholder:'es. mario-rossi',autocomplete:'off'})),el('div',{class:'actions'},button('Annulla',()=>dialog.close(),'quiet',{type:'button'}),el('button',{type:'submit',class:'primary'},'Continua')));
- form.addEventListener('submit',event=>{event.preventDefault();const value=form.elements.clientId.value.trim();try{validateId(value);dialog.close();if(athletes.some(a=>(a.client_id||a.email_cliente)===value)){open(value);return;}id=value;rows=[];program=[{titolo:'Giorno A',esercizi:[]}];day=0;changed();render();}catch(e){error(e);}});
+ form.addEventListener('submit',event=>{event.preventDefault();const value=form.elements.clientId.value.trim();try{validateId(value);dialog.close();if(athletes.some(a=>(a.client_id||a.email_cliente)===value)){open(value);return;}id=value;previousDrafts=[];rows=[];program=[{titolo:'Giorno A',esercizi:[]}];day=0;changed();render();}catch(e){error(e);}});
  dialog.addEventListener('close',()=>dialog.remove());dialog.append(form);document.body.append(dialog);dialog.showModal();form.elements.clientId.focus();
 }
 function accountDialog(action){
@@ -29,10 +44,10 @@ function accountDialog(action){
  username.oninput=()=>{changedByCoach=true;username.value=username.value.toLowerCase().replace(/[^a-z0-9._-]/g,'');};
  const submit=el('button',{type:'submit',class:'primary'},creating?'Registra atleta':'Aggiorna PIN');
  const form=el('form',{},el('h2',{},creating?'Registra atleta':'Reimposta PIN'),el('p',{},creating?'Crea nome utente e PIN per l’atleta. Dopo potrai preparare la sua scheda.':'Assegna un nuovo PIN o una nuova password all’atleta.'),...(creating?[field('Nome e cognome',name)]:[]),field('Nome utente',username),field('PIN o password',password),el('div',{class:'actions'},button('Annulla',()=>dialog.close(),'quiet',{type:'button'}),submit));
- form.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;submit.textContent='Attendi…';try{const value=username.value.trim();await coachAccount(action,value,password.value,name.value.trim());password.value='';dialog.close();if(creating){id=value;rows=[];program=[{titolo:'Giorno A',esercizi:[]}];day=0;dirty=false;changed();render();toast(isDemo?'Account simulato nella demo. Crea la scheda.':'Atleta registrato. Crea la sua scheda.');}else toast('Credenziale aggiornata. Comunicala all’atleta in privato.');}catch(e){error(e);}finally{submit.disabled=false;submit.textContent=creating?'Registra atleta':'Aggiorna PIN';}});
+ form.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;submit.textContent='Attendi…';try{const value=username.value.trim();await coachAccount(action,value,password.value,name.value.trim());password.value='';dialog.close();if(creating){id=value;previousDrafts=[];rows=[];program=[{titolo:'Giorno A',esercizi:[]}];day=0;dirty=false;changed();render();toast(isDemo?'Account simulato nella demo. Crea la scheda.':'Atleta registrato. Crea la sua scheda.');}else toast('Credenziale aggiornata. Comunicala all’atleta in privato.');}catch(e){error(e);}finally{submit.disabled=false;submit.textContent=creating?'Registra atleta':'Aggiorna PIN';}});
  dialog.addEventListener('close',()=>dialog.remove());dialog.append(form);document.body.append(dialog);dialog.showModal();(creating?name:username).focus();
 }
-function render(){const root=$('#content');root.className='';root.replaceChildren();const list=el('div',{class:'athlete-list'});const search=el('input',{placeholder:'Cerca atleta…','aria-label':'Cerca atleta'});function filter(){list.replaceChildren();[...new Set(athletes.map(a=>a.client_id||a.email_cliente))].filter(Boolean).filter(a=>a.toLowerCase().includes(search.value.toLowerCase())).forEach(a=>list.append(button(a,()=>open(a),a===id?'primary':'quiet')));}search.oninput=filter;filter();const aside=el('aside',{},el('div',{class:'eyebrow'},'I TUOI ATLETI'),search,list,el('div',{class:'coach-actions'},button('Registra atleta',()=>accountDialog('create'),'primary'),button('+ Nuovo programma',newProgramDialog),button('Reimposta PIN atleta',()=>accountDialog('reset'),'quiet'),button('Cambia il mio PIN o password',()=>location.href='reset.html','quiet')));const editor=el('section');root.append(el('div',{class:'coach-layout'},aside,editor));if(!id){editor.append(el('div',{class:'panel empty'},el('h2',{},'Seleziona un atleta'),el('p',{},'Apri una scheda dalla lista o registra un atleta.')));return;}
+function render(){const root=$('#content');root.className='';root.replaceChildren();const list=el('div',{class:'athlete-list'});const search=el('input',{placeholder:'Cerca atleta…','aria-label':'Cerca atleta'});function filter(){list.replaceChildren();[...new Set(athletes.map(a=>a.client_id||a.email_cliente))].filter(Boolean).filter(a=>a.toLowerCase().includes(search.value.toLowerCase())).forEach(a=>list.append(button(a,()=>open(a),a===id?'primary':'quiet')));}search.oninput=filter;filter();const aside=el('aside',{},el('div',{class:'eyebrow'},'I TUOI ATLETI'),search,list,el('div',{class:'coach-actions'},button('Registra atleta',()=>accountDialog('create'),'primary'),button('+ Nuovo programma',newProgramDialog),button('Reimposta PIN atleta',()=>accountDialog('reset'),'quiet'),button('Cambia il mio PIN o password',()=>location.href='reset.html','quiet')));const editor=el('section');renderCoachDraftNotice(editor);root.append(el('div',{class:'coach-layout'},aside,editor));if(!id){editor.append(el('div',{class:'panel empty'},el('h2',{},'Seleziona un atleta'),el('p',{},'Apri una scheda dalla lista o registra un atleta.')));return;}
 editor.append(el('div',{class:'row spread'},el('h2',{},id),button('Esporta bozza',exportDraft)));editor.append(recentCoachActivity(program));const tabs=el('div',{class:'tabs',role:'tablist','aria-label':'Giorni della scheda'});program.forEach((d,i)=>tabs.append(button(d.titolo,()=>{day=i;render();},'',{role:'tab','aria-selected':i===day})));tabs.append(button('+ Giorno',()=>{program.push({titolo:`Giorno ${program.length+1}`,esercizi:[]});day=program.length-1;changed();render();}));editor.append(tabs);if(!program.length){editor.append(el('p',{},'Aggiungi un giorno per iniziare.'));return;}const title=el('input',{value:program[day].titolo,maxlength:100});title.oninput=()=>{program[day].titolo=title.value;changed();};editor.append(field('Nome allenamento',title),el('div',{class:'actions',style:'margin-top:12px'},button('Duplica giorno',()=>{program.splice(day+1,0,clone(program[day]));day++;program[day].titolo+=' · copia';program[day].esercizi.forEach(ex=>{delete ex.storico;delete ex.ultimo_peso;});changed();render();}),button('Elimina giorno',()=>{if(confirm('Eliminare questo giorno e il relativo storico dalla scheda? Esporta prima una copia se vuoi conservarlo.')){program.splice(day,1);day=Math.max(0,day-1);changed();render();}},'danger')));program[day].esercizi.forEach((ex,i)=>editor.append(exCard(ex,i)));editor.append(button('+ Aggiungi esercizio',()=>{program[day].esercizi.push({nome:'',target:'3x10',recupero:90,note_coach:'',gifs:[],video:'',storico:[]});changed();render();}));const saveButton=button('Salva programma',save,'primary',{id:'saveProgram'});editor.append(el('div',{class:'sticky-save',style:'margin-top:24px'},el('small',{id:'saveStatus'},dirty?'Modifiche da salvare':'Programma aggiornato'),saveButton));}
 function inputField(label,value,fn,type='text'){const n=el('input',{type,value});n.oninput=()=>{fn(n.value);changed();};return field(label,n);}
 function noteField(ex){const n=el('textarea',{rows:2,value:ex.note_coach||'','aria-label':'Indicazioni per l’atleta'});n.oninput=()=>{ex.note_coach=n.value;changed();};const wrapper=field('Indicazioni per l’atleta',n);wrapper.classList.add('coach-note-field');return wrapper;}
@@ -76,13 +91,17 @@ function exCard(ex,i){
  const details=el('details',{},el('summary',{},'Video e dimostrazioni'));if(ex.gifs?.length||ex.gif)details.append(mediaThumb(ex));details.append(inputField('Link video HTTPS',ex.video||'',v=>ex.video=v));details.append(mediaPicker(ex));(ex.gifs||(ex.gif?[ex.gif]:[])).forEach((src,j)=>details.append(el('div',{class:'row spread'},el('small',{},src),button('Rimuovi',()=>{ex.gifs=ex.gifs||(ex.gif?[ex.gif]:[]);ex.gifs.splice(j,1);delete ex.gif;changed();render();}))));content.append(details);card.append(content);return card;
 }
 function exportDraft(){const a=el('a',{href:URL.createObjectURL(new Blob([JSON.stringify({client_id:id,programma:program},null,2)],{type:'application/json'})),download:`${id}-programma.json`});a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function renderCoachDraftNotice(root){
+ if(!previousDrafts.length)return;
+ root.append(el('section',{class:'notice draft-notice','aria-label':'Bozze coach precedenti'},el('p',{},'La scheda è cambiata. La bozza precedente è conservata senza sostituire il programma attuale.'),el('div',{class:'actions'},button('Scarica bozza precedente',()=>downloadDraft({client_id:id,bozze:previousDrafts},'LR-Studio-bozze-coach.json')),button('Rimuovi bozza precedente',()=>{if(confirm('Rimuovere le bozze precedenti? Scaricale prima se vuoi conservarle.')){previousDrafts=[];persistCoachDraft();render();}},'quiet'))));
+}
 async function save(){
  if(!program.length||program.some(d=>!d.titolo.trim()||!d.esercizi.length||d.esercizi.some(ex=>!ex.nome.trim()||!ex.target?.trim()||!Number.isFinite(ex.recupero)||ex.recupero<0||ex.recupero>3600))){toast('Completa giorni, nomi, target e recuperi validi (0–3600 s).');return;}
  if(program.some(d=>d.esercizi.some(ex=>ex.video&&!safeURL(ex.video)))){toast('Usa un link HTTPS valido per i video.');return;}
  const b=$('#saveProgram');b.disabled=true;b.textContent='Salvataggio…';
  try{await saveProgram(id,rows,program);}catch(e){error(e);b.disabled=false;b.textContent='Riprova salvataggio';return;}
  dirty=false;
- try{rows=await loadRows(id);program=normalize(rows);athletes=await listAthletes();sessionStorage.removeItem(draftKey());render();toast(isDemo?'Programma salvato nella demo.':'Programma salvato.');}
+ try{rows=await loadRows(id);program=normalize(rows);athletes=await listAthletes();if(previousDrafts.length)persistCoachDraft();else removeDraft(draftKey());render();toast(isDemo?'Programma salvato nella demo.':'Programma salvato.');}
  catch{const root=$('#content');root.replaceChildren(el('section',{class:'panel empty'},el('h2',{},'Programma salvato'),el('p',{},'Il salvataggio è riuscito, ma la verifica della scheda è stata interrotta. Riaprila prima di altre modifiche.'),el('div',{class:'actions'},button('Riprova verifica',()=>open(id),'primary'),button('Esporta copia',exportDraft))));}
 }
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});init();

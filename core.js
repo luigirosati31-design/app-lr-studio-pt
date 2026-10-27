@@ -16,19 +16,22 @@ export function targetInfo(target='3x10') {
   return {count:Math.min(30,Math.max(1,parseInt(parts[0])||3)),reps:parts[1]?.trim()||'',weightOnly:false};
 }
 export function makeDraft(program) {
-  return program.map(day => day.esercizi.map(ex => ({note:'',serie:Array.from({length:targetInfo(ex.target).count},()=>({kg:'',rip:'',check:false}))})));
+  return program.map(day => {const sessionId=crypto.randomUUID();return day.esercizi.map(ex => ({sessionId,note:'',serie:Array.from({length:targetInfo(ex.target).count},()=>({kg:'',rip:'',check:false}))}));});
 }
 export function recordDay(program, draft, dayIndex, date) {
   const result=clone(program);
+  const sessionId=draft[dayIndex].find(log=>log.sessionId)?.sessionId||crypto.randomUUID();
   result[dayIndex].esercizi.forEach((ex,i)=>{
     const log=draft[dayIndex][i];
+    log.sessionId ||= sessionId;
     const serie=log.serie.filter(s=>s.check).map(({kg,rip})=>({kg,rip}));
     if (!serie.length) return;
     ex.storico=Array.isArray(ex.storico)?ex.storico:[];
-    const rec={data:date,serie,note:log.note};
-    const index=ex.storico.findIndex(s=>s.data===date);
+    const index=ex.storico.findIndex(s=>s.session_id===log.sessionId);
+    const previous=index>=0?ex.storico[index]:null;
+    const rec={...previous,data:previous?.data||date,serie,note:log.note,session_id:log.sessionId,saved_at:previous?.saved_at||new Date().toISOString()};
     if(index<0) ex.storico.push(rec); else ex.storico[index]=rec;
-    ex.ultimo_peso=serie.filter(s=>s.kg).at(-1)?.kg||ex.ultimo_peso||'';
+    ex.ultimo_peso=ex.storico.at(-1)?.serie?.filter(s=>s.kg).at(-1)?.kg||ex.ultimo_peso||'';
   });
   return result;
 }

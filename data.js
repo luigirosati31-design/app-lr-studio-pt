@@ -20,8 +20,10 @@ export async function login(username,password){
  if(!['coach','athlete'].includes(verified.user.app_metadata?.role)){await client().auth.signOut();throw Error('Account non ancora associato. Contatta Luigi.');}
  return verified.user;
 }
-export async function updatePassword(password){const {error}=await client().auth.updateUser({password});if(error)throw Error('Impossibile aggiornare la password. Richiedi un nuovo link.');await client().auth.signOut();}
+export function validCredential(value){return typeof value==='string'&&/^(?:[0-9]{6,8}|.{12,128})$/.test(value);}
+export async function updatePassword(password){if(!validCredential(password))throw Error('Usa un PIN di 6–8 cifre oppure una password di almeno 12 caratteri.');const {error}=await client().auth.updateUser({password});if(error)throw Error('Impossibile aggiornare il PIN o la password. Riprova.');await client().auth.signOut();}
 export async function coachAccount(action,username,password,fullName=''){
+ if(!validCredential(password))throw Error('Usa un PIN di 6–8 cifre oppure una password di almeno 12 caratteri.');
  if(demo)return {ok:true,username};
  const {data,error}=await client().functions.invoke('coach-account',{body:{action,username,password,fullName}});
  if(error||!data?.ok){let message=data?.error;try{message ||= (await error?.context?.json())?.error;}catch{}throw Error(message||'Operazione non riuscita. Riprova.');}

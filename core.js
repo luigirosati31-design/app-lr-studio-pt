@@ -18,6 +18,28 @@ export function targetInfo(target='3x10') {
 export function makeDraft(program) {
   return program.map(day => {const sessionId=crypto.randomUUID();return day.esercizi.map(ex => ({sessionId,note:'',serie:Array.from({length:targetInfo(ex.target).count},()=>({kg:'',rip:'',check:false}))}));});
 }
+const exerciseName=value=>String(value||'').normalize('NFKC').trim().toLowerCase().replace(/\s+/g,' ');
+export function exerciseHistory(ex){return (Array.isArray(ex.storico)?ex.storico:[]).filter(record=>!record.exercise_name||exerciseName(record.exercise_name)===exerciseName(ex.nome));}
+export function renameExercise(ex,nextName,previousName=ex.nome){
+ const same=exerciseName(nextName)===exerciseName(previousName),oldWeight=ex.ultimo_peso;
+ if(exerciseName(nextName)!==exerciseName(previousName)){
+  for(const record of Array.isArray(ex.storico)?ex.storico:[])record.exercise_name ||= previousName;
+  if(ex.ultimo_peso){ex.previous_weights ||= [];if(!ex.previous_weights.some(item=>exerciseName(item.nome)===exerciseName(previousName)))ex.previous_weights.push({nome:previousName,peso:ex.ultimo_peso});}
+ }
+ ex.nome=nextName;
+ ex.ultimo_peso=exerciseHistory(ex).at(-1)?.serie?.filter(s=>s.kg).at(-1)?.kg||ex.previous_weights?.find(item=>exerciseName(item.nome)===exerciseName(nextName))?.peso||(same?oldWeight:'')||'';
+}
+export function validateSet(set,info){
+ const kg=String(set.kg??'').trim(),rip=String(set.rip??'').trim();
+ if(kg&&(!/^\d+([.,]\d+)?$/.test(kg)||!Number.isFinite(Number(kg.replace(',','.')))))return {field:'kg',message:'Inserisci un carico valido, uguale o maggiore di zero.'};
+ if(!info.weightOnly&&!/^[1-9]\d*$/.test(rip))return {field:'rip',message:'Inserisci ripetizioni intere maggiori di zero.'};
+ return null;
+}
+export function remainingDraft(program,draft,day){
+ const result=clone(draft),fresh=makeDraft(program)[day];
+ result[day]=draft[day].map((log,i)=>({...clone(log),sessionId:fresh[i].sessionId,note:log.serie.some(s=>s.check)?'':log.note,serie:log.serie.map(s=>s.check?{kg:'',rip:'',check:false}:clone(s))}));
+ return result;
+}
 export function recordDay(program, draft, dayIndex, date) {
   const result=clone(program);
   const sessionId=draft[dayIndex].find(log=>log.sessionId)?.sessionId||crypto.randomUUID();
@@ -27,11 +49,11 @@ export function recordDay(program, draft, dayIndex, date) {
     const serie=log.serie.filter(s=>s.check).map(({kg,rip})=>({kg,rip}));
     if (!serie.length) return;
     ex.storico=Array.isArray(ex.storico)?ex.storico:[];
-    const index=ex.storico.findIndex(s=>s.session_id===log.sessionId);
+    const index=ex.storico.findIndex(s=>s.session_id===log.sessionId&&(!s.exercise_name||exerciseName(s.exercise_name)===exerciseName(ex.nome)));
     const previous=index>=0?ex.storico[index]:null;
-    const rec={...previous,data:previous?.data||date,serie,note:log.note,session_id:log.sessionId,saved_at:previous?.saved_at||new Date().toISOString()};
+    const rec={...previous,data:previous?.data||date,serie,note:log.note,exercise_name:ex.nome,session_id:log.sessionId,saved_at:previous?.saved_at||new Date().toISOString()};
     if(index<0) ex.storico.push(rec); else ex.storico[index]=rec;
-    ex.ultimo_peso=ex.storico.at(-1)?.serie?.filter(s=>s.kg).at(-1)?.kg||ex.ultimo_peso||'';
+    ex.ultimo_peso=exerciseHistory(ex).at(-1)?.serie?.filter(s=>s.kg).at(-1)?.kg||ex.ultimo_peso||'';
   });
   return result;
 }

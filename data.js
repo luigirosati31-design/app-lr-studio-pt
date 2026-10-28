@@ -1,5 +1,5 @@
-import {clone,demoProgram} from './core.js?v=20261027.2';
-import {accessError,loginFailure} from './login-errors.js?v=20261027.2';
+import {clone,demoProgram} from './core.js?v=20261028.2';
+import {accessError,loginFailure} from './login-errors.js?v=20261028.2';
 const demo=new URLSearchParams(location.search).get('demo')==='1';
 export const isDemo=demo;
 export const config=window.LR_CONFIG;

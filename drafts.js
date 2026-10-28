@@ -1,4 +1,4 @@
-import {clone,makeDraft} from './core.js?v=20261027.2';
+import {clone,makeDraft} from './core.js?v=20261028.2';
 
 // Le credenziali restano nella sessione; qui conserviamo solo bozze dell'account.
 export function readDraft(key){

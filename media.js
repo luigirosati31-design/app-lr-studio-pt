@@ -1,6 +1,6 @@
-import {el,button} from './ui.js';
-import {safeURL} from './core.js?v=20261027.2';
-import {icon} from './icons.js';
+import {el,button} from './ui.js?v=20261028.2';
+import {safeURL} from './core.js?v=20261028.2';
+import {icon} from './icons.js?v=20261028.2';
 function player(src,name,large=false){const video=/\.mp4(?:\?|$)/i.test(src);const node=video?el('video',{src,...(large?{controls:'',autoplay:'',loop:'',muted:'',playsinline:'',preload:'auto'}:{autoplay:'',loop:'',muted:'',playsinline:'',preload:'auto'}),'aria-label':name}):el('img',{src,alt:`Dimostrazione: ${name}`,loading:'lazy'});return node;}
 export function mediaThumb(ex){
  const urls=(ex.gifs?.length?ex.gifs:ex.gif?[ex.gif]:[]).map(s=>safeURL(s,true)).filter(Boolean);

@@ -15,7 +15,7 @@ export function activities(program){
     for(const ex of day.esercizi||[]){
       for(const record of Array.isArray(ex.storico)?ex.storico:[]){
         if(!Array.isArray(record.serie)||!record.serie.length)continue;
-        items.push({dayIndex,day:day.titolo,exercise:ex.nome||'Esercizio',date:record.data||'',savedAt:record.saved_at||'',sets:record.serie.length,note:record.note||'',series:record.serie});
+        items.push({dayIndex,day:day.titolo,exercise:record.exercise_name||ex.nome||'Esercizio',date:record.data||'',savedAt:record.saved_at||'',sets:record.serie.length,note:record.note||'',series:record.serie});
       }
     }
   }
@@ -33,10 +33,13 @@ export function weeklyTraining(program,weeks=6,now=new Date()){
 export function strengthChanges(program){
  const result=[];
  for(const day of program)for(const ex of day.esercizi||[]){
-  const points=(Array.isArray(ex.storico)?ex.storico:[]).map(record=>({date:record.data,value:Math.max(0,...(record.serie||[]).map(set=>Number(String(set.kg||'').replace(',','.'))||0))})).filter(point=>activityDate(point.date)&&point.value>0).sort((a,b)=>dateValue(a.date)-dateValue(b.date));
+  const groups=new Map();for(const record of Array.isArray(ex.storico)?ex.storico:[]){const name=record.exercise_name||ex.nome||'Esercizio';if(!groups.has(name))groups.set(name,[]);groups.get(name).push(record);}
+  for(const [name,records] of groups){
+  const points=records.map(record=>({date:record.data,value:Math.max(0,...(record.serie||[]).map(set=>Number(String(set.kg||'').replace(',','.'))||0))})).filter(point=>activityDate(point.date)&&point.value>0).sort((a,b)=>dateValue(a.date)-dateValue(b.date));
   if(points.length<2)continue;
   const current=points.at(-1),previous=points.at(-2);
-  result.push({exercise:ex.nome||'Esercizio',current:current.value,previous:previous.value,difference:current.value-previous.value,date:current.date,previousDate:previous.date});
+  result.push({exercise:name,current:current.value,previous:previous.value,difference:current.value-previous.value,date:current.date,previousDate:previous.date});
+  }
  }
  return result.sort((a,b)=>dateValue(b.date)-dateValue(a.date));
 }

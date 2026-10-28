@@ -1,4 +1,4 @@
-import {client,config,updatePassword} from './data.js?v=20261028.2';
+import {client,config,updatePassword} from './data.js?v=20261028.4';
 const message=document.querySelector('#message'),form=document.querySelector('#newPassword');
 async function init(){
  if(!config.liveEnabled){message.textContent='La reimpostazione sarà disponibile dopo l’attivazione dell’accesso reale.';return;}

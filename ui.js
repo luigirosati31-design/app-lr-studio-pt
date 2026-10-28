@@ -1,4 +1,4 @@
-import {icon} from './icons.js?v=20261028.2';
+import {icon} from './icons.js?v=20261028.4';
 export const $=s=>document.querySelector(s);
 export function el(tag,attrs={},...children){const n=document.createElement(tag);for(const [key,value]of Object.entries(attrs)){if(key.startsWith('on'))n.addEventListener(key.slice(2),value);else if(key==='class')n.className=value;else if(key==='value')n.value=value;else n.setAttribute(key,value);}for(const c of children.flat()){if(c!==null&&c!==undefined)n.append(c instanceof Node?c:document.createTextNode(String(c)));}return n;}
 export function button(text,fn,cls='quiet',attrs={}){return el('button',{type:'button',class:cls,onclick:fn,...attrs},text);}

@@ -1,5 +1,6 @@
-import {clone,demoProgram} from './core.js?v=20261028.2';
-import {accessError,loginFailure} from './login-errors.js?v=20261028.2';
+import {clone,demoProgram,normalize,preserveHistory} from './core.js?v=20261028.4';
+import {prescription} from './drafts.js?v=20261028.4';
+import {accessError,loginFailure} from './login-errors.js?v=20261028.4';
 const demo=new URLSearchParams(location.search).get('demo')==='1';
 export const isDemo=demo;
 export const config=window.LR_CONFIG;
@@ -58,8 +59,11 @@ export async function listAthletes(){
  return [...rows,...data.usernames.filter(name=>!rows.some(row=>row.client_id===name||row.email_cliente===name)).map(name=>({client_id:name,email_cliente:name}))];
 }
 export async function saveProgram(id,rows,program){
- if(demo){sessionStorage.setItem('lr-demo-rows',JSON.stringify([{id:1,client_id:id,email_cliente:id,titolo_sessione:'PROGRAMMA_COMPLETO',dati_scheda:JSON.stringify(program)}]));return;}
- check(await client().rpc('lr_save_program',{p_client:validateId(id),p_expected:rows.map(r=>({id:r.id,dati_scheda:r.dati_scheda})),p_program:program}));
+ const current=demo?rows:await loadRows(id);
+ if(prescription(normalize(rows))!==prescription(normalize(current)))throw accessError('program_changed','Il programma è cambiato altrove. La bozza è conservata: riapri la scheda prima di continuare.');
+ const protectedProgram=preserveHistory(program,normalize(current));
+ if(demo){sessionStorage.setItem('lr-demo-rows',JSON.stringify([{id:1,client_id:id,email_cliente:id,titolo_sessione:'PROGRAMMA_COMPLETO',dati_scheda:JSON.stringify(protectedProgram)}]));return;}
+ check(await client().rpc('lr_save_program',{p_client:validateId(id),p_expected:current.map(r=>({id:r.id,dati_scheda:r.dati_scheda})),p_program:protectedProgram}));
 }
 export async function saveWorkout(rows,program){
  if(demo){await saveProgram('atleta-demo',rows,program);return;}

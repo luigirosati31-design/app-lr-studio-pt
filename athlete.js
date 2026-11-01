@@ -1,5 +1,5 @@
-import {whatsappURL} from './portal-contact.js?v=20261101.1';
-import {makePortal,glyph} from './portal.js?v=20261101.1';
+import {whatsappURL} from './portal-contact.js?v=20261101.2';
+import {makePortal,glyph} from './portal.js?v=20261101.2';
 import {mediaThumb} from './media.js?v=20261028.4';
 import {identity,isDemo,loadRows,saveWorkout,logout,measurements,saveMeasurements,massage,config} from './data.js?v=20261028.4';
 import {normalize,makeDraft,recordDay,payloads,clone,safeURL,targetInfo,exerciseHistory,validateSet,remainingDraft,targetLabel,shouldRest} from './core.js?v=20261028.4';

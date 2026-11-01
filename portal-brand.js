@@ -1,2 +1,6 @@
-import {glyph} from './portal.js?v=20261101.2';
+import {glyph} from './portal.js?v=20261101.3';
 for(const b of document.querySelectorAll('[data-view]')){const labels={home:'Dashboard',training:'Allenamenti',progress:'Progressi',checkin:'Check-in'};b.replaceChildren(glyph(b.dataset.view),document.createTextNode(labels[b.dataset.view]||b.dataset.view));}
+
+// Desktop navigation mirrors the existing authenticated controls.
+const sourceNav=document.querySelector('.bottom-nav'),shell=document.querySelector('.shell');
+if(sourceNav&&shell){const aside=document.createElement('aside');aside.className='p-desktop-nav';aside.setAttribute('aria-label','Navigazione desktop');const title=document.createElement('small');title.textContent='IL TUO PERCORSO';aside.append(title);const links=[];for(const original of sourceNav.querySelectorAll('[data-view]')){const copy=document.createElement('button');copy.type='button';copy.className='p-desktop-link';copy.dataset.desktopView=original.dataset.view;copy.replaceChildren(glyph(original.dataset.view),document.createTextNode(original.textContent));copy.addEventListener('click',()=>original.click());aside.append(copy);links.push([original,copy]);}const sync=()=>{aside.hidden=sourceNav.hidden;for(const [from,to]of links)to.setAttribute('aria-current',from.getAttribute('aria-current')||'false');};new MutationObserver(sync).observe(sourceNav,{attributes:true,subtree:true,attributeFilter:['hidden','aria-current']});shell.append(aside);sync();}

@@ -1,4 +1,4 @@
-import {mountCoachPortal} from './portal.js?v=20261101.2';
+import {mountCoachPortal} from './portal.js?v=20261101.3';
 import {mediaThumb} from './media.js?v=20261028.4';
 import {identity,isDemo,listAthletes,loadRows,saveProgram,coachAccount,logout,validateId} from './data.js?v=20261028.4';
 import {normalize,clone,safeURL,renameExercise,validTarget,preserveHistory,validCircuits} from './core.js?v=20261028.4';

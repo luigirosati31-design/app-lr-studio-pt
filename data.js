@@ -1,6 +1,6 @@
-import {clone,demoProgram,normalize,preserveHistory} from './core.js?v=20261028.4';
-import {prescription} from './drafts.js?v=20261028.4';
-import {accessError,loginFailure} from './login-errors.js?v=20261028.4';
+import {clone,demoProgram,normalize,preserveHistory} from './core.js?v=20261110.1';
+import {prescription} from './drafts.js?v=20261110.1';
+import {accessError,loginFailure} from './login-errors.js?v=20261110.1';
 const demo=new URLSearchParams(location.search).get('demo')==='1';
 export const isDemo=demo;
 export const config=window.LR_CONFIG;

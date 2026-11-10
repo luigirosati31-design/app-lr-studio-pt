@@ -1,4 +1,4 @@
-import {glyph} from './portal.js?v=20261101.3';
+import {glyph} from './portal.js?v=20261110.1';
 for(const b of document.querySelectorAll('[data-view]')){const labels={home:'Dashboard',training:'Allenamenti',progress:'Progressi',checkin:'Check-in'};b.replaceChildren(glyph(b.dataset.view),document.createTextNode(labels[b.dataset.view]||b.dataset.view));}
 
 // Desktop navigation mirrors the existing authenticated controls.

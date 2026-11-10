@@ -27,3 +27,6 @@ body.portal-app{font-family:"Segoe UI",Arial,Helvetica,sans-serif;--bg:#090b0d;-
 .portal-app .exercise .media-thumb.empty{padding:8px;background:#1c252b;color:#e4c979}
 @media(max-width:760px){.portal-app .exercise .media-thumb{width:76px;height:80px;min-width:76px}.portal-app .media-dialog h2{font-size:17px}}
 @media(max-width:360px){.portal-app .exercise .media-thumb{width:66px;height:70px;min-width:66px}}
+
+/* Paired exercises: independent kg/reps per round. */
+.paired-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.paired-heading{display:flex;justify-content:space-between;align-items:center;margin:4px 0 12px}.paired-part{min-width:0}.paired-part strong{display:block;font-size:12px;line-height:1.4;margin-bottom:8px;overflow-wrap:anywhere}.paired-inputs{display:grid;grid-template-columns:1fr 1fr;gap:6px}.paired-inputs label{min-width:0;font-size:11px}.paired-table.sets input{width:100%;min-width:0;padding:8px 4px;font-size:14px;box-sizing:border-box}.paired-table.sets td{padding:12px 6px}

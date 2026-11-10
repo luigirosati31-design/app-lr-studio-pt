@@ -1,12 +1,12 @@
-import {mountCoachPortal} from './portal.js?v=20261101.3';
-import {mediaThumb} from './media.js?v=20261028.4';
-import {identity,isDemo,listAthletes,loadRows,saveProgram,coachAccount,logout,validateId} from './data.js?v=20261028.4';
-import {normalize,clone,safeURL,renameExercise,validTarget,preserveHistory,validCircuits} from './core.js?v=20261028.4';
-import {activities,daysWithActivity} from './insights.js?v=20261028.4';
-import {exerciseOptions,findExercise} from './exercise-library.js?v=20261028.4';
-import {$,el,button,toast,error,field} from './ui.js?v=20261028.4';
-import {readDraft,writeDraft,removeDraft,downloadDraft,prescription} from './drafts.js?v=20261028.4';
-import {acquireDraftLock} from './draft-lock.js?v=20261028.4';
+import {mountCoachPortal} from './portal.js?v=20261110.1';
+import {mediaThumb} from './media.js?v=20261110.1';
+import {identity,isDemo,listAthletes,loadRows,saveProgram,coachAccount,logout,validateId} from './data.js?v=20261110.1';
+import {normalize,clone,safeURL,renameExercise,validTarget,preserveHistory,validCircuits,targetInfo} from './core.js?v=20261110.1';
+import {activities,daysWithActivity} from './insights.js?v=20261110.1';
+import {exerciseOptions,findExercise} from './exercise-library.js?v=20261110.1';
+import {$,el,button,toast,error,field} from './ui.js?v=20261110.1';
+import {readDraft,writeDraft,removeDraft,downloadDraft,prescription} from './drafts.js?v=20261110.1';
+import {acquireDraftLock} from './draft-lock.js?v=20261110.1';
 let workspaceLock,saving=false,editRevision=0;
 let rows=[],program=[],day=0,id='',dirty=false,athletes=[],media=[],coachUser;
 let previousDrafts=[];
@@ -87,6 +87,13 @@ function mediaPicker(ex){
  search.oninput=update;
  update();wrapper.append(search,hint,list);return wrapper;
 }
+function targetField(ex,refreshSummary){
+ const input=el('textarea',{rows:2,value:ex.target||'3x10','aria-label':'Serie / target',placeholder:'Es. 3x8 rest P, 3x8/4 mezzo ROM, da 12 a 6'});
+ const hint=el('small',{class:'exercise-search-hint','aria-live':'polite'});
+ function explain(){const info=targetInfo(input.value);hint.textContent=info.circuit?info.count+' righe · '+info.rounds+' giri per '+info.blocks+' blocchi.':info.count+' '+(info.count===1?'riga':'righe')+' di registrazione. Il testo resta completo; recupero e tecnica seguono le indicazioni del coach.';}
+ input.oninput=()=>{ex.target=input.value;changed();refreshSummary();explain();};
+ const wrapper=field('Serie / target',input);wrapper.append(hint);explain();return wrapper;
+}
 function exCard(ex,i){
  const open=expandedCards.has(ex)?expandedCards.get(ex):window.innerWidth>760||i===0||!ex.nome?.trim();expandedCards.set(ex,open);
  const card=el('article',{class:'editor-card'+(open?'':' is-collapsed')});
@@ -95,7 +102,7 @@ function exCard(ex,i){
  function refreshSummary(){summaryName.textContent=ex.nome||'Nuovo esercizio';summaryMeta.textContent=`${ex.target||'3x10'} · Recupero ${ex.recupero??90}s`;}
  const toggle=button(open?'Riduci':'Modifica',()=>{const next=content.hidden;content.hidden=!next;expandedCards.set(ex,next);card.classList.toggle('is-collapsed',!next);refreshSummary();toggle.textContent=next?'Riduci':'Modifica';toggle.setAttribute('aria-expanded',String(next));},'editor-toggle',{'aria-expanded':String(open),'aria-controls':content.id});
  card.append(el('div',{class:'editor-head'},el('div',{class:'editor-heading'},el('div',{class:'eyebrow'},`ESERCIZIO ${i+1}`),summaryName,summaryMeta),el('div',{class:'actions'},toggle,button('↑',()=>{if(i){const a=program[day].esercizi;[a[i-1],a[i]]=[a[i],a[i-1]];changed();render();}},'quiet',{'aria-label':'Sposta esercizio su'}),button('↓',()=>{const a=program[day].esercizi;if(i<a.length-1){[a[i+1],a[i]]=[a[i],a[i+1]];changed();render();}},'quiet',{'aria-label':'Sposta esercizio giù'}),button('Duplica',()=>{const copy=clone(ex);delete copy.storico;delete copy.ultimo_peso;expandedCards.set(copy,true);program[day].esercizi.splice(i+1,0,copy);changed();render();}),button('Rimuovi',()=>{if(confirm('Rimuovere questo esercizio dal programma attivo? Lo storico sarà conservato al salvataggio.')){program[day].esercizi.splice(i,1);changed();render();}},'danger'))));
- content.append(inputField('Codice circuito (uguale per gli esercizi abbinati)',ex.circuit_id||'',v=>ex.circuit_id=v.trim()),exerciseNameField(ex,refreshSummary),el('div',{class:'grid2'},inputField('Serie / target',ex.target||'3x10',v=>{ex.target=v;refreshSummary();}),inputField('Recupero (secondi)',ex.recupero??90,v=>{ex.recupero=Number(v);refreshSummary();},'number')),noteField(ex));
+ content.append(inputField('Codice circuito (uguale per gli esercizi abbinati)',ex.circuit_id||'',v=>ex.circuit_id=v.trim()),exerciseNameField(ex,refreshSummary),el('div',{class:'grid2'},targetField(ex,refreshSummary),inputField('Recupero (secondi)',ex.recupero??90,v=>{ex.recupero=Number(v);refreshSummary();},'number')),noteField(ex));
  const details=el('details',{},el('summary',{},'Video e dimostrazioni'));if(ex.gifs?.length||ex.gif)details.append(mediaThumb(ex));details.append(inputField('Link video HTTPS',ex.video||'',v=>ex.video=v));details.append(mediaPicker(ex));(ex.gifs||(ex.gif?[ex.gif]:[])).forEach((src,j)=>details.append(el('div',{class:'row spread'},el('small',{},src),button('Rimuovi',()=>{ex.gifs=ex.gifs||(ex.gif?[ex.gif]:[]);ex.gifs.splice(j,1);delete ex.gif;changed();render();}))));content.append(details);card.append(content);return card;
 }
 function exportDraft(){const a=el('a',{href:URL.createObjectURL(new Blob([JSON.stringify({client_id:id,programma:program},null,2)],{type:'application/json'})),download:`${id}-programma.json`});a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
@@ -106,7 +113,7 @@ function renderCoachDraftNotice(root){
 async function save(){
  if(saving||!workspaceLock?.check())return;
  if(!validCircuits(program)){toast('Gli esercizi con lo stesso codice circuito devono usare un target in set e lo stesso numero di blocchi.');return;}
- if(!program.length||program.some(d=>!d.titolo.trim()||!d.esercizi.length||d.esercizi.some(ex=>!ex.nome.trim()||!validTarget(ex.target)||!Number.isFinite(ex.recupero)||ex.recupero<0||ex.recupero>3600))){toast('Completa giorni e nomi. Usa target come 3x10, 3 set o 30 sec e recuperi validi (0–3600 s).');return;}
+ if(!program.length||program.some(d=>!d.titolo.trim()||!d.esercizi.length||d.esercizi.some(ex=>!ex.nome.trim()||!validTarget(ex.target)||!Number.isFinite(ex.recupero)||ex.recupero<0||ex.recupero>3600))){toast('Completa giorni, nomi e target. Il target accetta testo libero; controlla i recuperi (0–3600 s) e i limiti degli eventuali circuiti.');return;}
  if(program.some(d=>d.esercizi.some(ex=>ex.video&&!safeURL(ex.video)))){toast('Usa un link HTTPS valido per i video.');return;}
  const sentId=id,sentRows=clone(rows),sentProgram=clone(program),revision=editRevision;setSaving(true);
  try{

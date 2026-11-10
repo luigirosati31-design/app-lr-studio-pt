@@ -1,9 +1,9 @@
-import {whatsappURL} from './portal-contact.js?v=20261101.3';
-import {el,button,field,toast} from './ui.js?v=20261028.4';
-import {isDemo,measurements,saveMeasurements,config} from './data.js?v=20261028.4';
-import {safeURL} from './core.js?v=20261028.4';
-import {activities,weeklyTraining,strengthChanges,daysWithActivity} from './insights.js?v=20261028.4';
-import {checkins,saveCheckin,mondayISO,localISO,photoList,photoURL,uploadPhoto,removePhoto,reviews,reviewCheckin} from './portal-data.js?v=20261101.3';
+import {whatsappURL} from './portal-contact.js?v=20261110.1';
+import {el,button,field,toast} from './ui.js?v=20261110.1';
+import {isDemo,measurements,saveMeasurements,config} from './data.js?v=20261110.1';
+import {safeURL} from './core.js?v=20261110.1';
+import {activities,weeklyTraining,strengthChanges,daysWithActivity} from './insights.js?v=20261110.1';
+import {checkins,saveCheckin,mondayISO,localISO,photoList,photoURL,uploadPhoto,removePhoto,reviews,reviewCheckin} from './portal-data.js?v=20261110.1';
 const paths={home:'M3 10 12 3l9 7M5 9v12h5v-7h4v7h5V9',training:'M3 7v10M6 5v14M18 5v14M21 7v10M6 12h12',progress:'M4 20V12h3v8M11 20V7h3v13M18 20V3h3v17',checkin:'M8 5H5v16h14V5h-3M9 3h6v5H9zM8 13h8M8 17h5',photo:'M3 7h5l2-3h4l2 3h5v14H3zM15.5 13.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0',message:'m3 11 18-8-6 18-4-7-8-3zM11 14l10-11',calendar:'M4 5h16v16H4zM8 3v4M16 3v4M4 10h16',recovery:'M20 15A8 8 0 0 1 9 4a9 9 0 1 0 11 11',measure:'M4 4h16v16H4zM8 4v5M12 4v3M16 4v5'};
 export function glyph(name){const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');for(const [k,v]of Object.entries({viewBox:'0 0 24 24',fill:'none',stroke:'currentColor','stroke-width':1.7,'stroke-linecap':'round','stroke-linejoin':'round','aria-hidden':'true',class:'p-icon'}))svg.setAttribute(k,v);const p=document.createElementNS(svg.namespaceURI,'path');p.setAttribute('d',paths[name]||paths.training);svg.append(p);return svg;}
 const fmt=n=>Number(n).toLocaleString('it-IT',{maximumFractionDigits:1});

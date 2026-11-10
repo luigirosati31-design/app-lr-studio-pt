@@ -11,10 +11,14 @@ export function normalize(rows) {
 }
 export function targetInfo(target='3x10') {
   const raw=String(target).toLowerCase().replaceAll('×','x').trim();
+  const roundsOnly=raw.match(/^(?:per|x)\s*([1-9]\d*)\s*$/);
+  if(roundsOnly)return {count:Math.min(30,Number(roundsOnly[1])),reps:'',weightOnly:false};
   const circuit=raw.match(/^(\d+)\s*(?:sets?|giri?|giro)\s*(?:x\s*(\d+))?\s*$/);
   if(circuit){const rounds=Number(circuit[1]),blocks=Number(circuit[2]||1);return {count:Math.min(30,rounds*blocks),rounds,blocks,circuit:true,reps:'',weightOnly:true};}
   const sets=raw.match(/^(\d+)\s*(?:x|set\b|sets\b|round\b|rounds\b|gir[oi]\b)/);
   if(sets)return {count:Math.min(30,Math.max(1,Number(sets[1]))),reps:raw.replace(/^\d+\s*x\s*/,''),weightOnly:!/^\d+\s*x/.test(raw)};
+  const rangeSets=raw.match(/^(?:da\s*)?\d+\s*(?:a|[-–])\s*\d+\s*(?:per|x)\s*(\d+)\s*(?:serie|sets?)?\s*$/);
+  if(rangeSets)return {count:Math.min(30,Math.max(1,Number(rangeSets[1]))),reps:raw,weightOnly:true};
   // A duration is one task, not thirty sets; keep its text visible.
   if(/^\d+(?:[.,]\d+)?\s*(?:s|sec|secondi|min|minuti)\b/.test(raw))return {count:1,reps:raw,weightOnly:true};
   return {count:1,reps:raw,weightOnly:true};
@@ -32,7 +36,14 @@ export function validCircuits(plan){return plan.every(day=>{
  const codes=new Set(day.esercizi.map(e=>e.circuit_id).filter(Boolean));
  return [...codes].every(code=>{const members=day.esercizi.filter(e=>e.circuit_id===code).map(e=>targetInfo(e.target));return members.every(t=>t.circuit&&t.blocks===members[0].blocks);});
 });}
-export function validTarget(target){const info=targetInfo(target);if(info.circuit&&(!info.rounds||!info.blocks||info.rounds*info.blocks>30))return false;return /^(?:[1-9]\d?\s*(?:x|×|sets?\b|rounds?\b|gir[oi]\b)|\d+(?:[.,]\d+)?\s*(?:s|sec|secondi|min|minuti)\b)/i.test(String(target||'').trim());}
+export function validTarget(target){
+ // The target is the coach's prescription: keep any non-empty text verbatim.
+ if(typeof target!=='string'||!target.trim())return false;
+ const info=targetInfo(target);
+ // Existing structured circuits retain their round/block safety limits.
+ return !info.circuit||!!(info.rounds&&info.blocks&&info.rounds*info.blocks<=30);
+}
+
 export function makeDraft(program) {
   return program.map(day => {const sessionId=crypto.randomUUID();return day.esercizi.map(ex => ({sessionId,note:'',serie:Array.from({length:targetInfo(ex.target).count},()=>({kg:'',rip:'',check:false}))}));});
 }
@@ -48,6 +59,7 @@ export function renameExercise(ex,nextName,previousName=ex.nome){
  ex.ultimo_peso=exerciseHistory(ex).at(-1)?.serie?.filter(s=>s.kg).at(-1)?.kg||ex.previous_weights?.find(item=>exerciseName(item.nome)===exerciseName(nextName))?.peso||(same?oldWeight:'')||'';
 }
 export function validateSet(set,info){
+ if(set.components?.length){for(const [component,part]of set.components.entries()){const invalid=validateSet(part,{weightOnly:false});if(invalid)return {...invalid,component,message:part.name+': '+invalid.message};}return null;}
  const kg=String(set.kg??'').trim(),rip=String(set.rip??'').trim();
  if(kg&&(!/^\d+([.,]\d+)?$/.test(kg)||!Number.isFinite(Number(kg.replace(',','.')))))return {field:'kg',message:'Inserisci un carico valido, uguale o maggiore di zero.'};
  if(!info.weightOnly&&!/^[1-9]\d*$/.test(rip))return {field:'rip',message:'Inserisci ripetizioni intere maggiori di zero.'};
@@ -64,7 +76,7 @@ export function recordDay(program, draft, dayIndex, date) {
   result[dayIndex].esercizi.forEach((ex,i)=>{
     const log=draft[dayIndex][i];
     log.sessionId ||= sessionId;
-    const serie=log.serie.filter(s=>s.check).map(s=>{s.set_id ||= crypto.randomUUID();return {kg:s.kg,rip:s.rip,set_id:s.set_id};});
+    const serie=log.serie.filter(s=>s.check).map(s=>{s.set_id ||= crypto.randomUUID();return {kg:s.kg,rip:s.rip,set_id:s.set_id,...(s.components?{components:clone(s.components)}:{})};});
     if (!serie.length) return;
     ex.storico=Array.isArray(ex.storico)?ex.storico:[];
     const index=ex.storico.findIndex(s=>s.session_id===log.sessionId&&(!s.exercise_name||exerciseName(s.exercise_name)===exerciseName(ex.nome)));
@@ -117,3 +129,15 @@ export const demoProgram=[
  {titolo:'B · Gambe e addome',esercizi:[{nome:'Squat con bilanciere',target:'3x8',recupero:120,note_coach:'Piedi stabili. Scendi in controllo e risali mantenendo il busto compatto.',gifs:['esercizi/gambe/squat_bil.gif'],storico:[]},{nome:'Affondi sul posto con manubri',target:'3x10',recupero:75,note_coach:'Fai un passo comodo e mantieni il ginocchio in linea con il piede.',gifs:['esercizi/gambe/affondisulposto.gif'],storico:[]},{nome:'Sollevamento gambe alla sbarra',target:'3x12',recupero:60,note_coach:'Evita di oscillare. Solleva le gambe con l’addome, poi scendi lentamente.',gifs:['esercizi/addome/leg_raise_sbarra.gif'],storico:[]}]}
 ];
 
+
+export function groupNames(ex){
+ // Explicit per-N group notation keeps legacy circuit prescriptions unchanged.
+ if(!/^(?:per|x|×)\s*[1-9]\d*\s*$/i.test(String(ex.target||'').trim()))return [];
+ const names=String(ex.nome||'').split(/\s*\+\s*/).map(n=>n.trim()).filter(Boolean);
+ return names.length>1?names:[];
+}
+export function syncGroup(set){
+ set.kg=set.components.some(c=>c.kg)?set.components.map(c=>c.kg||'—').join(' / '):'';
+ set.rip=set.components.some(c=>c.rip)?set.components.map(c=>c.rip||'—').join(' / '):'';
+}
+export function setSummary(set){return set.components?.length?set.components.map(c=>c.name+': '+(c.kg||'—')+' kg × '+(c.rip||'—')).join(' · '):(set.kg||'—')+' kg × '+(set.rip||'—');}

@@ -1,4 +1,4 @@
-import {client,isDemo,validateId} from './data.js?v=20261028.4';
+import {client,isDemo,validateId} from './data.js?v=20261110.1';
 const BUCKET='lr-progress-private';
 const read=key=>{try{return JSON.parse(sessionStorage.getItem('lr-portal-demo-'+key)||'[]');}catch{return [];}};
 const write=(key,value)=>sessionStorage.setItem('lr-portal-demo-'+key,JSON.stringify(value));

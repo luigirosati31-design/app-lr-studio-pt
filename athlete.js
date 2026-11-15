@@ -2,7 +2,7 @@ import {whatsappURL} from './portal-contact.js?v=20261115.1';
 import {makePortal,glyph} from './portal.js?v=20261115.1';
 import {mediaThumb} from './media.js?v=20261115.1';
 import {identity,isDemo,loadRows,saveWorkout,logout,measurements,saveMeasurements,massage,config} from './data.js?v=20261115.1';
-import {normalize,makeDraft,recordDay,payloads,clone,safeURL,targetInfo,exerciseHistory,validateSet,remainingDraft,targetLabel,shouldRest,groupNames,syncGroup,setSummary,prepareLog,setReady,autoSeries,confirmSet} from './core.js?v=20261115.3';
+import {normalize,makeDraft,recordDay,payloads,clone,safeURL,targetInfo,exerciseHistory,validateSet,remainingDraft,targetLabel,shouldRest,groupNames,syncGroup,setSummary,prepareLog,setReady,autoSeries,confirmSet} from './core.js?v=20261115.4';
 import {activities,daysWithActivity,measurementTrend,weeklyTraining,strengthChanges} from './insights.js?v=20261115.1';
 import {$,el,button,toast,error,field,hero} from './ui.js?v=20261115.1';
 import {readDraft,writeDraft,cachedProgram,recoverDraft,recoveryTarget,prescription,hasLog,downloadDraft} from './drafts.js?v=20261115.1';
@@ -73,29 +73,20 @@ function exercise(ex,index){const log=draft[day][index],target=targetInfo(ex.tar
  prepareLog(ex,log);
  const names=groupNames(ex),parts=names.length?names:[ex.nome],weights=el('div',{class:'shared-weights'}),rounds=el('div',{class:'compact-rounds'}),slots=[];
  const update=()=>{log.serie.forEach((s,i)=>{slots[i]?.classList.toggle('done',!!s.check);const b=slots[i]?.querySelector('.set-confirm');if(b){b.textContent=s.check?'✓':'○';b.setAttribute('aria-pressed',String(!!s.check));}});store();updateProgress();};
- if(names.length){
-  const values=log.serie.map(s=>s.components.map(c=>c.kg).join('/')),unique=[...new Set(values)];
-  const input=el('input',{value:log.groupWeightText??(unique.length===1&&unique[0].replaceAll('/','')?unique[0]:''),inputmode:'text',placeholder:'es. 10/8','aria-label':'Pesi: '+names.join(' / ')});
-  input.oninput=()=>{log.groupWeightText=input.value;const values=input.value.split('/').map(x=>x.trim()),valid=values.length===1||values.length===names.length;log.serie.forEach(s=>{s.check=false;s.groupWeightError=!valid;s.components.forEach((p,c)=>p.kg=values.length===1?values[0]:values[c]||'');syncGroup(s);});update();};
-  weights.append(field('Kg',input));
- }else parts.forEach((name,c)=>{
-  const values=log.serie.map(s=>String(names.length?s.components[c].kg:s.kg)).filter(v=>v!==''),unique=[...new Set(values)];
-  const input=el('input',{value:unique.length===1?unique[0]:'',inputmode:'decimal',placeholder:unique.length>1?'Vari':'kg','aria-label':name+', peso per tutte le serie'});
-  input.oninput=()=>{log.serie.forEach(s=>{s.check=false;if(names.length){s.components[c].kg=input.value;syncGroup(s);}else s.kg=input.value;});update();};
-  weights.append(field('Kg',input));
-  if(unique.length>1)weights.append(el('small',{class:'muted'},'I pesi diversi della bozza sono conservati. Inserisci un peso qui solo per uniformarli.'));
- });
+ const values=log.serie.map(s=>String(s.kg??'')),unique=[...new Set(values)];
+ const weight=el('input',{value:unique.length===1?unique[0]:'',inputmode:'text',placeholder:unique.length>1?'Vari':'Testo libero','aria-label':names.length?'Pesi: '+names.join(' / '):ex.nome+', peso per tutte le serie'});
+ weight.oninput=()=>{log.groupWeightText=weight.value;log.serie.forEach(s=>{s.check=false;s.kg=weight.value;s.freeText=true;delete s.components;});update();};
+ weights.append(field('Kg',weight));
+ if(unique.length>1)weights.append(el('small',{class:'muted'},'I valori diversi della bozza sono conservati. Scrivi qui solo per uniformarli.'));
  const drawRound=(s,i)=>{
   const box=el('div',{class:'compact-round'+(s.check?' done':'')}),fields=el('div',{class:'compact-reps'});
   slots.push(box);
-  if(names.length){
-   const input=el('input',{value:s.groupRepText??(s.components.some(c=>c.rip)?s.components.map(c=>c.rip).join('/'):''),inputmode:'text',placeholder:'es. 10/10','aria-label':names.join(' / ')+', serie '+(i+1)+', ripetizioni'});
-   input.oninput=()=>{s.check=false;s.groupRepText=input.value;const values=input.value.split('/').map(x=>x.trim());s.groupRepError=values.length!==names.length;s.components.forEach((p,c)=>p.rip=values[c]||'');syncGroup(s);update();};fields.append(field('Ripetizioni',input));
-  }else parts.forEach((name,c)=>{const part=s,input=el('input',{value:part.rip,inputmode:target.weightOnly?'text':'numeric',placeholder:'rip.','aria-label':name+', serie '+(i+1)+', ripetizioni'});input.oninput=()=>{s.check=false;part.rip=input.value;update();};fields.append(field(target.weightOnly?'Target':'Ripetizioni',input));});
+  const input=el('input',{value:s.rip??'',inputmode:'text',placeholder:'Testo libero','aria-label':(names.length?names.join(' / '):ex.nome)+', serie '+(i+1)+', ripetizioni'});
+  input.oninput=()=>{s.check=false;s.rip=input.value;s.freeText=true;delete s.components;delete s.groupRepText;update();};fields.append(field(target.weightOnly?'Target':'Ripetizioni',input));
   const done=button(s.check?'✓':'○',()=>{const invalid=confirmSet(s,target);if(invalid){toast(invalid.message);return;}update();},'set-confirm',{'aria-label':'Conferma serie '+(i+1)+' di '+ex.nome,'aria-pressed':String(!!s.check)});box.append(fields,done);rounds.append(box);
  };
  log.serie.forEach(drawRound);body.append(...(names.length?[el('small',{class:'paired-order'},names.join(' / '))]:[]),el('div',{class:'classic-entry'},weights,rounds));
- body.append(el('div',{class:'exercise-tools'},button('+ Aggiungi serie',()=>{const previous=log.serie.at(-1),s={kg:names.length?'':previous?.kg||'',rip:'',check:false};if(names.length){s.groupWeightError=previous?.groupWeightError||false;s.components=parts.map((name,c)=>({name,kg:previous?.components[c]?.kg||'',rip:''}));syncGroup(s);}log.serie.push(s);drawRound(s,log.serie.length-1);update();}),button('Ripeti ultimi carichi',()=>{const previous=exerciseHistory(ex).at(-1)?.serie?.at(-1);if(!previous)return;if(names.length){if(previous.components?.map(c=>c.name).join('|')!==names.join('|'))return;delete log.groupWeightText;log.serie.forEach(s=>{s.check=false;s.groupWeightError=false;s.components.forEach((p,c)=>p.kg=previous.components[c].kg);syncGroup(s);});}else log.serie.forEach(s=>{s.check=false;s.kg=previous.kg||'';});update();renderTrainingOnly();}),button('Avvia recupero',()=>rest(ex.recupero??90))));
+ body.append(el('div',{class:'exercise-tools'},button('+ Aggiungi serie',()=>{const previous=log.serie.at(-1),s={kg:previous?.kg??'',rip:'',check:false,freeText:true};log.serie.push(s);drawRound(s,log.serie.length-1);update();}),button('Ripeti ultimi carichi',()=>{const previous=exerciseHistory(ex).at(-1)?.serie?.at(-1);if(!previous)return;delete log.groupWeightText;log.serie.forEach(s=>{s.check=false;s.kg=previous.kg??'';s.freeText=true;delete s.components;});update();renderTrainingOnly();}),button('Avvia recupero',()=>rest(ex.recupero??90))));
 }
 const details=el('details',{},el('summary',{},'Storico e note'));const url=safeURL(ex.video);if(url)details.append(el('p',{},el('a',{href:url,target:'_blank',rel:'noopener noreferrer'},'Apri video tecnica ↗')));if(exerciseHistory(ex).length){[...exerciseHistory(ex)].reverse().slice(0,5).forEach(r=>details.append(el('p',{class:'muted'},`${r.data} · ${r.serie.map(setSummary).join(' / ')}`)));}else details.append(el('p',{class:'muted'},'Il tuo storico inizierà qui.'));const notes=el('textarea',{rows:2,placeholder:'Come ti sei sentito?',value:log.note});notes.oninput=()=>{log.note=notes.value;store();};details.append(field('Note personali',notes));body.append(details);card.append(body);return card;}
 async function save(){

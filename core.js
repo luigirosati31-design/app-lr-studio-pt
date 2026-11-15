@@ -59,6 +59,7 @@ export function renameExercise(ex,nextName,previousName=ex.nome){
  ex.ultimo_peso=exerciseHistory(ex).at(-1)?.serie?.filter(s=>s.kg).at(-1)?.kg||ex.previous_weights?.find(item=>exerciseName(item.nome)===exerciseName(nextName))?.peso||(same?oldWeight:'')||'';
 }
 export function validateSet(set,info){
+ if(set.freeText)return null;
  if(set.components?.length){for(const [component,part]of set.components.entries()){const invalid=validateSet(part,{weightOnly:false});if(invalid)return {...invalid,component,message:part.name+': '+invalid.message};}return null;}
  const kg=String(set.kg??'').trim(),rip=String(set.rip??'').trim();
  if(kg&&(!/^\d+([.,]\d+)?$/.test(kg)||!Number.isFinite(Number(kg.replace(',','.')))))return {field:'kg',message:'Inserisci un carico valido, uguale o maggiore di zero.'};
@@ -77,7 +78,7 @@ export function recordDay(program, draft, dayIndex, date) {
   result[dayIndex].esercizi.forEach((ex,i)=>{
     const log=draft[dayIndex][i];
     log.sessionId ||= sessionId;
-    const serie=log.serie.filter(s=>s.check).map(s=>{s.set_id ||= crypto.randomUUID();return {kg:s.kg,rip:s.rip,set_id:s.set_id,...(s.components?{components:clone(s.components)}:{})};});
+    const serie=log.serie.filter(s=>s.check).map(s=>{s.set_id ||= crypto.randomUUID();return {kg:s.kg,rip:s.rip,set_id:s.set_id,...(s.freeText?{freeText:true}:{}),...(s.components?{components:clone(s.components)}:{})};});
     if (!serie.length) return;
     ex.storico=Array.isArray(ex.storico)?ex.storico:[];
     const index=ex.storico.findIndex(s=>s.session_id===log.sessionId&&(!s.exercise_name||exerciseName(s.exercise_name)===exerciseName(ex.nome)));
@@ -141,14 +142,16 @@ export function syncGroup(set){
  set.kg=set.components.some(c=>c.kg)?set.components.map(c=>c.kg||'—').join(' / '):'';
  set.rip=set.components.some(c=>c.rip)?set.components.map(c=>c.rip||'—').join(' / '):'';
 }
-export function setSummary(set){return set.components?.length?set.components.map(c=>c.name+': '+(c.kg||'—')+' kg × '+(c.rip||'—')).join(' · '):(set.kg||'—')+' kg × '+(set.rip||'—');}
+export function setSummary(set){if(set.freeText)return [set.kg,set.rip].filter(v=>v!=='').join(' · ')||'Serie confermata';return set.components?.length?set.components.map(c=>c.name+': '+(c.kg||'—')+' kg × '+(c.rip||'—')).join(' · '):(set.kg||'—')+' kg × '+(set.rip||'—');}
 
+// Preserve the exact entered strings, including incomplete legacy slash drafts.
 export function prepareLog(ex,log){
- const names=groupNames(ex);if(!names.length)return;
- for(const s of log.serie){if(s.components?.length)continue;
- const split=value=>String(value||'').split('/').map(x=>x.trim()).map(x=>x==='—'?'':x);
- const kg=split(s.kg),rip=split(s.rip);
- s.components=names.map((name,i)=>({name,kg:kg.length===1?kg[0]:kg[i]||'',rip:rip.length===1?rip[0]:rip[i]||''}));syncGroup(s);
+ for(const s of log.serie){
+  if(!s.freeText){
+   if(log.groupWeightText!==undefined)s.kg=log.groupWeightText;
+   if(s.groupRepText!==undefined)s.rip=s.groupRepText;
+  }
+  s.freeText=true;
  }
 }
 export function setReady(s,info){
@@ -160,7 +163,7 @@ export function setReady(s,info){
 export function autoSeries(ex,log){prepareLog(ex,log);}
 export function confirmSet(s,info){
  if(s.check){s.check=false;return null;}
- if(s.groupRepError||s.groupWeightError)return {message:'Controlla i valori separati da / per ogni esercizio.'};
+ if(s.freeText){s.check=true;return null;}
  const invalid=validateSet(s,info);if(invalid)return invalid;
  s.check=true;return null;
 }

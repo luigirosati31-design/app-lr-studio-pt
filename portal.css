@@ -30,3 +30,7 @@ body.portal-app{font-family:"Segoe UI",Arial,Helvetica,sans-serif;--bg:#090b0d;-
 
 /* Paired exercises: independent kg/reps per round. */
 .paired-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.paired-heading{display:flex;justify-content:space-between;align-items:center;margin:4px 0 12px}.paired-part{min-width:0}.paired-part strong{display:block;font-size:12px;line-height:1.4;margin-bottom:8px;overflow-wrap:anywhere}.paired-inputs{display:grid;grid-template-columns:1fr 1fr;gap:6px}.paired-inputs label{min-width:0;font-size:11px}.paired-table.sets input{width:100%;min-width:0;padding:8px 4px;font-size:14px;box-sizing:border-box}.paired-table.sets td{padding:12px 6px}
+
+.shared-weights{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px}.shared-weights label{font-size:13px}.shared-weights input{max-width:160px}.compact-rounds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.compact-round{min-width:0;background:#161e22;border:1px solid #303b40;border-radius:10px;padding:10px 7px}.compact-round.done{border-color:#a89047}.compact-round>strong{font-size:12px;color:#e5c56a}.compact-reps label{display:block;font-size:11px;margin:10px 0;overflow-wrap:anywhere}.compact-reps input{width:100%;min-width:0;padding:10px 5px;box-sizing:border-box}.compact-round button{font-size:10px;padding:8px 2px;width:100%}.compact-rounds+.muted{display:block;margin:12px 0}
+
+.shared-weights>small{grid-column:1/-1}

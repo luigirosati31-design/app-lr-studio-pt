@@ -68,6 +68,7 @@ export function validateSet(set,info){
 export function remainingDraft(program,draft,day){
  const result=clone(draft),fresh=makeDraft(program)[day];
  result[day]=draft[day].map((log,i)=>({...clone(log),sessionId:fresh[i].sessionId,note:log.serie.some(s=>s.check)?'':log.note,serie:log.serie.map(s=>s.check?{kg:'',rip:'',check:false}:clone(s))}));
+ result[day].forEach(log=>delete log.groupWeightText);
  return result;
 }
 export function recordDay(program, draft, dayIndex, date) {
@@ -132,8 +133,8 @@ export const demoProgram=[
 
 export function groupNames(ex){
  // Explicit per-N group notation keeps legacy circuit prescriptions unchanged.
- if(!/^(?:per|x|×)\s*[1-9]\d*\s*$/i.test(String(ex.target||'').trim()))return [];
- const names=String(ex.nome||'').split(/\s*\+\s*/).map(n=>n.trim()).filter(Boolean);
+ if(targetInfo(ex.target).circuit)return [];
+ const names=String(ex.nome||'').split(/\s*[+/]\s*/).map(n=>n.trim()).filter(Boolean);
  return names.length>1?names:[];
 }
 export function syncGroup(set){
@@ -141,3 +142,18 @@ export function syncGroup(set){
  set.rip=set.components.some(c=>c.rip)?set.components.map(c=>c.rip||'—').join(' / '):'';
 }
 export function setSummary(set){return set.components?.length?set.components.map(c=>c.name+': '+(c.kg||'—')+' kg × '+(c.rip||'—')).join(' · '):(set.kg||'—')+' kg × '+(set.rip||'—');}
+
+export function prepareLog(ex,log){
+ const names=groupNames(ex);if(!names.length)return;
+ for(const s of log.serie){if(s.components?.length)continue;
+ const split=value=>String(value||'').split('/').map(x=>x.trim()).map(x=>x==='—'?'':x);
+ const kg=split(s.kg),rip=split(s.rip);
+ s.components=names.map((name,i)=>({name,kg:kg.length===1?kg[0]:kg[i]||'',rip:rip.length===1?rip[0]:rip[i]||''}));syncGroup(s);
+ }
+}
+export function setReady(s,info){
+ if(s.groupRepError||s.groupWeightError)return false;
+ if(s.components?.length)return s.components.every(c=>String(c.rip||'').trim()&&validateSet(c,{weightOnly:false})===null);
+ return !!String(s.rip||'').trim()&&validateSet(s,info)===null;
+}
+export function autoSeries(ex,log){if(targetInfo(ex.target).circuit)return;prepareLog(ex,log);for(const s of log.serie)s.check=setReady(s,targetInfo(ex.target));}

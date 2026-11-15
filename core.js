@@ -133,7 +133,7 @@ export const demoProgram=[
 
 export function groupNames(ex){
  // Explicit per-N group notation keeps legacy circuit prescriptions unchanged.
- if(targetInfo(ex.target).circuit)return [];
+
  const names=String(ex.nome||'').split(/\s*[+/]\s*/).map(n=>n.trim()).filter(Boolean);
  return names.length>1?names:[];
 }
@@ -156,4 +156,11 @@ export function setReady(s,info){
  if(s.components?.length)return s.components.every(c=>String(c.rip||'').trim()&&validateSet(c,{weightOnly:false})===null);
  return !!String(s.rip||'').trim()&&validateSet(s,info)===null;
 }
-export function autoSeries(ex,log){if(targetInfo(ex.target).circuit)return;prepareLog(ex,log);for(const s of log.serie)s.check=setReady(s,targetInfo(ex.target));}
+// Prepare legacy drafts without inferring confirmation from entered values.
+export function autoSeries(ex,log){prepareLog(ex,log);}
+export function confirmSet(s,info){
+ if(s.check){s.check=false;return null;}
+ if(s.groupRepError||s.groupWeightError)return {message:'Controlla i valori separati da / per ogni esercizio.'};
+ const invalid=validateSet(s,info);if(invalid)return invalid;
+ s.check=true;return null;
+}

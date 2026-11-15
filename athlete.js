@@ -2,7 +2,7 @@ import {whatsappURL} from './portal-contact.js?v=20261115.1';
 import {makePortal,glyph} from './portal.js?v=20261115.1';
 import {mediaThumb} from './media.js?v=20261115.1';
 import {identity,isDemo,loadRows,saveWorkout,logout,measurements,saveMeasurements,massage,config} from './data.js?v=20261115.1';
-import {normalize,makeDraft,recordDay,payloads,clone,safeURL,targetInfo,exerciseHistory,validateSet,remainingDraft,targetLabel,shouldRest,groupNames,syncGroup,setSummary,prepareLog,setReady,autoSeries} from './core.js?v=20261115.1';
+import {normalize,makeDraft,recordDay,payloads,clone,safeURL,targetInfo,exerciseHistory,validateSet,remainingDraft,targetLabel,shouldRest,groupNames,syncGroup,setSummary,prepareLog,setReady,autoSeries,confirmSet} from './core.js?v=20261115.3';
 import {activities,daysWithActivity,measurementTrend,weeklyTraining,strengthChanges} from './insights.js?v=20261115.1';
 import {$,el,button,toast,error,field,hero} from './ui.js?v=20261115.1';
 import {readDraft,writeDraft,cachedProgram,recoverDraft,recoveryTarget,prescription,hasLog,downloadDraft} from './drafts.js?v=20261115.1';
@@ -72,16 +72,16 @@ function renderTrainingOnly(){if(!workspaceLock?.check()){showLockedWorkspace();
 function exercise(ex,index){const log=draft[day][index],target=targetInfo(ex.target);if(target.circuit&&log.serie.length<target.count){while(log.serie.length<target.count)log.serie.push({kg:'',rip:'',check:false});store();toast('Circuito aggiornato: controlla i dati precedenti. Le righe mancanti sono state aggiunte senza cancellare la bozza.');}const card=el('article',{class:'exercise'});card.append(el('div',{class:'exercise-head'},mediaThumb(ex),el('div',{class:'exercise-heading'},el('div',{class:'exercise-number'},'ESERCIZIO '+String(index+1).padStart(2,'0')),el('h3',{},ex.nome||'Esercizio'),el('div',{class:'prescription'},`${String(ex.target||'3x10')} · Recupero ${ex.recupero??90} s`))));const body=el('div',{class:'exercise-body'});if(target.circuit){const members=program[day].esercizi.filter(e=>ex.circuit_id?e.circuit_id===ex.circuit_id:e===ex);body.append(el('p',{class:'coach-note'},(ex.circuit_id?'Circuito '+ex.circuit_id+' · ':'')+members.map(e=>e.nome).join(' → ')+'. Ripeti il giro senza pausa. Recupero solo tra i blocchi.'));}const last=exerciseHistory(ex).at(-1);if(last?.serie?.length)body.append(el('p',{class:'previous-sets'},'Ultima volta · '+last.serie.map(setSummary).join('  /  ')));else if(ex.ultimo_peso)body.append(el('p',{class:'previous-sets'},`Ultimo carico · ${ex.ultimo_peso} kg`));if(ex.note_coach)body.append(el('div',{class:'coach-note'},ex.note_coach));{
  prepareLog(ex,log);
  const names=groupNames(ex),parts=names.length?names:[ex.nome],weights=el('div',{class:'shared-weights'}),rounds=el('div',{class:'compact-rounds'}),slots=[];
- const update=()=>{log.serie.forEach((s,i)=>{s.check=setReady(s,target);slots[i]?.classList.toggle('done',s.check);});store();updateProgress();};
+ const update=()=>{log.serie.forEach((s,i)=>{slots[i]?.classList.toggle('done',!!s.check);const b=slots[i]?.querySelector('.set-confirm');if(b){b.textContent=s.check?'✓':'○';b.setAttribute('aria-pressed',String(!!s.check));}});store();updateProgress();};
  if(names.length){
   const values=log.serie.map(s=>s.components.map(c=>c.kg).join('/')),unique=[...new Set(values)];
   const input=el('input',{value:log.groupWeightText??(unique.length===1&&unique[0].replaceAll('/','')?unique[0]:''),inputmode:'text',placeholder:'es. 10/8','aria-label':'Pesi: '+names.join(' / ')});
-  input.oninput=()=>{log.groupWeightText=input.value;const values=input.value.split('/').map(x=>x.trim()),valid=values.length===1||values.length===names.length;log.serie.forEach(s=>{s.groupWeightError=!valid;s.components.forEach((p,c)=>p.kg=values.length===1?values[0]:values[c]||'');syncGroup(s);});update();};
+  input.oninput=()=>{log.groupWeightText=input.value;const values=input.value.split('/').map(x=>x.trim()),valid=values.length===1||values.length===names.length;log.serie.forEach(s=>{s.check=false;s.groupWeightError=!valid;s.components.forEach((p,c)=>p.kg=values.length===1?values[0]:values[c]||'');syncGroup(s);});update();};
   weights.append(field('Kg',input));
  }else parts.forEach((name,c)=>{
   const values=log.serie.map(s=>String(names.length?s.components[c].kg:s.kg)).filter(v=>v!==''),unique=[...new Set(values)];
   const input=el('input',{value:unique.length===1?unique[0]:'',inputmode:'decimal',placeholder:unique.length>1?'Vari':'kg','aria-label':name+', peso per tutte le serie'});
-  input.oninput=()=>{log.serie.forEach(s=>{if(names.length){s.components[c].kg=input.value;syncGroup(s);}else s.kg=input.value;});update();};
+  input.oninput=()=>{log.serie.forEach(s=>{s.check=false;if(names.length){s.components[c].kg=input.value;syncGroup(s);}else s.kg=input.value;});update();};
   weights.append(field('Kg',input));
   if(unique.length>1)weights.append(el('small',{class:'muted'},'I pesi diversi della bozza sono conservati. Inserisci un peso qui solo per uniformarli.'));
  });
@@ -90,23 +90,19 @@ function exercise(ex,index){const log=draft[day][index],target=targetInfo(ex.tar
   slots.push(box);
   if(names.length){
    const input=el('input',{value:s.groupRepText??(s.components.some(c=>c.rip)?s.components.map(c=>c.rip).join('/'):''),inputmode:'text',placeholder:'es. 10/10','aria-label':names.join(' / ')+', serie '+(i+1)+', ripetizioni'});
-   input.oninput=()=>{s.groupRepText=input.value;const values=input.value.split('/').map(x=>x.trim());s.groupRepError=values.length!==names.length;s.components.forEach((p,c)=>p.rip=values[c]||'');syncGroup(s);update();};fields.append(field('Ripetizioni',input));
-  }else parts.forEach((name,c)=>{const part=s,input=el('input',{value:part.rip,inputmode:target.weightOnly?'text':'numeric',placeholder:'rip.','aria-label':name+', serie '+(i+1)+', ripetizioni'});input.oninput=()=>{part.rip=input.value;update();};fields.append(field(target.weightOnly?'Target':'Ripetizioni',input));});
-  box.append(fields);rounds.append(box);
+   input.oninput=()=>{s.check=false;s.groupRepText=input.value;const values=input.value.split('/').map(x=>x.trim());s.groupRepError=values.length!==names.length;s.components.forEach((p,c)=>p.rip=values[c]||'');syncGroup(s);update();};fields.append(field('Ripetizioni',input));
+  }else parts.forEach((name,c)=>{const part=s,input=el('input',{value:part.rip,inputmode:target.weightOnly?'text':'numeric',placeholder:'rip.','aria-label':name+', serie '+(i+1)+', ripetizioni'});input.oninput=()=>{s.check=false;part.rip=input.value;update();};fields.append(field(target.weightOnly?'Target':'Ripetizioni',input));});
+  const done=button(s.check?'✓':'○',()=>{const invalid=confirmSet(s,target);if(invalid){toast(invalid.message);return;}update();},'set-confirm',{'aria-label':'Conferma serie '+(i+1)+' di '+ex.nome,'aria-pressed':String(!!s.check)});box.append(fields,done);rounds.append(box);
  };
  log.serie.forEach(drawRound);body.append(...(names.length?[el('small',{class:'paired-order'},names.join(' / '))]:[]),el('div',{class:'classic-entry'},weights,rounds));
- body.append(el('div',{class:'exercise-tools'},button('+ Aggiungi serie',()=>{const previous=log.serie.at(-1),s={kg:names.length?'':previous?.kg||'',rip:'',check:false};if(names.length){s.groupWeightError=previous?.groupWeightError||false;s.components=parts.map((name,c)=>({name,kg:previous?.components[c]?.kg||'',rip:''}));syncGroup(s);}log.serie.push(s);drawRound(s,log.serie.length-1);update();}),button('Ripeti ultimi carichi',()=>{const previous=exerciseHistory(ex).at(-1)?.serie?.at(-1);if(!previous)return;if(names.length){if(previous.components?.map(c=>c.name).join('|')!==names.join('|'))return;delete log.groupWeightText;log.serie.forEach(s=>{s.groupWeightError=false;s.components.forEach((p,c)=>p.kg=previous.components[c].kg);syncGroup(s);});}else log.serie.forEach(s=>s.kg=previous.kg||'');update();renderTrainingOnly();}),button('Avvia recupero',()=>rest(ex.recupero??90))));
+ body.append(el('div',{class:'exercise-tools'},button('+ Aggiungi serie',()=>{const previous=log.serie.at(-1),s={kg:names.length?'':previous?.kg||'',rip:'',check:false};if(names.length){s.groupWeightError=previous?.groupWeightError||false;s.components=parts.map((name,c)=>({name,kg:previous?.components[c]?.kg||'',rip:''}));syncGroup(s);}log.serie.push(s);drawRound(s,log.serie.length-1);update();}),button('Ripeti ultimi carichi',()=>{const previous=exerciseHistory(ex).at(-1)?.serie?.at(-1);if(!previous)return;if(names.length){if(previous.components?.map(c=>c.name).join('|')!==names.join('|'))return;delete log.groupWeightText;log.serie.forEach(s=>{s.check=false;s.groupWeightError=false;s.components.forEach((p,c)=>p.kg=previous.components[c].kg);syncGroup(s);});}else log.serie.forEach(s=>{s.check=false;s.kg=previous.kg||'';});update();renderTrainingOnly();}),button('Avvia recupero',()=>rest(ex.recupero??90))));
 }
 const details=el('details',{},el('summary',{},'Storico e note'));const url=safeURL(ex.video);if(url)details.append(el('p',{},el('a',{href:url,target:'_blank',rel:'noopener noreferrer'},'Apri video tecnica ↗')));if(exerciseHistory(ex).length){[...exerciseHistory(ex)].reverse().slice(0,5).forEach(r=>details.append(el('p',{class:'muted'},`${r.data} · ${r.serie.map(setSummary).join(' / ')}`)));}else details.append(el('p',{class:'muted'},'Il tuo storico inizierà qui.'));const notes=el('textarea',{rows:2,placeholder:'Come ti sei sentito?',value:log.note});notes.oninput=()=>{log.note=notes.value;store();};details.append(field('Note personali',notes));body.append(details);card.append(body);return card;}
 async function save(){
  if(busy)return;
- for(const [i,log]of draft[day].entries()){
- const ex=program[day].esercizi[i],info=targetInfo(ex.target);autoSeries(ex,log);if(info.circuit)continue;
- for(const s of log.serie){const touched=s.components?s.components.some(c=>String(c.rip||'').trim()):String(s.rip||'').trim();if(touched&&!setReady(s,info)){toast('Controlla peso e ripetizioni di '+ex.nome+'. La bozza è conservata.');return;}}
- }
  const completed=draft[day].flatMap(ex=>ex.serie).filter(set=>set.check).length;
- if(!completed){toast('Compila le ripetizioni di almeno una serie prima di salvare.');return;}
- for(const [i,log] of draft[day].entries())for(const [j,set] of log.serie.entries())if(set.check){const invalid=validateSet(set,targetInfo(program[day].esercizi[i].target));if(invalid){toast(invalid.message);document.querySelectorAll('article.exercise')[i]?.querySelectorAll('tbody tr')[j]?.querySelectorAll('input')[invalid.field==='kg'?0:1]?.focus();return;}}
+ if(!completed){toast('Conferma almeno una serie con il cerchietto prima di salvare.');return;}
+ for(const [i,log] of draft[day].entries())for(const [j,set] of log.serie.entries())if(set.check){const invalid=validateSet(set,targetInfo(program[day].esercizi[i].target));if(invalid){toast(invalid.message);document.querySelectorAll('article.exercise')[i]?.querySelectorAll('.compact-round')[j]?.querySelectorAll('input')[invalid.field==='kg'?0:1]?.focus();return;}}
  if(!workspaceLock?.check())return;
  busy=true;updateProgress();
  try{
@@ -248,3 +244,4 @@ function renderHome(){
   }
 }
 function showSuccess(done){const phrases=['La costanza si costruisce così: un allenamento alla volta.','Hai dedicato tempo a te. Continua a costruire il tuo percorso.','Un altro allenamento registrato. Il percorso continua.'];const dialog=el('dialog',{class:'success-dialog','aria-label':'Allenamento salvato'});dialog.append(el('div',{class:'success-mark','aria-hidden':'true'},'✓'),el('div',{class:'eyebrow'},'GIORNO '+dayLetter(day)),el('h2',{},'Allenamento registrato.'),el('p',{},done+' serie salvate.'+(isDemo?' Salvate nella demo.':' Salvate nel tuo registro.')+(draft[day].some(hasLog)?' I dati non confermati e le note restano in bozza.':'')),el('p',{class:'success-note'},phrases[Math.floor(Math.random()*phrases.length)]),el('div',{class:'actions'},button('Rivedi la scheda',()=>dialog.close()),button('Torna ai giorni',()=>{dialog.close();workoutOpen=false;store();renderTrainingOnly();},'primary')));dialog.addEventListener('close',()=>dialog.remove());document.body.append(dialog);dialog.showModal();}
+
